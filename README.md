@@ -13,14 +13,17 @@ customer-service-agent / sales-analytics-agent / marketing-crm-agent) AX(AI Tran
 > **현재 상태 (2026-08-19)**: 설계 문서(`docs/00~10`)와 실행 가능한 Profile 스캐폴드
 > (`.hermes/profiles/<role>/{config.yaml, SOUL.md, USER.md, MEMORY.md, skills/}`)를
 > 작성했고, **실제로 `docker compose build/up`을 실행해 배포한 뒤 실제 `gpt-5-mini` 챗으로
-> 핵심 경로를 검증했습니다**: `hermes doctor`에서 7개 프로필 모두 정상 인식, coordinator가
-> `terminal`로 order-payment-agent를 위임(설계대로 `delegate_task` 미사용), 그 결과
-> `code_execution`이 실제로 `mock-pos` 컨테이너를 호출해 주문/결제/재고차감이 발생하는
-> 것까지 mock-pos API로 독립 재확인했습니다. 이 과정에서 실측으로만 알 수 있었던 이슈
-> 2건(코드 실행 샌드박스가 `.env`를 상속하지 않음, `terminal` 위임이 ~120초 타임아웃될
-> 수 있음 — 하위 프로세스는 계속 실행되어 완료됨)을 발견해 문서와 스크립트에 반영했습니다.
-> 자세한 실측 기록은 [docs/07-roadmap.md](docs/07-roadmap.md), [docs/10-usecase-tests.md](docs/10-usecase-tests.md)
-> 참고. 나머지 4개 프로필과 HITL 3개 게이트는 아직 미검증입니다.
+> 7개 프로필 전체 + 오케스트레이션 + HITL 게이트 3개를 모두 검증했습니다.** 요약:
+> `hermes doctor`에서 7개 프로필 모두 정상 인식, coordinator가 `terminal`로 하위
+> 프로필을 위임(설계대로 `delegate_task` 미사용)하고 Active Verification까지 수행,
+> `code_execution`이 실제로 `mock-pos` 컨테이너를 호출해 주문/결제/환불/재고차감이
+> 발생하는 것까지 mock-pos API로 독립 재확인, 3개 HITL 게이트(프로모션·대량발주·환불)
+> 모두 승인 없이는 실행되지 않음을 확인했습니다. 이 과정에서 실측으로만 알 수 있었던
+> 이슈 여러 건(샌드박스가 `.env`를 상속하지 않음, `terminal` 타임아웃이 60~120초로
+> 가변적이고 결과도 사례마다 다름, `kanban` 네이티브 툴 미동작, `web`/`search` 키 필요,
+> 매출 리포트 필드 오독 버그 등)을 발견해 문서·스크립트에 반영했습니다. 자세한 실측
+> 기록은 [docs/07-roadmap.md](docs/07-roadmap.md), [docs/10-usecase-tests.md](docs/10-usecase-tests.md)
+> 참고.
 >
 > 이 저장소는 이전에 `hermes-core/`라는 커스텀 Python 구현(자체 OpenAI 함수콜 루프,
 > `discord.py` 봇)으로 "Hermes 에이전트"를 흉내 냈으나, 형제 프로젝트
@@ -110,11 +113,13 @@ uvicorn mock_pos.main:app --reload --port 8080
   `reservation_management`/`sales_reporting`)의 레퍼런스 스크립트는 이 때문에 접속
   정보(`http://mock-pos:8080` / `dev-key` / `store_demo`)를 하드코딩된 기본값으로
   바꿔뒀습니다(Mock POS 키는 개발용 고정 키라 안전).
-- **`terminal` 위임 호출이 약 120초 후 타임아웃될 수 있습니다**(`exit 124`) — 하위
-  프로필이 code_execution까지 수행하는 복잡한 작업일 때 발생했습니다. 타임아웃 후에도
-  하위 프로세스는 백그라운드에서 계속 실행되어 완료되므로(고아 프로세스로 남지 않음),
-  coordinator는 타임아웃 응답만으로 실패를 단정하지 않고 Active Verification으로
-  재확인하도록 설계·검증했습니다.
+- **`terminal` 위임 호출이 60~120초 사이(고정값 아님)에 타임아웃될 수 있습니다**
+  (`exit 124`). **타임아웃 후 결과는 사례마다 다릅니다** — 어떤 때는 하위 프로세스가
+  백그라운드에서 계속 실행되어 완료되고(고아 프로세스로 남지 않음), 어떤 때는 실제로
+  종료되어 결과가 없습니다(둘 다 실측으로 확인). 그래서 "타임아웃 후에도 완료된다"고
+  가정하면 안 되며, coordinator는 타임아웃 응답만으로 성공/실패를 단정하지 않고 매번
+  Active Verification으로 재확인하도록 설계·검증했습니다 — 재고 브리핑 테스트에서는
+  실제로 데이터가 없다는 것을 있는 그대로 보고하고 재시도 여부를 사용자에게 물었습니다.
 - **`kanban` 네이티브 툴은 coordinator에서 동작하지 않습니다**(dispatcher가 생성한 워커
   전용). coordinator는 `workspace/kanban/*.md` 파일 카드로 진행 상황을 관리합니다 —
   이것이 정식 방법입니다.
@@ -124,11 +129,15 @@ uvicorn mock_pos.main:app --reload --port 8080
   동작합니다.
 - 실 POS 벤더(토스플레이스/카카오페이) 연동은 아직 없습니다 — 현재는 Mock POS로 기능
   검증까지만 수행합니다.
-- HITL 승인 게이트는 총 3개입니다(프로모션/캠페인 집행·재고 대량 발주·결제 환불/주문
-  취소) — [docs/06-hitl-approval-design.md](docs/06-hitl-approval-design.md) 참고.
-  이 3개 게이트가 실제 대화에서 걸리는지는 아직 미검증입니다.
+- **HITL 승인 게이트는 총 3개이며(프로모션/캠페인 집행·재고 대량 발주·결제 환불/주문
+  취소), 2026-08-19 실제 챗으로 3개 모두 검증했습니다** — 승인 없이 즉시 진행을
+  요청해도 세 프로필(marketing-crm-agent/inventory-agent/order-payment-agent) 모두
+  명시적으로 거부하고 coordinator 승인이 필요하다고 안내했습니다. 환불 게이트는 대상
+  결제가 실제로 `COMPLETED` 상태를 유지(`refunded_at: null`)함을 mock-pos API로 재확인.
+  [docs/06-hitl-approval-design.md](docs/06-hitl-approval-design.md) 참고.
 - `coordinator`가 다른 프로필에 작업을 위임하는 실제 메커니즘은 `delegate_task`가 아니라
   `terminal` 동기 호출입니다 — **2026-08-19 실제로 구동해 검증 완료**(위 현재 상태 참고).
-- 7개 프로필 중 3개(coordinator, order-payment-agent, 그리고 이 둘 사이의 위임)만
-  실제 챗으로 검증했습니다. 나머지 4개 프로필과 HITL 3개 게이트는
-  [docs/10-usecase-tests.md](docs/10-usecase-tests.md)에 미검증(⬜)으로 남아 있습니다.
+- **7개 프로필 전부와 coordinator의 오케스트레이션(단건 위임 + 4개 프로필 동시 브리핑)을
+  실제 챗으로 검증했습니다** — [docs/10-usecase-tests.md](docs/10-usecase-tests.md) Part
+  A~C 전부 ✅. 미검증으로 남은 것은 Part D/E 일부(재고 부족 409 실제 챗 시나리오, 다중
+  매장 격리 — 해당 없음)와 `kanban` 기반 다단계 파이프라인 전체 실행 정도입니다.
