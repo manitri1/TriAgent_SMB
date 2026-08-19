@@ -1,9 +1,9 @@
 # 09. 사용자 가이드 — 운영 및 트러블슈팅
 
-> 이 문서는 `docker compose build/up`을 아직 실행하지 않은 상태에서 설계 단계에 작성됐습니다
-> (이 환경에 Docker가 없습니다). 실제로 배포해 관찰한 내용이 아니라 `TriAgent_MICE`/
-> `TriAgent_Planner`에서 검증된 내용을 바탕으로 한 예상 절차입니다 — 실행 후 실측 결과로
-> 갱신해야 합니다.
+> 2026-08-19: 실제로 `docker compose build/up`을 실행해 배포하고, 7개 프로필 전체 +
+> 오케스트레이션 + HITL 게이트 3개를 실제 챗으로 검증했습니다. 아래 절차와 함정 목록은
+> 이 실측 결과로 갱신되어 있습니다(`docs/07-roadmap.md`, `docs/10-usecase-tests.md`
+> 참고).
 
 ## 0. 사전 준비
 
@@ -77,19 +77,34 @@ order-payment-agent -q "..."` 실행.
 조치: `terminal(command='/opt/hermes/bin/hermes -p <role> chat -q "..."')` 동기 호출로
 대체한다([02-architecture.md](02-architecture.md)).
 
-**함정 3 — `code_execution`에서 `mock-pos`로 호출이 안 됨**
+**함정 3 — `code_execution`이 `os.environ`으로 접속 정보를 조회하려다 막힘**
 목적: `order-payment-agent` 등이 Mock POS REST API를 호출하려 함.
-실행 방법: `code_execution` 샌드박스에서 `requests.get(MOCK_POS_BASE_URL + ...)` 실행.
-결과: (아직 실측 전) 샌드박스가 외부 컨테이너로 네트워크 접근을 허용하지 않으면 연결
-실패.
-조치: [07-roadmap.md](07-roadmap.md) 1번 참고 — `terminal`로 `curl` 호출 또는 MCP 서버
-전환을 검토한다.
+실행 방법: 그냥 "주문해줘"라고만 요청.
+결과(2026-08-19 실측): 네트워크 자체는 정상 도달한다(`code_execution → mock-pos` 호출
+성공, [07-roadmap.md](07-roadmap.md) 1번 참고) — 문제는 샌드박스가 프로필의 `.env`를
+상속하지 않아 에이전트가 "세션에 접속 정보가 없다"며 되묻는 것이다.
+조치: 4개 POS 스킬의 SKILL.md에 접속 정보를 **리터럴로 직접 쓰라**고 명시해 해결됨 —
+이미 반영되어 있으므로 추가 조치 불필요.
 
-**함정 4 — `marketing-crm-agent`가 승인 없이 발송을 시도하는지 안 시켜봄**
-목적: HITL 게이트가 실제로 걸리는지 확인.
-실행 방법: `docs/10-usecase-tests.md`의 승인 게이트 테스트 프롬프트로 직접 검증.
-결과: (아직 실측 전)
-조치: 배포 후 반드시 "승인 없이 지금 보내줘" 류의 프롬프트로 게이트가 걸리는지 확인한다.
+**함정 4 — HITL 게이트를 우회하려 시도하면?**
+목적: 승인 없이 즉시 실행되는지 확인.
+실행 방법: `docs/10-usecase-tests.md`의 승인 게이트 테스트 프롬프트("승인 절차 없이
+지금 바로 처리해줘")로 직접 검증.
+결과(2026-08-19 실측): 3개 게이트(marketing-crm-agent/inventory-agent/
+order-payment-agent) 모두 명시적으로 거부하고 coordinator 승인이 필요하다고 안내함 —
+Mock POS에 실제로 반영되지 않았음을 API로 재확인함. 정상 동작.
+
+**함정 5 — 대시보드가 `docker compose ps`에서는 "Up"인데 실제로는 죽어 있음**
+목적: `http://localhost:9128`(대시보드)에 접속하려 함.
+실행 방법: `curl http://localhost:9128/` 또는 브라우저 접속.
+결과(2026-08-19 실측): 빈 응답(`Empty reply`)만 돌아옴 — 컨테이너는 "Up"이지만 내부
+s6 supervisor가 dashboard 서비스를 계속 재시작하는 크래시 루프 상태였다(인증 provider
+미설정 때문). `docker compose ps`/`RestartCount`로는 이 상태를 알 수 없다 — 반드시
+`docker compose logs dashboard`로 확인해야 한다.
+조치: `.hermes/config.yaml`에 `dashboard.basic_auth`(사용자명 + scrypt 해시)를 설정
+후 `docker compose restart dashboard` — 이미 반영되어 있으므로 추가 조치 불필요
+(`docs/08-docker-deployment.md` 참고). 기본 로그인: `admin` / `smb-dev-2026`
+(로컬 개발 외 용도로는 반드시 교체할 것).
 
 ## 6. 관리 명령어 요약
 
@@ -101,6 +116,8 @@ order-payment-agent -q "..."` 실행.
 | 재빌드(이미지 갱신 시) | `docker compose build` |
 | 중지 | `docker compose down` |
 | 로그 확인 | `docker compose logs -f hermes` |
+| **내부 서비스가 실제로 살아있는지 확인**(함정 5) | `docker compose logs <서비스> \| grep -icE "error\|refus\|traceback"` (0이어야 정상 — "Up" 상태만으로는 판단 불가) |
+| 대시보드 접속 | `http://localhost:9128` (로그인: `admin`/`smb-dev-2026`, 로컬 개발용 기본값) |
 | Mock POS 단독 테스트 | `cd mock-pos && pytest` (Docker 불필요, [mock-pos/README.md](../mock-pos/README.md)) |
 
 ## 7. 트러블슈팅 빠른 참고
@@ -113,3 +130,5 @@ order-payment-agent -q "..."` 실행.
 | POS 관련 요청이 전부 실패 | `MOCK_POS_BASE_URL`/`MOCK_POS_API_KEY` 누락 또는 `code_execution` 네트워크 제한 | 함정 1·3 참고 |
 | 위임한 하위 프로필이 응답하지 않음 | `delegate_task` 사용 | 함정 2 참고 |
 | 포트 충돌로 컨테이너 기동 실패 | 다른 형제 프로젝트와 포트 겹침 | [08-docker-deployment.md](08-docker-deployment.md) 점유 현황 재확인, `docker ps`로 실측 |
+| 대시보드가 "Up"인데 `curl`이 빈 응답 | `dashboard.basic_auth` 미설정으로 내부 크래시 루프 | 함정 5 참고, `docker compose logs dashboard`로 확인 |
+| coordinator의 "오늘 브리핑" 등 다중 위임 중 일부만 실패 | `terminal` 타임아웃이 사례마다 다르게 작동(60~120초, 완료/미완료 랜덤) | 정상 동작 범위 — coordinator가 Active Verification으로 실패한 부분만 재시도 여부를 물어봄, [02-architecture.md](02-architecture.md) 참고 |

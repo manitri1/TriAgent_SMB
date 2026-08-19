@@ -127,6 +127,13 @@ uvicorn mock_pos.main:app --reload --port 8080
   `FIRECRAWL_API_KEY` 등)가 없으면 비활성입니다. 현재 이 키 없이 배포되어 있어
   `customer-service-agent`/`marketing-crm-agent`는 웹 검색 없이 내부 지식만으로
   동작합니다.
+- **대시보드는 `docker compose ps`에서 "Up"으로 보여도 내부적으로 죽어 있을 수 있습니다**
+  — 실제로 배포 몇 시간 뒤 발견: 인증 provider 미설정으로 s6가 dashboard 서비스를
+  계속 재시작하는 크래시 루프였지만, 컨테이너 프로세스 자체는 종료되지 않아
+  `RestartCount=0`, `Up`으로만 보였습니다. `.hermes/config.yaml`에
+  `dashboard.basic_auth`를 설정해 해결했습니다(기본 로그인 `admin`/`smb-dev-2026`, 로컬
+  개발 외 용도로는 교체 필요) — [docs/08-docker-deployment.md](docs/08-docker-deployment.md)
+  참고.
 - 실 POS 벤더(토스플레이스/카카오페이) 연동은 아직 없습니다 — 현재는 Mock POS로 기능
   검증까지만 수행합니다.
 - **HITL 승인 게이트는 총 3개이며(프로모션/캠페인 집행·재고 대량 발주·결제 환불/주문

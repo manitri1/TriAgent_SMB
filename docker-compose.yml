@@ -53,8 +53,12 @@ services:
     command: ["dashboard", "--host", "0.0.0.0", "--no-open"]
     # ⚠️ 컨테이너 "내부" 바인딩은 0.0.0.0이어야 한다 — 127.0.0.1로 바인딩하면 Docker의 포트
     # 포워딩이 도달하지 못한다. 실제 외부 노출 범위는 위 ports:의 "127.0.0.1:9128:..." 호스트
-    # 바인딩이 담당한다. Hermes Agent는 0.0.0.0 바인딩을 감지하면 자동으로 인증을 요구하므로
-    # .hermes/.env에 HERMES_DASHBOARD_BASIC_AUTH_USERNAME/PASSWORD/SECRET을 채워야 한다.
+    # 바인딩이 담당한다. Hermes Agent는 0.0.0.0 바인딩을 감지하면 인증 provider가 없는 한
+    # 바인딩 자체를 거부한다 — 2026-08-19 실측: 인증 미설정 상태로는 컨테이너 내부에서
+    # dashboard 서비스가 계속 재시작을 반복했고(s6 레벨 크래시 루프라 `docker compose ps`는
+    # 계속 "Up"으로만 보임 — docs/08-docker-deployment.md 참고), .hermes/.env의 환경변수가
+    # 아니라 .hermes/config.yaml의 `dashboard.basic_auth.username`/`password_hash`로
+    # 설정해야 실제로 뜬다.
 
   mock-pos:
     build: ./mock-pos

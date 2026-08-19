@@ -10,6 +10,15 @@ plugins:
 platforms:
   webhook:
     enabled: false
+dashboard:
+  basic_auth:
+    username: admin
+    # 개발용 기본 비밀번호: smb-dev-2026 (docs/08-docker-deployment.md 참고).
+    # 대시보드는 호스트에서 127.0.0.1:9128로만 노출되므로(외부 접근 불가) 위험도는
+    # 낮지만, 로컬 개발 외 용도로 쓰기 전에는 반드시 새 해시로 교체할 것:
+    #   docker compose exec hermes python3 -c \
+    #     "from plugins.dashboard_auth.basic import hash_password; print(hash_password('새 비밀번호'))"
+    password_hash: "scrypt$16384$8$1$Ock0d3EFjXBZ5BXko7UZVQ==$oWFfybIgLRvdOqnDFIFocdfHVPfP9wPfMefaSyOaA0Q="
 _config_version: 33
 
 # ── Security ──────────────────────────────────────────────────────────

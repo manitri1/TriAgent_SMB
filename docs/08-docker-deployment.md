@@ -77,3 +77,35 @@ docker compose down
   (`hermes-triagent-smb`, `-dashboard`, `-mock-pos`)가 모두 정상 기동함을 확인했습니다.
 - ✅ `hermes doctor`로 컨테이너 내부에서 7개 프로필이 모두 인식됨을 확인했습니다
   ([07-roadmap.md](07-roadmap.md) 8번, [10-usecase-tests.md](10-usecase-tests.md) TC-19).
+
+## ⚠️ 발견한 함정 — 대시보드가 "Up"인데 실제로는 죽어 있었음 (2026-08-19)
+
+배포 몇 시간 뒤 재점검하다가 `docker compose ps`에서는 `hermes-triagent-smb-dashboard`가
+계속 `Up`으로 표시됐지만, `curl http://localhost:9128/`이 빈 응답(`Empty reply`)을
+반환하는 것을 발견했습니다. 로그를 열어보니 원인은:
+
+- Docker의 포트 포워딩이 작동하려면 컨테이너 **내부** 서비스가 `0.0.0.0`에 바인딩돼야
+  합니다(`127.0.0.1`로 바인딩하면 컨테이너 네임스페이스 밖에서 도달 불가) — 그래서
+  `docker-compose.yml`에 `command: ["dashboard", "--host", "0.0.0.0", ...]`를 이미
+  넣어뒀습니다.
+- 하지만 Hermes Agent는 `0.0.0.0` 바인딩을 감지하면 인증 provider(비밀번호 또는 OAuth)가
+  설정돼 있지 않은 한 **바인딩 자체를 거부**합니다("Refusing to bind dashboard to
+  0.0.0.0 — ... no auth providers are registered").
+- 인증을 설정하지 않았기 때문에 컨테이너 내부의 s6 supervisor가 `dashboard` 서비스를
+  계속 재시작→실패→재시작을 반복했습니다. **문제는 이 크래시 루프가 s6 레벨에서
+  일어나서 컨테이너 프로세스 자체는 한 번도 종료되지 않았다는 것**입니다 — 그래서
+  Docker의 `RestartCount`는 계속 `0`이었고 `docker compose ps`는 계속 `Up`으로만
+  보였습니다. **"Up" 상태만으로는 내부 서비스가 실제로 살아있는지 알 수 없습니다** —
+  로그를 열어보거나 실제로 엔드포인트를 호출해봐야 합니다.
+
+**조치**: `.hermes/config.yaml`에 `dashboard.basic_auth`(사용자명 + scrypt 해시)를
+추가했습니다. 대시보드가 호스트에서 `127.0.0.1:9128`로만 노출되므로(외부 접근 불가)
+개발용 기본 비밀번호를 그대로 커밋했습니다 — 로컬 개발 외 용도로 쓰기 전에는 새
+해시로 교체하세요(`.hermes/config.yaml`의 주석에 재생성 명령어 포함). 수정 후
+`docker compose restart dashboard`로 재시작해 `HERMES_DASHBOARD_READY` 로그와
+`curl` 302(로그인 리다이렉트) 응답을 확인했습니다.
+
+**교훈**: 이 프로젝트의 `main` `hermes` 컨테이너와 `mock-pos`도 같은 방식(로그 전체를
+`grep -icE "error|refus|traceback|exception"`, s6 서비스 재시작 횟수 확인)으로
+재점검해 실제로 깨끗함을 확인했습니다 — 배포 직후 한 번 확인했다고 끝이 아니라, 시간이
+지난 뒤에도 로그 기반으로 재점검하는 습관이 필요합니다.
