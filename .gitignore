@@ -1,0 +1,62 @@
+# Python (mock-pos)
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.env
+
+# Hermes Agent 런타임/캐시/비밀정보 — 소스 오브 트루스가 아님
+.hermes/**/.env
+.hermes/**/.env.bak-*
+!.hermes/**/.env.example
+.hermes/**/*.bak-*
+.hermes/**/cache/
+.hermes/**/.cache/
+.hermes/**/.config/
+.hermes/**/.local/
+.hermes/**/.npm/
+.hermes/**/lazy-packages/
+.hermes/**/audio_cache/
+.hermes/**/image_cache/
+.hermes/**/sandboxes/
+.hermes/**/sessions/
+.hermes/**/state.db
+.hermes/**/state.db-shm
+.hermes/**/state.db-wal
+.hermes/**/auth.json
+.hermes/**/auth.lock
+.hermes/**/*.log
+.hermes/**/pairing/
+.hermes/**/cron/
+.hermes/**/hooks/
+.hermes/bin/
+.hermes/**/bin/
+.hermes/**/.skills_prompt_snapshot.json
+.hermes/logs/
+.hermes/.hermes_history
+.hermes/pastes/
+.hermes/memories/
+.hermes/state/
+.hermes/home/
+.hermes/gateway/
+.hermes/gateway.lock
+.hermes/gateway.pid
+.hermes/gateway_state.json
+.hermes/gateway-starts.log
+.hermes/channel_directory.json
+.hermes/kanban.db*
+.hermes/kanban/
+.hermes/*_cache.json
+.hermes/backups/
+.hermes/skills/
+
+# Hermes가 프로필 첫 사용 시 자동으로 복사해 넣는 번들 스킬 마켓플레이스(수백 개 파일,
+# 프로필당 ~8MB) — 우리가 작성한 게 아니라 Hermes CLI가 자동 채워 넣는 캐시성 콘텐츠라
+# 소스로 관리하지 않는다. 우리가 직접 작성한 4개 카테고리(orchestration/pos/support/
+# marketing)만 예외로 추적한다.
+.hermes/profiles/*/skills/*
+!.hermes/profiles/*/skills/orchestration
+!.hermes/profiles/*/skills/pos
+!.hermes/profiles/*/skills/support
+!.hermes/profiles/*/skills/marketing

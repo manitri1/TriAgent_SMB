@@ -1,0 +1,15 @@
+{
+  "order_id": "order_cce4fb24d44a",
+  "items": [
+    {
+      "item_id": "menu_bagel",
+      "quantity": 1,
+      "note": null,
+      "unit_price": 3000,
+      "subtotal": 3000
+    }
+  ],
+  "total": 3000,
+  "payment_status": "COMPLETED",
+  "timestamp": "2026-08-19T08:37:58.490696Z"
+}

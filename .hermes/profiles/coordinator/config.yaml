@@ -1,0 +1,6 @@
+model:
+  default: gpt-5-mini
+  provider: openai-api
+onboarding:
+  seen:
+    tool_progress_prompt: true
