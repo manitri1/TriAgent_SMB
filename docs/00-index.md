@@ -17,7 +17,8 @@
 | [07-roadmap.md](07-roadmap.md) | 이번 단계 이후 남은 작업 (실 POS 벤더 연동, 오케스트레이션·HITL 실측) |
 | [08-docker-deployment.md](08-docker-deployment.md) | Windows Docker Compose 배포 — 형제 프로젝트 포트/볼륨 조사 결과 |
 | [09-users-guide.md](09-users-guide.md) | 실행/운영 가이드 (챗 중심) — 프로필별 대화 진입점, 흔한 함정, 트러블슈팅 |
-| [10-usecase-tests.md](10-usecase-tests.md) | Usecase 테스트 목록 — 현재는 전부 미검증(⬜) 상태 |
+| [10-usecase-tests.md](10-usecase-tests.md) | Usecase 테스트 목록 — 2026-08-19 실제 배포로 Part A~C(프로필 단독/오케스트레이션/HITL 게이트) 전부 검증 완료 |
+| [11-external-integrations-guideline.md](11-external-integrations-guideline.md) | Shopify/Stripe 테스트 자동화 가이드라인(별도 작업, API 키 확보 전 준비 문서) — TriAgent_SMB 본체와는 독립적 |
 
 ## 한 줄 요약
 

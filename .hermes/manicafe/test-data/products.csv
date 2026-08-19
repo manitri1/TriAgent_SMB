@@ -1,0 +1,13 @@
+sku,name,price,cost,category,inventory_quantity,description,taxable
+MAN-0001,Americano,3500,800,coffee,200,Classic hot americano,true
+MAN-0002,Latte,4500,1000,coffee,150,Creamy milk latte,true
+MAN-0003,Cappuccino,4700,1100,coffee,120,Espresso with milk foam,true
+MAN-0004,Espresso,3000,700,coffee,180,Single shot espresso,true
+MAN-0005,Cold Brew,5200,1200,coffee,90,Slow steeped cold brew,true
+MAN-0006,Matcha Latte,5200,1200,tea,80,Japanese matcha with milk,true
+MAN-0007,Chai Latte,4800,1100,tea,70,Spiced chai latte,true
+MAN-0008,Blueberry Muffin,2800,500,bakery,60,Freshly baked muffin,false
+MAN-0009,Croissant,3000,600,bakery,50,Buttery croissant,false
+MAN-0010,Sandwich (Ham & Cheese),6500,1800,sandwich,40,savory ham & cheese sandwich,false
+MAN-0011,Strawberry Smoothie,5500,1300,smoothie,55,summer strawberry smoothie,true
+MAN-0012,Seasonal Cake Slice,6000,2000,dessert,30,cake slice of the month,false

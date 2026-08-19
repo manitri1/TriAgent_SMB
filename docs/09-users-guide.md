@@ -59,6 +59,19 @@ docker compose exec -it hermes hermes chat --profile coordinator
 없이 동작합니다 — 이 경우 7개 역할의 SOUL.md/USER.md/MEMORY.md/skills가 전혀 로드되지
 않으므로, 반드시 `--profile <role>`을 명시해야 합니다.
 
+> **2026-08-19 실측**: 대시보드(또는 `-it` 인터랙티브 챗)에서 프로필을 지정하지 않고
+> "테스트용 카페 시나리오 준비해줘" 같은 일반적인 요청을 했더니, 기본 Hermes 페르소나
+> ("You are Hermes Agent, an intelligent AI assistant...")가 우리 프로젝트를 전혀 모른
+> 채 응답했습니다 — Mock POS는 언급조차 없이 처음부터 Shopify/Stripe 연동을 제안했고,
+> 산출물도 우리 `workspace/<category>/` 관례가 아니라 `manicafe/`라는 새 최상위
+> 디렉터리에 만들었습니다. 게다가 계획 파일은 `.hermes/plans/...`에 쓴다는 게 실제로는
+> `.hermes/.hermes/plans/...`(이중 중첩)에 생겼습니다 — 이 컨테이너의 `HERMES_HOME`이
+> 이미 우리 저장소의 `.hermes/`에 마운트돼 있는데, 기본 에이전트는 "홈 아래
+> `.hermes/plans/`"라는 통상적인 상대경로 가정을 그대로 써서 자기 자신의 홈 안에 또
+> `.hermes/`를 만든 것입니다. **교훈**: 대시보드로 채팅할 때도 반드시 프로필을 선택해야
+> 하고(대시보드 UI에서 프로필 선택 가능), 아무 프로필도 선택하지 않은 세션의 산출물은
+> `workspace/`가 아닌 곳에 남을 수 있으니 위치를 확인해야 합니다.
+
 ## 5. 흔한 함정
 
 **함정 1 — top-level `.env`만 채우고 프로필별 `.env`를 빠뜨림**
