@@ -31,3 +31,4 @@ ORD-20260825-0027,2026-08-25T15:35:00Z,amelia@example.com,MAN-0012,1,6000,6000,p
 ORD-20260826-0028,2026-08-26T16:20:00Z,ben@example.com,MAN-0005,1,5200,5200,completed,paid,0,
 ORD-20260827-0029,2026-08-27T17:05:00Z,clara@example.com,MAN-0007,2,4800,9600,completed,paid,0,
 ORD-20260828-0030,2026-08-28T18:40:00Z,derek@example.com,MAN-0002,1,4500,4500,completed,paid,0
+ORD-20260820-104645,2026-08-20T10:46:45Z,testuser@example.com,MAN-0001,2,3500,7000,completed,paid,0,Simulated immediate payment per user request

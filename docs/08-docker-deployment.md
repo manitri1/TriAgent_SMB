@@ -76,7 +76,7 @@ docker compose down
   확인한 뒤, 그 어떤 것과도 포트/컨테이너명이 겹치지 않고 3개 컨테이너
   (`hermes-triagent-smb`, `-dashboard`, `-mock-pos`)가 모두 정상 기동함을 확인했습니다.
 - ✅ `hermes doctor`로 컨테이너 내부에서 7개 프로필이 모두 인식됨을 확인했습니다
-  ([07-roadmap.md](07-roadmap.md) 8번, [10-usecase-tests.md](10-usecase-tests.md) TC-19).
+  ([07-roadmap.md](07-roadmap.md) 8번, [10-usecase-tests.md](10-usecase-tests.md) TC-33).
 
 ## ⚠️ 발견한 함정 — 대시보드가 "Up"인데 실제로는 죽어 있었음 (2026-08-19)
 

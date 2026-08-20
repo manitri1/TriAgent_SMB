@@ -1,5 +1,5 @@
 sku,name,price,cost,category,inventory_quantity,description,taxable
-MAN-0001,Americano,3500,800,coffee,200,Classic hot americano,true
+MAN-0001,Americano,3500,800,coffee,198,Classic hot americano,true
 MAN-0002,Latte,4500,1000,coffee,150,Creamy milk latte,true
 MAN-0003,Cappuccino,4700,1100,coffee,120,Espresso with milk foam,true
 MAN-0004,Espresso,3000,700,coffee,180,Single shot espresso,true
