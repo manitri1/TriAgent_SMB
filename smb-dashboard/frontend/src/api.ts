@@ -65,8 +65,11 @@ export interface Approval {
   decided_at?: string;
 }
 
+export type OrderStatusFilter = Order["status"] | "ALL";
+
 export const api = {
-  todayOrders: () => request<Order[]>("/api/orders/today"),
+  todayOrders: (status?: Order["status"]) =>
+    request<Order[]>(`/api/orders/today${status ? `?status=${status}` : ""}`),
   inventory: () => request<InventoryItem[]>("/api/inventory"),
   reservations: (date?: string) =>
     request<Reservation[]>(`/api/reservations${date ? `?date=${date}` : ""}`),

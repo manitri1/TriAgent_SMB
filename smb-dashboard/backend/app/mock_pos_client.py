@@ -28,8 +28,9 @@ async def _get(path: str, params: Optional[dict] = None) -> dict | list:
         raise HTTPException(status_code=502, detail=f"재고/주문 서비스 오류: {exc.response.status_code}") from exc
 
 
-async def list_orders() -> list[dict]:
-    return await _get("/orders")  # type: ignore[return-value]
+async def list_orders(status: Optional[str] = None) -> list[dict]:
+    params = {"status": status} if status else {}
+    return await _get("/orders", params=params)  # type: ignore[return-value]
 
 
 async def list_inventory() -> list[dict]:

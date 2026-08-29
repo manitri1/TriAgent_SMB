@@ -76,6 +76,24 @@ body {
   font-size: 0.8rem;
 }
 
+.filter-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.tab-filter {
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  border-bottom: 1px solid #ddd;
+}
+
+.tab-filter.tab-active {
+  border-color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
 .error {
   color: #b91c1c;
 }

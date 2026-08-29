@@ -2,7 +2,7 @@
 id: SPEC-DASHBOARD-001
 title: "SMB Dashboard MVP — Orders/Inventory/Reservations/Sales/Approvals 웹 UI"
 version: "0.1.0"
-status: draft
+status: in-progress
 created: 2026-08-29
 updated: 2026-08-29
 author: manit
