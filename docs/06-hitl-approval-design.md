@@ -5,6 +5,14 @@ Hermes 게이트웨이 내장 `/approve`/`/deny`는 **쉘 명령 승인**용(`ap
 문서는 `coordinator`가 `messaging`/`clarify` 툴셋만으로 도메인 HITL을 구현하는 방법을
 정의합니다.
 
+> **업데이트(SPEC-DASHBOARD-001):** 아래 절차는 여전히 유효하지만, 이제 `smb-dashboard`가
+> 제공하는 구조화 승인 큐가 **병행 채널**로 추가되었습니다 — Discord 대화만 남아 있던
+> 승인 상태가 처음으로 구조화된 REST 저장소(`POST/GET/PATCH /api/approvals`)를 갖게
+> 되었습니다. 두 채널 중 먼저 도달한 결정이 유효합니다. 상세 흐름은
+> [docs/13-mvp-dashboard-design.md §5](13-mvp-dashboard-design.md)와
+> `.hermes/profiles/coordinator/skills/orchestration/task_dispatch_and_verification/SKILL.md`의
+> "구조화 승인 큐 연동" 절을 참고하세요.
+
 ## 공통 흐름
 
 ```

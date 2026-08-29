@@ -1,10 +1,15 @@
-# Python (mock-pos)
+# Python (mock-pos, smb-dashboard/backend)
 __pycache__/
 *.pyc
 .pytest_cache/
 .venv/
 venv/
 .env
+
+# smb-dashboard (docs/13-mvp-dashboard-design.md)
+smb-dashboard/data/*.json
+smb-dashboard/frontend/node_modules/
+smb-dashboard/frontend/dist/
 
 # Hermes Agent 런타임/캐시/비밀정보 — 소스 오브 트루스가 아님
 .hermes/**/.env

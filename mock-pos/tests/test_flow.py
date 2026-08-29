@@ -173,6 +173,43 @@ def test_refunded_payment_excluded_from_sales_but_shown_in_settlement():
     assert settlement["refunded_count"] >= 1
 
 
+def test_list_orders_filters_by_status():
+    resp = client.post(
+        f"/v1/stores/{STORE}/catalog/items",
+        headers=HEADERS,
+        json={"item_id": "menu_espresso", "name": "에스프레소", "unit_price": 4000, "initial_stock": 10},
+    )
+    assert resp.status_code == 201
+
+    resp = client.post(
+        f"/v1/stores/{STORE}/orders",
+        headers=HEADERS,
+        json={"line_items": [{"item_id": "menu_espresso", "quantity": 1}]},
+    )
+    open_order = resp.json()
+
+    resp = client.post(
+        f"/v1/stores/{STORE}/orders",
+        headers=HEADERS,
+        json={"line_items": [{"item_id": "menu_espresso", "quantity": 1}]},
+    )
+    completed_order = resp.json()
+    client.post(
+        f"/v1/stores/{STORE}/payments", headers=HEADERS, json={"order_id": completed_order["order_id"]}
+    )
+
+    resp = client.get(f"/v1/stores/{STORE}/orders", headers=HEADERS)
+    assert resp.status_code == 200
+    ids = {o["order_id"] for o in resp.json()}
+    assert open_order["order_id"] in ids
+    assert completed_order["order_id"] in ids
+
+    resp = client.get(f"/v1/stores/{STORE}/orders", headers=HEADERS, params={"status": "OPEN"})
+    ids = {o["order_id"] for o in resp.json()}
+    assert open_order["order_id"] in ids
+    assert completed_order["order_id"] not in ids
+
+
 def test_list_reservations_filters_by_status():
     resp = client.post(
         f"/v1/stores/{STORE}/reservations",

@@ -30,10 +30,40 @@ platforms: [Linux, macOS, Windows]
 3. 카드를 `done`으로 옮기기 전, Mock POS를 재조회하거나 `workspace/` 산출물 파일을 직접
    열어 확인한다. 텍스트 보고만으로, 또는 `terminal` 타임아웃만으로 완료/실패를 단정하지
    않는다. 확인 불가하면 카드 상태를 `blocked`로 유지하고 근거를 재요청한다.
-4. 프로모션 집행 / 대량 발주 확정 / 환불·취소 처리 — 이 3개 HITL 게이트에 도달하면
-   `messaging`/`clarify`로 사장님에게 검토를 요청하고, 명시적 승인 없이는 진행하지 않는다.
+4. 프로모션 집행 / 대량 발주 확정 / 환불·취소 처리 — 이 3개 HITL 게이트에 도달하면 아래
+   "구조화 승인 큐 연동" 절차대로 대시보드에도 대기 레코드를 만들고, 기존과 동일하게
+   `messaging`/`clarify`로 사장님에게 검토를 요청한다. 두 채널(Discord 대화 / 대시보드
+   웹 UI) 중 **먼저 도달한 결정**을 유효한 것으로 삼으며, 명시적 승인 없이는 진행하지 않는다.
 5. "오늘 브리핑" 같은 종합 요청은 `sales-analytics-agent`와 `inventory-agent`를 순서대로
    호출해 결과를 종합한 뒤 간결하게 보고한다.
+
+## 구조화 승인 큐 연동 (신규, docs/13-mvp-dashboard-design.md §5)
+
+기존에는 HITL 승인 상태가 Discord 대화 안에만 존재하고 구조화된 저장소가 없었다. 이제
+`smb-dashboard`(신규 서비스)가 승인 큐 REST API를 제공하므로, 게이트 도달 시 다음을 추가로
+수행한다.
+
+**접속 정보 (다른 pos 스킬과 동일한 이유로 하드코딩 — code_execution 샌드박스는 `.env`를
+상속하지 않는다):**
+```python
+DASHBOARD_BASE_URL = "http://smb-dashboard:8652"
+DASHBOARD_AUTH = ("owner", "smb-dashboard-dev-2026")  # 개발용 기본값, 운영 전 교체 필요
+```
+
+1. 게이트 도달 즉시 `POST {DASHBOARD_BASE_URL}/api/approvals`로 대기 레코드를 만든다:
+   `{"type": "promo"|"reorder"|"refund", "summary": "<한 줄 요약>", "details": "<채널/금액/사유 등 전문>", "requested_by": "<담당 프로필명>"}`.
+   응답의 `approval_id`를 기억해둔다.
+2. 기존과 동일하게 Discord 메시지를 보내되, "웹 대시보드(승인 대기열 탭)에서도 승인/반려할
+   수 있습니다"를 안내에 포함한다.
+3. `clarify` 응답을 기다리는 동안, 주기적으로(예: 몇 차례) `GET {DASHBOARD_BASE_URL}/api/approvals/{approval_id}`를
+   폴링해 `status`가 `pending`이 아니게 되었는지 확인한다. 웹에서 먼저 결정되면 그 결과를
+   즉시 반영하고 Discord 대화는 "이미 대시보드에서 처리됨"으로 마무리한다.
+4. Discord 대화로 먼저 결정된 경우에도, `PATCH {DASHBOARD_BASE_URL}/api/approvals/{approval_id}`
+   (`{"status": "approved"|"rejected", "reason": "..."}`)로 대시보드 쪽 상태를 동기화한다.
+   이미 결정된 레코드에 재차 PATCH를 시도하면 409가 반환되는데, 이는 오류가 아니라
+   "이미 다른 채널에서 처리됨"을 뜻하므로 그대로 진행한다.
+5. 최종 결정은 기존과 동일하게 `coordinator/MEMORY.md`의 "확정된 승인/반려 이력"에 한 줄
+   남긴다.
 
 ## 카드 형식 (`workspace/kanban/<날짜>-<슬러그>.md`)
 ```markdown

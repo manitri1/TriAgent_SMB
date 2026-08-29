@@ -19,6 +19,8 @@
 | [09-users-guide.md](09-users-guide.md) | 실행/운영 가이드 (챗 중심) — 프로필별 대화 진입점, 흔한 함정, 트러블슈팅 |
 | [10-usecase-tests.md](10-usecase-tests.md) | Usecase 테스트 목록 — 2026-08-19 실제 배포로 Part A~C(프로필 단독/오케스트레이션/HITL 게이트) 전부 검증 완료 |
 | [11-external-integrations-guideline.md](11-external-integrations-guideline.md) | Shopify/Stripe 테스트 자동화 가이드라인(별도 작업, API 키 확보 전 준비 문서) — TriAgent_SMB 본체와는 독립적 |
+| [12-mvp-window-options.md](12-mvp-window-options.md) | MVP를 "별도의 창"으로 운영하는 3가지 방안 비교(독립 배포 인스턴스/데스크톱 앱 창/커스텀 웹 UI) — 방향 미확정, 비교 문서 |
+| [13-mvp-dashboard-design.md](13-mvp-dashboard-design.md) | 12장에서 채택한 옵션 C(커스텀 웹 UI) 상세 설계 — API 계약, 화면 구성, 승인 큐 이중 채널 흐름, 포트/영속성. 아직 구현 전(SPEC-DASHBOARD-001) |
 
 ## 한 줄 요약
 

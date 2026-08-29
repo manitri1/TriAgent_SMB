@@ -68,3 +68,27 @@ services:
       - "8080:8080"
     environment:
       MOCK_POS_API_KEY: ${MOCK_POS_API_KEY:-dev-key}
+
+  # docs/13-mvp-dashboard-design.md: 옵션 C(커스텀 웹 UI) MVP. Hermes 내장 CLI 대시보드
+  # (위 dashboard 서비스, 9128)와는 별개로, mock-pos를 프록시해 주문/재고/예약/매출을
+  # 보여주고 신규 승인 큐(HITL 이중 채널)를 제공하는 전용 화면이다. 컨테이너명에 기존
+  # `hermes-triagent-smb-dashboard`(Hermes CLI 대시보드)와 겹치지 않도록 `-ui` 접미사를 쓴다.
+  smb-dashboard:
+    build: ./smb-dashboard
+    container_name: hermes-triagent-smb-dashboard-ui
+    restart: unless-stopped
+    depends_on:
+      - mock-pos
+    ports:
+      - "127.0.0.1:8652:8652"   # 잠정 포트 — 배포 직전 `docker ps`로 형제 프로젝트와 미충돌 재확인할 것
+    environment:
+      MOCK_POS_BASE_URL: http://mock-pos:8080
+      MOCK_POS_API_KEY: ${MOCK_POS_API_KEY:-dev-key}
+      STORE_ID: ${STORE_ID:-store_demo}
+      LOW_STOCK_THRESHOLD: ${LOW_STOCK_THRESHOLD:-10}
+      # 로컬 개발용 기본 자격증명 — 실제 운영 전 .env에서 반드시 교체할 것
+      # (기존 Hermes 대시보드의 dashboard.basic_auth와 동일한 방침, docs/13 §6 참고)
+      DASHBOARD_BASIC_AUTH_USER: ${DASHBOARD_BASIC_AUTH_USER:-owner}
+      DASHBOARD_BASIC_AUTH_PASSWORD: ${DASHBOARD_BASIC_AUTH_PASSWORD:-smb-dashboard-dev-2026}
+    volumes:
+      - ./smb-dashboard/data:/data   # 승인 큐 JSON 영속화 — named volume이 아니라 bind mount로 호스트 드라이브에 남긴다

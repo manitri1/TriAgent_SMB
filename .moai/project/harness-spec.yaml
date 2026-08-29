@@ -1,0 +1,18 @@
+# .moai/project/harness-spec.yaml — machine-readable harness generation input
+# Generated from .moai/project/interview.md (Stage A + Stage B answers)
+
+domain: ax-automation-smb
+goal: "Ship the SMB dashboard MVP (SPEC-DASHBOARD-001): a web screen for orders/inventory/reservations/sales and a dual-channel (web + Discord) HITL approval queue."
+constraints:
+  - "No per-item low-stock threshold (global LOW_STOCK_THRESHOLD only) — docs/13 §8"
+  - "No realtime WebSocket/SSE updates — polling only — docs/13 §8"
+  - "Single store_id / no multi-store or i18n support — docs/13 §8"
+scope: "In scope: Hermes coordinator + 6 worker profiles, Mock POS REST API (orders/inventory/reservations/payments/reports), smb-dashboard (FastAPI backend proxying Mock POS + owning the approvals JSON store, React/Vite frontend). Out of scope: multi-store/multi-language support, realtime updates, per-item low-stock thresholds."
+
+verification: "pytest (mock-pos: pytest in mock-pos/, config in pytest.ini; smb-dashboard backend: pytest in backend/, using pytest-httpx to mock Mock POS calls — declared but not yet exercised in any test)"
+external_systems:
+  - "Mock POS REST API (http://mock-pos:8080, proxied by smb-dashboard backend)"
+  - "Hermes gateway/coordinator (writes/polls the approvals queue via code_execution)"
+  - "Discord (existing parallel HITL channel, unchanged)"
+ui_surface: has-ui
+team_sharing: solo
