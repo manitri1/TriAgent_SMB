@@ -1,0 +1,27 @@
+[
+  {
+    "item_id": "menu_americano",
+    "stock_quantity": 0,
+    "low_stock_threshold": 5,
+    "updated_at": "2026-09-04T00:26:49.640578Z",
+    "_list_index": 1
+  },
+  {
+    "item_id": "menu_latte",
+    "stock_quantity": 143,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-04T02:28:34.884517Z"
+  },
+  {
+    "item_id": "menu_cappuccino",
+    "stock_quantity": 117,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-04T03:56:13.923787Z"
+  },
+  {
+    "item_id": "menu_muffin",
+    "stock_quantity": 51,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-04T00:26:51.297465Z"
+  }
+]

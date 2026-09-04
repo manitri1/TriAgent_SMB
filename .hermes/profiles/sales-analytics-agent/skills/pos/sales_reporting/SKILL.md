@@ -35,6 +35,10 @@ HEADERS = {"X-API-Key": API_KEY}
   — **매출액은 `total_sales`다. `order_count`는 건수이지 금액이 아니다.**
 - `GET /reports/settlement?period=` → `{"gross_sales": <총매출>, "payment_count": <결제건수>,
   "refunded_amount": <환불액>, "refunded_count": <환불건수>, "currency": "KRW"}`
+- `GET /reports/margin?period=` → `{"total_revenue": <매출>, "total_cost": <원가>,
+  "gross_margin": <매출총이익>, "margin_rate": <0~1 사이 비율>, "currency": "KRW"}`
+  — `margin_rate`는 비율이다(퍼센트로 말할 때는 100을 곱해서 설명). 원가 미등록
+  품목은 `cost=0`으로 계산되므로 마진이 실제보다 높게 나올 수 있다는 점을 함께 언급한다.
 
 ## 절차
 1. `GET /v1/stores/{STORE_ID}/reports/sales?period=`와
@@ -42,7 +46,10 @@ HEADERS = {"X-API-Key": API_KEY}
    today/week/month/all).
 2. 위 "응답 필드"의 정확한 키(`total_sales`, `gross_sales` 등)로 값을 읽는다. 요청한
    기간에 맞춰 요약하고, 추세를 언급할 때는 비교 기준을 명확히 밝힌다.
-3. `workspace/sales/<날짜>.md`에 요약을 기록한다.
+3. "마진 얼마야", "이 메뉴 남는 거 얼마야" 같은 수익성 질문에는
+   `GET /v1/stores/{STORE_ID}/reports/margin?period=`를 조회해 반환값을 그대로
+   보고한다 — 매출에서 임의로 원가를 추정해 계산하지 않는다.
+4. `workspace/sales/<날짜>.md`에 요약을 기록한다.
 
 ## 반환값
 - 매출/정산 요약

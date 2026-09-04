@@ -16,6 +16,8 @@ class CatalogItemCreate(BaseModel):
     unit_price: int
     category: Optional[str] = None
     initial_stock: int = 0
+    low_stock_threshold: int = 5
+    cost: int = 0
 
 
 class CatalogItem(BaseModel):
@@ -23,6 +25,7 @@ class CatalogItem(BaseModel):
     name: str
     unit_price: int
     category: Optional[str] = None
+    cost: int = 0
 
 
 # --- Orders ---
@@ -50,7 +53,7 @@ class OrderUpdate(BaseModel):
 class Order(BaseModel):
     order_id: str
     store_id: str
-    status: str = "OPEN"  # OPEN | COMPLETED | CANCELED | REFUNDED
+    status: str = "OPEN"  # OPEN | COMPLETED | CANCELED | PARTIALLY_REFUNDED | REFUNDED
     line_items: List[OrderLineItem]
     total_amount: int
     currency: str = "KRW"
@@ -66,14 +69,20 @@ class PaymentCreate(BaseModel):
     method: str = "CARD"
 
 
+class RefundRequest(BaseModel):
+    amount: Optional[int] = None
+    reason: Optional[str] = None
+
+
 class Payment(BaseModel):
     payment_id: str
     store_id: str
     order_id: str
     amount: int
     currency: str = "KRW"
-    status: str = "COMPLETED"  # COMPLETED | REFUNDED
+    status: str = "COMPLETED"  # COMPLETED | PARTIALLY_REFUNDED | REFUNDED
     method: str = "CARD"
+    refunded_amount: int = 0
     created_at: datetime = Field(default_factory=utcnow)
     refunded_at: Optional[datetime] = None
 
@@ -83,6 +92,7 @@ class Payment(BaseModel):
 class InventoryItem(BaseModel):
     item_id: str
     stock_quantity: int
+    low_stock_threshold: int = 5
     updated_at: datetime = Field(default_factory=utcnow)
 
 
@@ -133,4 +143,59 @@ class SettlementReport(BaseModel):
     payment_count: int
     refunded_amount: int = 0
     refunded_count: int = 0
+    partial_refund_amount: int = 0
+    partial_refund_count: int = 0
     currency: str = "KRW"
+
+
+class TopItem(BaseModel):
+    item_id: str
+    name: str
+    quantity: int
+    revenue: int
+    cost: int = 0
+    margin: int = 0
+
+
+class DailySales(BaseModel):
+    date: str
+    order_count: int
+    total_sales: int
+
+
+class MarginSummary(BaseModel):
+    store_id: str
+    period: str
+    total_revenue: int
+    total_cost: int
+    gross_margin: int
+    margin_rate: float
+    currency: str = "KRW"
+
+
+# --- Customers (CRM MVP) ---
+
+class CustomerCreate(BaseModel):
+    customer_id: str
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    notes: Optional[str] = None
+
+
+class Customer(BaseModel):
+    customer_id: str
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    notes: Optional[str] = None
+    created_at: datetime = Field(default_factory=utcnow)
+    order_count: int = 0
+    total_spent: int = 0
+    last_order_at: Optional[datetime] = None
+
+
+class RepeatCustomer(BaseModel):
+    customer_id: str
+    name: Optional[str] = None
+    order_count: int
+    total_spent: int
+    last_order_at: Optional[datetime] = None

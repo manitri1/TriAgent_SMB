@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}재고 파악/주문관리 — 마니카페 운영 콘솔{% endblock %}
+{% block content %}
+<h1>재고 파악 / 주문관리</h1>
+<p class="lead">현재 재고 현황입니다. 재입고가 필요하면 아래에서 요청하세요 — coordinator에게 전달되어 승인 절차(HITL 게이트 2)를 거칩니다.</p>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>재고 현황</h2>
+    <button id="refresh-inventory" class="btn-ghost" type="button">새로고침</button>
+  </div>
+  <table class="data-table">
+    <thead><tr><th>품목</th><th>현재 재고</th><th>저재고 임계치</th><th>상태</th></tr></thead>
+    <tbody id="inventory-rows"><tr><td colspan="4" class="empty">불러오는 중…</td></tr></tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>재입고 요청</h2>
+  <p class="hint">coordinator에게 전달됩니다 — 수량이 기준을 넘으면 승인이 필요할 수 있습니다.</p>
+  <div id="inventory-demo-bar" class="demo-bar"></div>
+  <form id="restock-form" class="restock-form">
+    <label>품목
+      <select id="restock-item"><option value="">품목을 불러오는 중…</option></select>
+    </label>
+    <label>수량
+      <input type="number" id="restock-qty" min="1" placeholder="예: 20" required>
+    </label>
+    <label>사유(선택)
+      <input type="text" id="restock-reason" placeholder="예: 주말 성수기 대비">
+    </label>
+    <button type="submit" class="btn-primary">재입고 요청</button>
+  </form>
+  <div id="restock-reply" class="restock-reply"></div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="/static/inventory.js?v={{ v }}"></script>{% endblock %}

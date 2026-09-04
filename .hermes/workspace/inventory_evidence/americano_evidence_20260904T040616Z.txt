@@ -1,0 +1,4 @@
+0001 | item_id=menu_americano | name=None | stock_quantity=0
+0002 | item_id=menu_latte | name=None | stock_quantity=143
+0003 | item_id=menu_cappuccino | name=None | stock_quantity=117
+0004 | item_id=menu_muffin | name=None | stock_quantity=51

@@ -16,6 +16,7 @@ class StoreData:
     orders: Dict[str, dict] = field(default_factory=dict)
     payments: Dict[str, dict] = field(default_factory=dict)
     reservations: Dict[str, dict] = field(default_factory=dict)
+    customers: Dict[str, dict] = field(default_factory=dict)
 
 
 class InMemoryStore:

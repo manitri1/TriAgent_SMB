@@ -14,6 +14,17 @@ router = APIRouter(
 )
 
 
+@router.get("", response_model=list[Order])
+def list_orders(store_id: str, status: str | None = None, customer_id: str | None = None):
+    data = store.get(store_id)
+    orders = list(data.orders.values())
+    if status is not None:
+        orders = [o for o in orders if o["status"] == status]
+    if customer_id is not None:
+        orders = [o for o in orders if o["customer_id"] == customer_id]
+    return orders
+
+
 @router.post("", response_model=Order, status_code=201)
 def create_order(store_id: str, payload: OrderCreate):
     data = store.get(store_id)

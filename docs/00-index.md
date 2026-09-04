@@ -19,6 +19,9 @@
 | [09-users-guide.md](09-users-guide.md) | 실행/운영 가이드 (챗 중심) — 프로필별 대화 진입점, 흔한 함정, 트러블슈팅 |
 | [10-usecase-tests.md](10-usecase-tests.md) | Usecase 테스트 목록 — 2026-08-19 실제 배포로 Part A~C(프로필 단독/오케스트레이션/HITL 게이트) 전부 검증 완료 |
 | [11-external-integrations-guideline.md](11-external-integrations-guideline.md) | Shopify/Stripe 테스트 자동화 가이드라인(별도 작업, API 키 확보 전 준비 문서) — TriAgent_SMB 본체와는 독립적 |
+| [12-web-gui-demo.md](12-web-gui-demo.md) | 웹 GUI 시연 방안 — 채팅은 기존 Hermes 대시보드(`/chat`) 재사용, 실적 그래픽 분석은 mock-pos에 신규 페이지 추가 필요(아직 미구현, 절차만 정리됨) |
+| [13-demo-video-script.md](13-demo-video-script.md) | 4분할 동시 재생 10초 데모 영상 촬영·조립 스크립트 — 촬영/합성은 로컬(docker+ffmpeg) 환경 필요, `mock-pos/scripts/seed_demo_video.sh` + `scripts/build_demo_video.sh` 사용 |
+| [14-webapp-users-guide.md](14-webapp-users-guide.md) | `webapp/`(마니카페 운영 콘솔) 사용 가이드 — 고객 문의/주문 접수/재고 관리/대시보드 4화면, 기존 Hermes 대시보드와의 차이, 배포·트러블슈팅 |
 
 ## 한 줄 요약
 

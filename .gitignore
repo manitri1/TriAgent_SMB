@@ -50,6 +50,9 @@ venv/
 .hermes/*_cache.json
 .hermes/backups/
 .hermes/skills/
+.hermes/projects.db
+.hermes/verification_evidence.db
+.hermes/tui-theme-boot.json
 
 # Hermes가 프로필 첫 사용 시 자동으로 복사해 넣는 번들 스킬 마켓플레이스(수백 개 파일,
 # 프로필당 ~8MB) — 우리가 작성한 게 아니라 Hermes CLI가 자동 채워 넣는 캐시성 콘텐츠라

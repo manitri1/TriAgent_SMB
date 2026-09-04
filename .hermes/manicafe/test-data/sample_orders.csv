@@ -22,6 +22,8 @@ ORD-20260819-0020,2026-08-19T08:30:00Z,tina@example.com,MAN-0002,1,4500,4500,com
 # Refund examples
 ORD-20260819-0021,2026-08-19T09:05:00Z,uma@example.com,MAN-0001,1,3500,3500,refunded,refunded,3500,Full refund issued
 ORD-20260820-0022,2026-08-20T10:15:00Z,victor@example.com,MAN-0002,2,4500,9000,completed,paid,0,
+ORD-20260820-104645,2026-08-20T10:46:45Z,testuser@example.com,MAN-0001,2,3500,7000,completed,paid,0,Simulated immediate payment per user request
+ORD-20260820-120255,2026-08-20T12:02:55Z,testuser@example.com,MAN-0001,2,3500,7000,completed,paid,0,Simulated immediate payment per user request
 ORD-20260821-0023,2026-08-21T11:45:00Z,wendy@example.com,MAN-0009,1,3000,3000,completed,paid,0,
 ORD-20260822-0024,2026-08-22T12:30:00Z,xander@example.com,MAN-0010,1,6500,6500,completed,paid,0,
 ORD-20260823-0025,2026-08-23T13:15:00Z,yara@example.com,MAN-0006,1,5200,5200,completed,paid,0,
@@ -31,4 +33,30 @@ ORD-20260825-0027,2026-08-25T15:35:00Z,amelia@example.com,MAN-0012,1,6000,6000,p
 ORD-20260826-0028,2026-08-26T16:20:00Z,ben@example.com,MAN-0005,1,5200,5200,completed,paid,0,
 ORD-20260827-0029,2026-08-27T17:05:00Z,clara@example.com,MAN-0007,2,4800,9600,completed,paid,0,
 ORD-20260828-0030,2026-08-28T18:40:00Z,derek@example.com,MAN-0002,1,4500,4500,completed,paid,0
-ORD-20260820-104645,2026-08-20T10:46:45Z,testuser@example.com,MAN-0001,2,3500,7000,completed,paid,0,Simulated immediate payment per user request
+
+ORD-20260823-02490601,2026-08-23T02:49:06Z,testuser1@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490602,2026-08-23T02:49:06Z,testuser2@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490603,2026-08-23T02:49:06Z,testuser3@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490604,2026-08-23T02:49:06Z,testuser4@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490605,2026-08-23T02:49:06Z,testuser5@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490606,2026-08-23T02:49:06Z,testuser6@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490607,2026-08-23T02:49:06Z,testuser7@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490608,2026-08-23T02:49:06Z,testuser8@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490609,2026-08-23T02:49:06Z,testuser9@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490610,2026-08-23T02:49:06Z,testuser10@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490611,2026-08-23T02:49:06Z,testuser11@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490612,2026-08-23T02:49:06Z,testuser12@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490613,2026-08-23T02:49:06Z,testuser13@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490614,2026-08-23T02:49:06Z,testuser14@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-02490615,2026-08-23T02:49:06Z,testuser15@example.com,MAN-0001,1,3500,3500,completed,paid,0,Simulated batch order
+ORD-20260823-04511901-LARGE,2026-08-23T04:51:19Z,large@example.com,MAN-0010,10,6500,65000,completed,paid,0,Large order - corporate lunch
+ORD-20260823-04511902-REFUND,2026-08-23T04:51:19Z,refund@example.com,MAN-0003,1,4700,4700,refunded,refunded,4700,Full refund issued
+ORD-20260823-04511903-PARTIAL,2026-08-23T04:51:19Z,partial@example.com,MAN-0012,1,6000,6000,partially_refunded,paid,3000,Partial refund - damaged
+ORD-20260823-04511904-PENDING,2026-08-23T04:51:19Z,pending@example.com,MAN-0005,2,5200,10400,pending,pending,0,Pending payment - customer checkout
+ORD-20260823-04511905-FAILED,2026-08-23T04:51:19Z,failed@example.com,MAN-0004,1,3000,3000,failed,failed,0,Payment failed - card declined
+ORD-20260823-04511906-DISCOUNT,2026-08-23T04:51:19Z,discount@example.com,MAN-0002,2,4500,8100,completed,paid,0,10% coupon SAVE10
+ORD-20260823-04511907-BUNDLE,2026-08-23T04:51:19Z,bundle@example.com,MAN-0002,1,4500,4500,completed,paid,0,bundle: latte + muffin
+ORD-20260823-04511907-BUNDLE,2026-08-23T04:51:19Z,bundle@example.com,MAN-0008,1,2800,2800,completed,paid,0,bundle: latte + muffin
+ORD-20260823-04511908-PICKUP,2026-08-23T04:51:19Z,pickup@example.com,MAN-0001,1,3500,3500,completed,paid,0,Pickup 14:00 | qty adjusted 2->1 due to inventory
+ORD-20260823-04511909-BAKERY,2026-08-23T04:51:19Z,bakery@example.com,MAN-0008,5,2800,14000,completed,paid,0,Tax-exempt bakery order
+ORD-20260823-04511910-CORP,2026-08-23T04:51:19Z,corp@example.com,MAN-0011,20,5500,110000,completed,paid,0,Corporate order - invoice requested

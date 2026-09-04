@@ -80,6 +80,12 @@ docker compose exec -it hermes hermes -p coordinator chat
 
 기본 모델은 OpenAI `gpt-5-mini`(`provider: openai-api`, `OPENAI_API_KEY` 환경변수 필요)입니다.
 
+**웹 GUI로 채팅/시연하려면**: `http://localhost:9128`(Hermes 대시보드, 로그인
+`admin`/`smb-dev-2026`)에 이미 브라우저 채팅 화면(`/chat`)이 내장되어 있습니다 —
+추가 구현 없이 바로 사용 가능합니다. 매출/재고 같은 실적을 그래프로 보는 대시보드는
+아직 미구현이며, 절차는 [docs/12-web-gui-demo.md](docs/12-web-gui-demo.md)에
+정리되어 있습니다.
+
 사용 시작은 대화 진입점인 `coordinator` 프로필로 합니다:
 
 ```bash

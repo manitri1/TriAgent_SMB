@@ -31,6 +31,13 @@
 6. 사장님이 "오늘 어때?" 같은 브리핑을 요청하면 `sales-analytics-agent`, `inventory-agent`
    등 관련 프로필을 순서대로 호출해 결과를 종합한 뒤 간결하게 보고한다(별도 운영비서
    프로필 없이 coordinator가 직접 흡수).
+7. 사장님이 "오늘 요약 Discord로 보내줘" 같은 발송 요청을 하면, 원칙 6과 동일하게 데이터를
+   종합한 뒤 `messaging` 툴로 Discord에 발송한다. 이는 금액 집행이나 계약 리스크가 없는
+   정보성 알림이므로 **HITL 게이트 대상이 아니다**(`reservation-agent`의 노쇼 리마인더와
+   동일한 근거 — [docs/06-hitl-approval-design.md](../../../../docs/06-hitl-approval-design.md)
+   참고). ⚠️ 이 발송 경로는 `DISCORD_BOT_TOKEN` 미설정으로 아직 실측 검증하지 못했다
+   ([docs/07-roadmap.md](../../../../docs/07-roadmap.md) §4 참고) — 토큰 설정 후 실제
+   발송까지 확인이 필요하다.
 
 ## 하지 말아야 할 일
 - 주문 생성, 재고 조정, 예약 생성, 홍보 문구 등 실제 산출물을 직접 만들지 않는다 — 반드시

@@ -68,3 +68,32 @@ services:
       - "8080:8080"
     environment:
       MOCK_POS_API_KEY: ${MOCK_POS_API_KEY:-dev-key}
+
+  webapp:
+    # 4화면 커스텀 운영 콘솔(고객 문의/주문 접수/재고 관리/대시보드). 설계 배경은
+    # webapp/README.md, 승인된 plan(curried-percolating-ocean.md) 참고.
+    build: ./webapp
+    container_name: hermes-triagent-smb-webapp
+    restart: unless-stopped
+    depends_on:
+      - hermes
+      - mock-pos
+    ports:
+      - "127.0.0.1:9130:8090"   # dashboard 서비스와 동일하게 localhost 전용 노출
+    environment:
+      MOCK_POS_BASE_URL: http://mock-pos:8080
+      MOCK_POS_API_KEY: ${MOCK_POS_API_KEY:-dev-key}
+      STORE_ID: ${STORE_ID:-store_demo}
+      HERMES_CONTAINER_NAME: hermes-triagent-smb
+      HERMES_BIN_PATH: /opt/hermes/bin/hermes
+      # Phase 0 실측(2026-09-04): coordinator 중첩 위임이 200초를 넘긴 사례가 있어
+      # 넉넉히 잡는다 (curried-percolating-ocean.md 참고).
+      HERMES_EXEC_TIMEOUT_SECONDS: ${HERMES_EXEC_TIMEOUT_SECONDS:-500}
+      WEBAPP_BASIC_AUTH_USERNAME: ${WEBAPP_BASIC_AUTH_USERNAME:-admin}
+      WEBAPP_BASIC_AUTH_PASSWORD_HASH: ${WEBAPP_BASIC_AUTH_PASSWORD_HASH:?webapp/scripts/hash_password.py로 생성해 .env에 설정할 것}
+    volumes:
+      # hermes_client.py가 Docker SDK exec_run으로 hermes 컨테이너에 명령을
+      # 실행하기 위해 필요 — webapp 컨테이너가 호스트 수준 Docker 제어권을 갖게
+      # 되는 트레이드오프를 127.0.0.1 전용 포트 노출로 완화한다(webapp/README.md,
+      # docs/06-hitl-approval-design.md와 별개의 알려진 위험 요소로 문서화됨).
+      - /var/run/docker.sock:/var/run/docker.sock

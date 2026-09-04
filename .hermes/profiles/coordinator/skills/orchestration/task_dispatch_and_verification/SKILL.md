@@ -34,6 +34,19 @@ platforms: [Linux, macOS, Windows]
    `messaging`/`clarify`로 사장님에게 검토를 요청하고, 명시적 승인 없이는 진행하지 않는다.
 5. "오늘 브리핑" 같은 종합 요청은 `sales-analytics-agent`와 `inventory-agent`를 순서대로
    호출해 결과를 종합한 뒤 간결하게 보고한다.
+6. "오늘 요약 Discord로 보내줘" 같은 요청은 5번과 동일하게
+   `sales-analytics-agent`(매출/정산/마진)와 `inventory-agent`(저재고 품목)를 호출해
+   아래 템플릿으로 조합한 뒤 `messaging` 툴로 Discord에 발송한다. 정보성 알림이라 HITL
+   게이트 대상이 아니다(예약 리마인더와 동일 근거). **`DISCORD_BOT_TOKEN` 미설정으로
+   실제 발송은 아직 검증 전이다** — 토큰이 설정된 뒤 반드시 실측으로 확인한다.
+
+   ```
+   📊 오늘 요약 (<날짜>)
+   매출: <total_sales>원 (주문 <order_count>건)
+   정산: 총매출 <gross_sales>원 / 환불 <refunded_amount>원 / 부분환불 <partial_refund_amount>원
+   마진: <gross_margin>원 (마진율 <margin_rate>%)
+   재고 경고: <저재고 품목 목록, 없으면 "없음">
+   ```
 
 ## 카드 형식 (`workspace/kanban/<날짜>-<슬러그>.md`)
 ```markdown
@@ -52,3 +65,4 @@ verification:
 - 배정된 카드 목록과 상태(`workspace/kanban/` 파일 경로)
 - Active Verification 결과(검증 방법과 확인 여부)
 - HITL 게이트 통과 여부(승인/반려/대기)
+- (해당 시) Discord 일일 요약 발송 여부 — `DISCORD_BOT_TOKEN` 설정 전까지는 미검증

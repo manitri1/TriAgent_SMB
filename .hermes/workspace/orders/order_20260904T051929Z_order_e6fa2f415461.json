@@ -1,0 +1,19 @@
+{
+  "order_id": "order_e6fa2f415461",
+  "store_id": "store_demo",
+  "status": "OPEN",
+  "line_items": [
+    {
+      "item_id": "menu_americano",
+      "quantity": 2,
+      "note": null,
+      "unit_price": 3500,
+      "subtotal": 7000
+    }
+  ],
+  "total_amount": 7000,
+  "currency": "KRW",
+  "customer_id": null,
+  "created_at": "2026-09-04T05:19:29.984950Z",
+  "updated_at": "2026-09-04T05:19:29.984953Z"
+}

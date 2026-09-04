@@ -1,0 +1,3 @@
+{
+  "error": "409 Client Error: Conflict for url: http://mock-pos:8080/v1/stores/store_demo/payments"
+}

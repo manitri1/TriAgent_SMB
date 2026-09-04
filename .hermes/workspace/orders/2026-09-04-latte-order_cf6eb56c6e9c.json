@@ -1,0 +1,8 @@
+{
+  "order_id": "order_cf6eb56c6e9c",
+  "amount": 4500,
+  "payment_method": "CARD",
+  "payment_status": "COMPLETED",
+  "timestamp": "2026-09-04T02:28:34.887497Z",
+  "receipt_id": "pay_476957caf0ba"
+}

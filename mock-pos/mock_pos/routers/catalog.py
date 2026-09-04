@@ -39,12 +39,14 @@ def create_item(store_id: str, payload: CatalogItemCreate):
         name=payload.name,
         unit_price=payload.unit_price,
         category=payload.category,
+        cost=payload.cost,
     )
     data.catalog[item.item_id] = item.model_dump()
 
     data.inventory[item.item_id] = {
         "item_id": item.item_id,
         "stock_quantity": payload.initial_stock,
+        "low_stock_threshold": payload.low_stock_threshold,
         "updated_at": datetime.now(timezone.utc),
     }
     return item

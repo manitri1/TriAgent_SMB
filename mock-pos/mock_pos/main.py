@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from mock_pos.routers import catalog, inventory, orders, payments, reports, reservations
+from mock_pos.routers import catalog, customers, dashboard, inventory, orders, payments, reports, reservations
 
 app = FastAPI(
     title="Mock POS API",
@@ -14,6 +14,8 @@ app.include_router(payments.router)
 app.include_router(inventory.router)
 app.include_router(reservations.router)
 app.include_router(reports.router)
+app.include_router(customers.router)
+app.include_router(dashboard.router)
 
 
 @app.get("/health", tags=["health"])

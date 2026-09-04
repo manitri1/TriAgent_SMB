@@ -36,10 +36,14 @@ HEADERS = {"X-API-Key": API_KEY}
 3. 결제 확정 요청이 오면 `POST /v1/stores/{STORE_ID}/payments`(`order_id`, `method`)를
    호출한다 — 성공 시 주문이 `COMPLETED`로 전환되고 재고가 자동 차감된다. 재고 부족이면
    409 오류를 그대로 전달한다.
-4. 환불 요청이 오면 먼저 coordinator에게 게이트 3(환불/취소) 승인을 요청한다. **승인이
-   확인된 뒤에만** `POST /v1/stores/{STORE_ID}/payments/{payment_id}/refund`를 호출한다
-   — 성공 시 결제가 `REFUNDED`, 주문이 `REFUNDED`로 전환되고 재고가 원상 복구된다. 이미
-   환불된 결제를 다시 호출하면 409 오류가 발생한다.
+4. 환불 요청이 오면(전액이든 일부 금액이든) 먼저 coordinator에게 게이트 3(환불/취소)
+   승인을 요청한다. **승인이 확인된 뒤에만**
+   `POST /v1/stores/{STORE_ID}/payments/{payment_id}/refund`를 호출한다 —
+   `amount`(생략하면 잔액 전액)를 요청 본문에 담는다. `amount`가 결제 잔액보다 작으면
+   결제/주문은 `PARTIALLY_REFUNDED`로 전환되고 **재고는 복구되지 않는다**(부분환불은
+   현금 조정으로 취급 — 전액 환불이 완료된 시점에만 재고가 원상 복구된다). 잔액을
+   초과하는 `amount`는 400, 이미 전액(`REFUNDED`) 환불된 결제를 다시 호출하면 409
+   오류가 발생한다.
 5. `workspace/orders/<날짜>.md`에 주문/환불 요약(품목, 수량, 금액, 상태)을 추가로 기록한다.
 
 ## 반환값

@@ -37,8 +37,20 @@ def get_settlement_report(period: str = "today") -> dict:
     return resp.json()
 
 
+def get_margin_summary(period: str = "today") -> dict:
+    resp = requests.get(
+        f"{BASE_URL}/v1/stores/{STORE_ID}/reports/margin",
+        headers=HEADERS,
+        params={"period": period},
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+
 if __name__ == "__main__":
     sales = get_sales_summary("today")
     settlement = get_settlement_report("today")
+    margin = get_margin_summary("today")
     print(f"오늘 매출: {sales['total_sales']}원 (주문 {sales['order_count']}건)")
     print(f"오늘 정산: 총매출 {settlement['gross_sales']}원, 결제 {settlement['payment_count']}건")
+    print(f"오늘 마진: {margin['gross_margin']}원 (마진율 {margin['margin_rate']*100:.1f}%)")

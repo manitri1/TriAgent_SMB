@@ -69,6 +69,15 @@ COMPLETED)가 생성된 것을 coordinator 스스로 파일을 열어 검증(Act
 사장님에게 메시지를 보내고 응답을 기다리는 흐름)까지는 아직 검증하지 못했습니다
 (`DISCORD_BOT_TOKEN` 미설정).
 
+**추가(2026-08-23)**: coordinator의 "일일 요약 Discord 발송" 스킬/설정도 작성
+완료했습니다([05장](05-skills-and-tools.md) coordinator 섹션, [06장](06-hitl-approval-design.md)
+"게이트로 두지 않은 것" 참고) — 단, 이 항목 역시 같은 `DISCORD_BOT_TOKEN` 미설정
+문제로 실제 발송은 아직 검증하지 못했습니다. 토큰 설정 후 (1) `hermes doctor`로
+`messaging` 툴셋 활성 확인, (2) 실제 챗으로 발송 트리거, (3) Discord 채널에 메시지가
+실제로 도착하는지, (4) 메시지 값이 mock-pos 리포트와 일치하는지(Active Verification)
+순서로 확인이 필요합니다. 매일 무인 자동 발송 트리거(Hermes 네이티브 `/cron` vs 외부
+OS 스케줄러)도 아직 결정하지 않았습니다.
+
 ## 5. 실 POS 벤더 연동
 
 `mock-pos/`는 Square API 오브젝트 구조를 참조한 시뮬레이터입니다. 실제 매장에 연결하려면
@@ -90,6 +99,12 @@ COMPLETED)가 생성된 것을 coordinator 스스로 파일을 열어 검증(Act
   `refunded_amount`/`refunded_count`로 별도 표시하도록 수정했다.
 - mock-pos pytest 스위트 7건 전체 통과, 4개 POS 스킬 레퍼런스 스크립트로 로컬 서버에
   대해 실제 실행까지 검증했다(환불/예약목록 포함).
+- ✅ **(2026-08-23 추가)** 대시보드 Tier 2/3 작업으로 다음을 추가했다(모두 기존
+  엔드포인트/모델은 변경하지 않는 추가만 — [12장](12-web-gui-demo.md) 참고):
+  주문 목록(`GET /orders`), 인기 메뉴 TOP5·일별 매출 리포트, 서버 저장 저재고 임계치,
+  원가/마진 리포트(`GET /reports/margin`), 부분환불(`POST /payments/{id}/refund`에
+  `amount` 파라미터), 고객 엔티티 + 재방문 고객 리포트(`GET /reports/repeat-customers`).
+  mock-pos pytest 스위트는 25건으로 늘었고 전체 통과한다.
 
 ## 7. 배포 자동화 (완료, 실제 검증도 완료)
 

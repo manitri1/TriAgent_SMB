@@ -1,0 +1,33 @@
+{
+  "order_id": "order_b754dea0424d",
+  "created_at": "2026-09-04T03:56:13.775353Z",
+  "orderer": "사장님",
+  "items": [
+    {
+      "item_id": "menu_cappuccino",
+      "quantity": 1,
+      "note": null,
+      "unit_price": 4700,
+      "subtotal": 4700
+    }
+  ],
+  "total_amount": 4700,
+  "payment_status": "paid",
+  "payment_receipt": {
+    "payment_id": "pay_3e7c439cd60e",
+    "status": "COMPLETED",
+    "raw": {
+      "payment_id": "pay_3e7c439cd60e",
+      "store_id": "store_demo",
+      "order_id": "order_b754dea0424d",
+      "amount": 4700,
+      "currency": "KRW",
+      "status": "COMPLETED",
+      "method": "CARD",
+      "refunded_amount": 0,
+      "created_at": "2026-09-04T03:56:13.923856Z",
+      "refunded_at": null
+    }
+  },
+  "payment_error": null
+}

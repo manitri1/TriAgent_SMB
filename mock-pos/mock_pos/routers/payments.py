@@ -1,10 +1,10 @@
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException
 
 from mock_pos.auth import verify_api_key
-from mock_pos.models import Payment, PaymentCreate
+from mock_pos.models import Payment, PaymentCreate, RefundRequest
 from mock_pos.routers.orders import _deduct_inventory
 from mock_pos.store import store
 
@@ -50,26 +50,38 @@ def get_payment(store_id: str, payment_id: str):
 
 
 @router.post("/{payment_id}/refund", response_model=Payment)
-def refund_payment(store_id: str, payment_id: str):
+def refund_payment(store_id: str, payment_id: str, payload: RefundRequest = Body(default=RefundRequest())):
     data = store.get(store_id)
     payment = data.payments.get(payment_id)
     if not payment:
         raise HTTPException(status_code=404, detail="Payment not found")
-    if payment["status"] != "COMPLETED":
+    if payment["status"] not in ("COMPLETED", "PARTIALLY_REFUNDED"):
         raise HTTPException(status_code=409, detail=f"Payment is already {payment['status']}")
 
     order = data.orders.get(payment["order_id"])
-    if not order or order["status"] != "COMPLETED":
+    if not order or order["status"] not in ("COMPLETED", "PARTIALLY_REFUNDED"):
         raise HTTPException(status_code=409, detail="Order is not in a refundable state")
 
-    for line in order["line_items"]:
-        record = data.inventory.get(line["item_id"])
-        if record:
-            record["stock_quantity"] += line["quantity"]
-            record["updated_at"] = datetime.now(timezone.utc)
+    remaining = payment["amount"] - payment["refunded_amount"]
+    amount = payload.amount if payload.amount is not None else remaining
+    if amount <= 0 or amount > remaining:
+        raise HTTPException(status_code=400, detail=f"amount must be between 1 and {remaining}")
 
-    order["status"] = "REFUNDED"
-    order["updated_at"] = datetime.now(timezone.utc)
-    payment["status"] = "REFUNDED"
+    payment["refunded_amount"] += amount
     payment["refunded_at"] = datetime.now(timezone.utc)
+
+    if payment["refunded_amount"] >= payment["amount"]:
+        # 전액 환불 완료 시에만 재고를 원상 복구한다 — 부분환불은 현금 조정으로 취급한다.
+        for line in order["line_items"]:
+            record = data.inventory.get(line["item_id"])
+            if record:
+                record["stock_quantity"] += line["quantity"]
+                record["updated_at"] = datetime.now(timezone.utc)
+        order["status"] = "REFUNDED"
+        payment["status"] = "REFUNDED"
+    else:
+        order["status"] = "PARTIALLY_REFUNDED"
+        payment["status"] = "PARTIALLY_REFUNDED"
+
+    order["updated_at"] = datetime.now(timezone.utc)
     return payment

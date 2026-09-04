@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}실시간 매장 대시보드 — 마니카페 운영 콘솔{% endblock %}
+{% block content %}
+<h1>실시간 매장 대시보드</h1>
+<div class="demo-bar demo-bar--static">
+  <span class="demo-label">데모 마지막 단계 · 다른 화면에서 만든 주문/재입고가 반영됐는지 새로고침해서 확인하세요</span>
+</div>
+<div class="dash-controls">
+  <button id="refresh" class="btn-primary" type="button">새로고침</button>
+  <label class="auto-refresh"><input type="checkbox" id="auto"> 10초마다 자동 새로고침</label>
+</div>
+
+<div class="grid">
+  <div class="card"><h2>오늘 매출</h2><div class="value" id="sales-today">-</div></div>
+  <div class="card"><h2>이번 주 매출</h2><div class="value" id="sales-week">-</div></div>
+  <div class="card">
+    <h2>정산 요약 (오늘)</h2>
+    <table class="kv-table">
+      <tr><td>총매출</td><td id="settle-gross">-</td></tr>
+      <tr><td>결제건수</td><td id="settle-count">-</td></tr>
+      <tr><td>환불액</td><td id="settle-refund">-</td></tr>
+      <tr><td>환불건수</td><td id="settle-refund-count">-</td></tr>
+      <tr><td>부분환불액</td><td id="settle-partial-refund">-</td></tr>
+      <tr><td>부분환불건수</td><td id="settle-partial-refund-count">-</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>원가/마진 (오늘)</h2>
+    <table class="kv-table">
+      <tr><td>총매출</td><td id="margin-revenue">-</td></tr>
+      <tr><td>총원가</td><td id="margin-cost">-</td></tr>
+      <tr><td>매출총이익</td><td id="margin-gross">-</td></tr>
+      <tr><td>마진율</td><td id="margin-rate">-</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card"><h2>매출 추이 (최근 7일)</h2><canvas id="chart-daily"></canvas></div>
+  <div class="card"><h2>인기 메뉴 TOP5 (오늘)</h2><canvas id="chart-top"></canvas></div>
+</div>
+
+<div class="grid">
+  <div class="card"><h2>재고 현황</h2><canvas id="chart-inventory"></canvas></div>
+  <div class="card">
+    <h2>오늘 예약</h2>
+    <table class="data-table">
+      <thead><tr><th>시간</th><th>고객</th><th>서비스</th></tr></thead>
+      <tbody id="table-reservations"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>재방문 고객 TOP (전체 기간, 2건 이상)</h2>
+    <table class="data-table">
+      <thead><tr><th>고객</th><th>주문건수</th><th>누적 결제액</th></tr></thead>
+      <tbody id="table-repeat-customers"></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/dashboard.js?v={{ v }}"></script>
+{% endblock %}

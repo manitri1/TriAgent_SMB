@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}주문 접수 — 마니카페 운영 콘솔{% endblock %}
+{% block content %}
+<h1>주문 접수</h1>
+<p class="lead">품목을 선택해 주문서를 만들거나, 아래 채팅으로 자유롭게 요청하세요. 두 방식 모두 coordinator에게 전달되어 가격/재고 검증과 결제까지 처리됩니다.</p>
+
+<section class="panel">
+  <h2>품목으로 주문 만들기</h2>
+  <div id="order-items" class="order-items"><p class="hint">품목을 불러오는 중…</p></div>
+  <label class="field">
+    <span>고객 이름(선택)</span>
+    <input type="text" id="order-customer-name" placeholder="예: 홍길동">
+  </label>
+  <label class="field">
+    <span>메모(선택)</span>
+    <input type="text" id="order-note" placeholder="예: 얼음 적게">
+  </label>
+  <button id="order-submit" class="btn-primary" type="button" disabled>주문 접수 (품목을 선택하세요)</button>
+</section>
+
+<section class="panel chat-panel">
+  <h2>자유 채팅으로 요청</h2>
+  <div id="orders-thread" class="chat-thread"></div>
+  <div id="orders-demo-bar" class="demo-bar"></div>
+  <form id="orders-form" class="chat-form">
+    <input id="orders-input" type="text" autocomplete="off" placeholder="예: 아메리카노 2잔, 결제까지 처리해줘">
+    <button type="submit" class="btn-primary">보내기</button>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>최근 주문</h2>
+    <button id="refresh-orders" class="btn-ghost" type="button">새로고침</button>
+  </div>
+  <p class="hint">채팅 응답이 늦거나 타임아웃돼도, 실제로 주문이 들어갔는지는 여기서 확인하세요.</p>
+  <table class="data-table">
+    <thead><tr><th>주문번호</th><th>품목</th><th>금액</th><th>상태</th></tr></thead>
+    <tbody id="orders-rows"><tr><td colspan="4" class="empty">불러오는 중…</td></tr></tbody>
+  </table>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/chat.js?v={{ v }}"></script>
+<script src="/static/orders.js?v={{ v }}"></script>
+{% endblock %}
