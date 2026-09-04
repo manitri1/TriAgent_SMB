@@ -136,3 +136,49 @@ coordinator의 "오늘 브리핑" 요청에서는 설계(2개 프로필)보다 �
 이력·디자이너 스케줄, 편의점 자동 발주·유통기한 관리)은 공통 프로필이 안정화된 뒤 각
 프로필의 SOUL.md/Skill을 확장하는 방식으로 진행합니다. 이번 단계는 4개 업종 공통 기능만
 다룹니다.
+
+## 11. ⚠️ Hermes v0.21.0에서 `code_execution`/`terminal`의 mock-pos 호출이 기본 차단됨 (신규 발견, 중요)
+
+**2026-09-04, VPS(Hostinger) 배포 후 재검증 중 발견.** [1번 항목](#1-code_execution--mock-pos-네트워크-접근-가능-여부-실측-완료)에서
+2026-08-19에 검증했던 `code_execution → http://mock-pos:8080` 경로가, VPS에 새로
+`docker compose build/up`(이미지 `nousresearch/hermes-agent:latest`를 새로 pull —
+버전 **v0.21.0 (2026.8.31 빌드)**, 로컬 Windows는 그보다 오래된 캐시 이미지를 씀)한 뒤
+`inventory-agent`에게 "아메리카노 재고 얼마나 남았어?"를 챗으로 물으면 다음 순서로 전부
+막힙니다:
+
+1. `execute_code` 자체가 `[BLOCKED: execute_code runs arbitrary local Py...]`로 차단
+2. `terminal`로 우회한 `curl http://mock-pos:8080/...`도
+   `[BLOCKED: Security scan — [HIGH] Plain HTTP UR...]`로 차단
+3. `web_extract`(fetch)로 재우회 시도도 `Blocked: URL targets a private or internal
+   network address`(SSRF 가드, `/opt/hermes/tools/web_tools.py`)로 차단
+
+**원인**: 새 버전이 "위험한 명령"(임의 코드 실행, 평문 HTTP 호출)에 대해 기본적으로
+**사람의 승인**을 요구합니다. `hermes chat -q "..."`처럼 사람이 없는 non-interactive
+1회성 호출에는 승인해줄 사람이 없어 자동으로 거부됩니다. `.hermes/config.yaml`의
+`security.tirith_*` 설정과는 무관합니다(`TIRITH_ENABLED=false`로도 해결 안 됨 — 실제로
+시도해 확인).
+
+**해결책(확인됨)**: `hermes chat --yolo ...`로 실행하면(위험 명령 승인 프롬프트를
+전부 우회) 정상적으로 mock-pos에 접근합니다 — 실제로 `--yolo` 추가 후 동일 질문이
+`GET http://mock-pos:8080/v1/stores/store_demo/inventory`를 성공적으로 호출함을
+확인했습니다(단, 이번엔 VPS의 mock-pos 데이터가 비어 있어 재고 자체는 못 찾음 — 아래
+참고).
+
+**아직 확인 못한 것 — 중요**: 이 "위험 명령 승인" 요구가 **Discord 같은 인터랙티브
+채널에서도 동일하게 사람이 없다고 판단해 거부하는지, 아니면 Discord 사용자에게 승인
+버튼을 띄우는지** 확인하지 못했습니다. 만약 Discord에서도 자동 거부된다면, 실제 운영
+중인 VPS 배포([18-vps-connect-and-use.md](18-vps-connect-and-use.md))에서 주문/재고/
+예약/매출 조회가 **전부 실패**한다는 뜻이라 최우선으로 확인해야 합니다. 확인 방법: 실제
+Discord `#smb-ops`에서 order-payment-agent나 inventory-agent에게 주문/재고 조회를
+요청해보고 `[BLOCKED: ...]` 메시지가 뜨는지 관찰.
+
+**추가로 발견한 별개 이슈**: VPS의 `mock-pos` 컨테이너는 로컬과 달리 **시드 데이터가
+없습니다**(`catalog/items`, `/inventory` 모두 빈 배열 `[]`). 로컬에서 그동안 누적된
+테스트 데이터가 VPS에는 없어서입니다. `mock-pos/scripts/seed_manicafe_demo.sh` 또는
+`seed_demo_video.sh`로 시드해야 Part A의 POS 의존 테스트를 VPS에서 의미 있게 돌릴 수
+있습니다.
+
+**[10-usecase-tests.md](10-usecase-tests.md) 재검증 시 영향받는 항목**: TC-04, TC-05,
+TC-06, TC-07~TC-09, TC-10~TC-12, TC-16~TC-18, TC-28, TC-29 등 POS/`code_execution`에
+의존하는 모든 항목 — VPS에서 재검증할 때는 반드시 `--yolo`(또는 실제 Discord 인터랙티브
+승인 경로 확인)와 mock-pos 시드가 선행돼야 함.

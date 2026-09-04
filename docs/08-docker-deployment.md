@@ -1,5 +1,8 @@
 # 08. Docker 배포 — 포트/볼륨 조사와 운영 명령어
 
+> 이 문서는 **로컬 Windows(Docker Desktop)** 배포 기준입니다. 원격 VPS(Linux) 배포는
+> [16-vps-deployment.md](16-vps-deployment.md)를 참고하세요.
+
 ## 조사 방법론
 
 `e:/work/Hermes/` 아래 모든 형제 프로젝트의 `docker-compose.yml`을 정적으로 스캔했습니다.

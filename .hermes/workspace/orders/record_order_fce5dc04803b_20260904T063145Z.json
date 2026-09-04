@@ -1,0 +1,197 @@
+{
+  "timestamp": "20260904T063145Z",
+  "catalog_before": [
+    {
+      "item_id": "menu_americano",
+      "name": "\uc544\uba54\ub9ac\uce74\ub178",
+      "unit_price": 3500,
+      "category": "coffee",
+      "cost": 800
+    },
+    {
+      "item_id": "menu_latte",
+      "name": "\ub77c\ub5bc",
+      "unit_price": 4500,
+      "category": "coffee",
+      "cost": 1000
+    },
+    {
+      "item_id": "menu_cappuccino",
+      "name": "\uce74\ud478\uce58\ub178",
+      "unit_price": 4700,
+      "category": "coffee",
+      "cost": 1100
+    },
+    {
+      "item_id": "menu_espresso",
+      "name": "\uc5d0\uc2a4\ud504\ub808\uc18c",
+      "unit_price": 3000,
+      "category": "coffee",
+      "cost": 700
+    },
+    {
+      "item_id": "menu_coldbrew",
+      "name": "\ucf5c\ub4dc\ube0c\ub8e8",
+      "unit_price": 5200,
+      "category": "coffee",
+      "cost": 1200
+    },
+    {
+      "item_id": "menu_matcha_latte",
+      "name": "\ub9d0\ucc28\ub77c\ub5bc",
+      "unit_price": 5200,
+      "category": "tea",
+      "cost": 1200
+    },
+    {
+      "item_id": "menu_chai_latte",
+      "name": "\ucc28\uc774\ub77c\ub5bc",
+      "unit_price": 4800,
+      "category": "tea",
+      "cost": 1100
+    },
+    {
+      "item_id": "menu_muffin",
+      "name": "\ube14\ub8e8\ubca0\ub9ac \uba38\ud540",
+      "unit_price": 2800,
+      "category": "bakery",
+      "cost": 500
+    },
+    {
+      "item_id": "menu_croissant",
+      "name": "\ud06c\ub8e8\uc544\uc0c1",
+      "unit_price": 3000,
+      "category": "bakery",
+      "cost": 600
+    },
+    {
+      "item_id": "menu_sandwich",
+      "name": "\ud584&\uce58\uc988 \uc0cc\ub4dc\uc704\uce58",
+      "unit_price": 6500,
+      "category": "sandwich",
+      "cost": 1800
+    },
+    {
+      "item_id": "menu_smoothie",
+      "name": "\ub538\uae30 \uc2a4\ubb34\ub514",
+      "unit_price": 5500,
+      "category": "smoothie",
+      "cost": 1300
+    },
+    {
+      "item_id": "menu_cake",
+      "name": "\uc2dc\uc98c \ucf00\uc774\ud06c(\ub538\uae30)",
+      "unit_price": 6000,
+      "category": "dessert",
+      "cost": 2000
+    }
+  ],
+  "catalog_after": [
+    {
+      "item_id": "menu_americano",
+      "name": "\uc544\uba54\ub9ac\uce74\ub178",
+      "unit_price": 3500,
+      "category": "coffee",
+      "cost": 800
+    },
+    {
+      "item_id": "menu_latte",
+      "name": "\ub77c\ub5bc",
+      "unit_price": 4500,
+      "category": "coffee",
+      "cost": 1000
+    },
+    {
+      "item_id": "menu_cappuccino",
+      "name": "\uce74\ud478\uce58\ub178",
+      "unit_price": 4700,
+      "category": "coffee",
+      "cost": 1100
+    },
+    {
+      "item_id": "menu_espresso",
+      "name": "\uc5d0\uc2a4\ud504\ub808\uc18c",
+      "unit_price": 3000,
+      "category": "coffee",
+      "cost": 700
+    },
+    {
+      "item_id": "menu_coldbrew",
+      "name": "\ucf5c\ub4dc\ube0c\ub8e8",
+      "unit_price": 5200,
+      "category": "coffee",
+      "cost": 1200
+    },
+    {
+      "item_id": "menu_matcha_latte",
+      "name": "\ub9d0\ucc28\ub77c\ub5bc",
+      "unit_price": 5200,
+      "category": "tea",
+      "cost": 1200
+    },
+    {
+      "item_id": "menu_chai_latte",
+      "name": "\ucc28\uc774\ub77c\ub5bc",
+      "unit_price": 4800,
+      "category": "tea",
+      "cost": 1100
+    },
+    {
+      "item_id": "menu_muffin",
+      "name": "\ube14\ub8e8\ubca0\ub9ac \uba38\ud540",
+      "unit_price": 2800,
+      "category": "bakery",
+      "cost": 500
+    },
+    {
+      "item_id": "menu_croissant",
+      "name": "\ud06c\ub8e8\uc544\uc0c1",
+      "unit_price": 3000,
+      "category": "bakery",
+      "cost": 600
+    },
+    {
+      "item_id": "menu_sandwich",
+      "name": "\ud584&\uce58\uc988 \uc0cc\ub4dc\uc704\uce58",
+      "unit_price": 6500,
+      "category": "sandwich",
+      "cost": 1800
+    },
+    {
+      "item_id": "menu_smoothie",
+      "name": "\ub538\uae30 \uc2a4\ubb34\ub514",
+      "unit_price": 5500,
+      "category": "smoothie",
+      "cost": 1300
+    },
+    {
+      "item_id": "menu_cake",
+      "name": "\uc2dc\uc98c \ucf00\uc774\ud06c(\ub538\uae30)",
+      "unit_price": 6000,
+      "category": "dessert",
+      "cost": 2000
+    }
+  ],
+  "order": {
+    "order_id": "order_fce5dc04803b",
+    "store_id": "store_demo",
+    "status": "OPEN",
+    "line_items": [
+      {
+        "item_id": "menu_americano",
+        "quantity": 2,
+        "note": null,
+        "unit_price": 3500,
+        "subtotal": 7000
+      }
+    ],
+    "total_amount": 7000,
+    "currency": "KRW",
+    "customer_id": null,
+    "created_at": "2026-09-04T06:31:15.181348Z",
+    "updated_at": "2026-09-04T06:31:15.181351Z"
+  },
+  "receipt_error": {
+    "detail": "Insufficient stock for item menu_americano"
+  }
+}

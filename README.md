@@ -78,6 +78,10 @@ docker compose exec -it hermes hermes -p coordinator chat
 조사 근거와 운영 명령어 전체는 [docs/08-docker-deployment.md](docs/08-docker-deployment.md),
 챗 사용법은 [docs/09-users-guide.md](docs/09-users-guide.md) 참고.
 
+**원격 VPS에 배포하려면**: [docs/16-vps-deployment.md](docs/16-vps-deployment.md)(SSH/방화벽/
+원격 특이사항), VS Code로 그 VPS에 접속해 개발/운영하려면
+[docs/17-vscode-remote-connection.md](docs/17-vscode-remote-connection.md) 참고.
+
 기본 모델은 OpenAI `gpt-5-mini`(`provider: openai-api`, `OPENAI_API_KEY` 환경변수 필요)입니다.
 
 **웹 GUI로 채팅/시연하려면**: `http://localhost:9128`(Hermes 대시보드, 로그인
@@ -109,8 +113,10 @@ uvicorn mock_pos.main:app --reload --port 8080
 - `.hermes/profiles/*/USER.md`의 "(예시)" 표시가 남은 항목을 실제 매장/사장님 정보로 채웠는지 확인
 - `hermes tools enable ...`로 각 프로필에 필요한 툴셋을 켰는지 확인
   ([docs/03-hermes-agent-integration.md](docs/03-hermes-agent-integration.md)의 매핑표 참고)
-- `hermes gateway setup`으로 Discord 등 승인 채널을 실제로 연결했는지 확인
-  ([docs/06-hitl-approval-design.md](docs/06-hitl-approval-design.md) 참고)
+- `.hermes/.env`에 `DISCORD_BOT_TOKEN`/`DISCORD_ALLOWED_USERS`를 채워 Discord 등 승인
+  채널을 실제로 연결했는지 확인
+  ([docs/06-hitl-approval-design.md](docs/06-hitl-approval-design.md),
+  [docs/15-discord-integration.md](docs/15-discord-integration.md) 참고)
 
 ## 알려진 제약 ([docs/07-roadmap.md](docs/07-roadmap.md), [docs/10-usecase-tests.md](docs/10-usecase-tests.md) 참고)
 
