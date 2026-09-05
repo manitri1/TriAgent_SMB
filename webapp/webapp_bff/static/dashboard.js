@@ -26,8 +26,16 @@ async function loadDashboard() {
   const reservations = await getJSON(`/api/pos/reservations?date=${today}&status=BOOKED`);
   const repeatCustomers = await getJSON("/api/pos/reports/repeat-customers?period=all&min_orders=2");
 
-  if (salesToday) document.getElementById("sales-today").textContent = salesToday.total_sales.toLocaleString() + "원";
-  if (salesWeek) document.getElementById("sales-week").textContent = salesWeek.total_sales.toLocaleString() + "원";
+  if (salesToday) {
+    document.getElementById("sales-today").textContent = salesToday.total_sales.toLocaleString() + "원";
+    document.getElementById("sales-today-count").textContent = `결제 ${salesToday.order_count}건`;
+  }
+  if (salesWeek) {
+    document.getElementById("sales-week").textContent = salesWeek.total_sales.toLocaleString() + "원";
+    document.getElementById("sales-week-count").textContent = `결제 ${salesWeek.order_count}건`;
+  }
+  const freshness = document.getElementById("dash-freshness");
+  if (freshness) freshness.textContent = "마지막 업데이트 · 방금 전";
   if (settlement) {
     document.getElementById("settle-gross").textContent = settlement.gross_sales.toLocaleString() + "원";
     document.getElementById("settle-count").textContent = settlement.payment_count;
@@ -48,7 +56,7 @@ async function loadDashboard() {
       type: "line",
       data: {
         labels: daily.map((d) => d.date.slice(5)),
-        datasets: [{ label: "매출", data: daily.map((d) => d.total_sales), borderColor: "#2563eb", tension: 0.2 }],
+        datasets: [{ label: "매출", data: daily.map((d) => d.total_sales), borderColor: "#5b3df0", backgroundColor: "rgba(91,61,240,0.12)", fill: true, tension: 0.25 }],
       },
       options: { plugins: { legend: { display: false } } },
     });
@@ -59,7 +67,7 @@ async function loadDashboard() {
       type: "bar",
       data: {
         labels: topItems.map((i) => i.name),
-        datasets: [{ label: "매출", data: topItems.map((i) => i.revenue), backgroundColor: "#16a34a" }],
+        datasets: [{ label: "매출", data: topItems.map((i) => i.revenue), backgroundColor: "#5b3df0" }],
       },
       options: { indexAxis: "y", plugins: { legend: { display: false } } },
     });
@@ -74,7 +82,7 @@ async function loadDashboard() {
           label: "재고",
           data: inventory.map((i) => i.stock_quantity),
           backgroundColor: inventory.map((i) =>
-            i.stock_quantity <= (i.low_stock_threshold ?? 5) ? "#dc2626" : "#94a3b8"
+            i.stock_quantity <= (i.low_stock_threshold ?? 5) ? "#d1373b" : "#b3aee0"
           ),
         }],
       },

@@ -23,6 +23,11 @@ def index():
     return RedirectResponse(url="/dashboard")
 
 
+@router.get("/home")
+def home_page(request: Request):
+    return templates.TemplateResponse(request, "home.html", {"active": None})
+
+
 @router.get("/inventory")
 def inventory_page(request: Request):
     return templates.TemplateResponse(request, "inventory.html", {"active": "inventory"})

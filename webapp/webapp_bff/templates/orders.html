@@ -7,15 +7,23 @@
 <section class="panel">
   <h2>품목으로 주문 만들기</h2>
   <div id="order-items" class="order-items"><p class="hint">품목을 불러오는 중…</p></div>
-  <label class="field">
-    <span>고객 이름(선택)</span>
-    <input type="text" id="order-customer-name" placeholder="예: 홍길동">
-  </label>
-  <label class="field">
-    <span>메모(선택)</span>
-    <input type="text" id="order-note" placeholder="예: 얼음 적게">
-  </label>
-  <button id="order-submit" class="btn-primary" type="button" disabled>주문 접수 (품목을 선택하세요)</button>
+  <div style="display: flex; gap: 14px;">
+    <label class="field" style="flex: 1;">
+      <span>고객 이름(선택)</span>
+      <input type="text" id="order-customer-name" placeholder="예: 홍길동">
+    </label>
+    <label class="field" style="flex: 1;">
+      <span>메모(선택)</span>
+      <input type="text" id="order-note" placeholder="예: 얼음 적게">
+    </label>
+  </div>
+  <div class="cart-summary">
+    <div>
+      <div class="cart-summary-count" id="cart-count">품목을 선택하세요</div>
+      <div class="cart-summary-total" id="cart-total"></div>
+    </div>
+    <button id="order-submit" class="btn-primary" type="button" disabled>주문 접수</button>
+  </div>
 </section>
 
 <section class="panel chat-panel">

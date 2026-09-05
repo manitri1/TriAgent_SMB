@@ -5,6 +5,10 @@
  */
 const selectedQty = {}; // item_id -> quantity
 let catalogNameById = {};
+let catalogItems = [];
+// 자유 채팅과 품목-피커가 같은 conversation_id(=hermes 세션)를 공유하므로,
+// 채팅 응답을 기다리는 동안 품목-피커로도 겹쳐 보내지 못하게 잠근다.
+let chatBusy = false;
 
 async function loadCatalog() {
   const container = document.getElementById("order-items");
@@ -14,6 +18,7 @@ async function loadCatalog() {
     return [];
   }
   const items = await res.json();
+  catalogItems = items;
   catalogNameById = Object.fromEntries(items.map((i) => [i.item_id, i.name]));
   if (!items.length) {
     container.innerHTML = '<p class="hint">등록된 품목이 없습니다.</p>';
@@ -41,17 +46,42 @@ async function loadCatalog() {
       const next = Math.max(0, (selectedQty[itemId] || 0) + delta);
       selectedQty[itemId] = next;
       document.getElementById(`qty-${itemId}`).textContent = next;
+      const plusBtn = container.querySelector(`.qty-btn[data-item="${itemId}"][data-delta="1"]`);
+      if (plusBtn) plusBtn.classList.toggle("qty-btn--active", next > 0);
       updateSubmitButton(items);
     });
   });
 }
 
 function updateSubmitButton(items) {
-  const total = Object.values(selectedQty).reduce((sum, q) => sum + q, 0);
+  const itemCount = Object.values(selectedQty).reduce((sum, q) => sum + q, 0);
+  const amount = items.reduce((sum, item) => sum + (selectedQty[item.item_id] || 0) * item.unit_price, 0);
   const btn = document.getElementById("order-submit");
-  btn.disabled = total === 0;
-  btn.textContent = total === 0 ? "주문 접수 (품목을 선택하세요)" : `주문 접수 (${total}개 품목)`;
+  btn.disabled = itemCount === 0 || chatBusy;
   btn.dataset.items = JSON.stringify(items);
+
+  const countEl = document.getElementById("cart-count");
+  const totalEl = document.getElementById("cart-total");
+  if (itemCount === 0) {
+    countEl.textContent = "품목을 선택하세요";
+    totalEl.textContent = "";
+  } else {
+    countEl.textContent = `총 ${itemCount}개 품목`;
+    totalEl.textContent = `${amount.toLocaleString()}원`;
+  }
+}
+
+const ORDER_STATUS_LABEL = {
+  OPEN: ["대기", "pill-warning"],
+  COMPLETED: ["완료", "pill-success"],
+  CANCELED: ["취소", "pill-danger"],
+  PARTIALLY_REFUNDED: ["부분환불", "pill-warning"],
+  REFUNDED: ["환불", "pill-danger"],
+};
+
+function renderOrderStatus(status) {
+  const [label, cls] = ORDER_STATUS_LABEL[status] || [status, ""];
+  return `<span class="pill ${cls}">${label}</span>`;
 }
 
 function composeOrderMessage(items) {
@@ -92,7 +122,7 @@ async function loadRecentOrders() {
       <td>${order.order_id}</td>
       <td>${items}</td>
       <td>${order.total_amount.toLocaleString()}원</td>
-      <td>${order.status}</td>
+      <td>${renderOrderStatus(order.status)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -110,6 +140,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     profile: "coordinator",
     storageKey: "conversation_id_orders",
     onReply: loadRecentOrders,
+    onBusyChange: (busy) => {
+      chatBusy = busy;
+      updateSubmitButton(catalogItems);
+    },
     demoBarId: "orders-demo-bar",
     demoQueue: [
       { label: "아메리카노 2잔 주문", message: "아메리카노 2잔 주문 들어왔어, 결제까지 처리해줘." },
@@ -127,6 +161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("orders-form").requestSubmit();
     Object.keys(selectedQty).forEach((k) => (selectedQty[k] = 0));
     document.querySelectorAll(".qty-value").forEach((el) => (el.textContent = "0"));
+    document.querySelectorAll(".qty-btn--active").forEach((el) => el.classList.remove("qty-btn--active"));
     updateSubmitButton(items);
     document.getElementById("order-customer-name").value = "";
     document.getElementById("order-note").value = "";

@@ -2,17 +2,32 @@
 {% block title %}실시간 매장 대시보드 — 마니카페 운영 콘솔{% endblock %}
 {% block content %}
 <h1>실시간 매장 대시보드</h1>
+<p class="lead">매출, 정산, 재고, 예약을 한눈에 확인하세요. 주문 접수 화면에서 만든 주문이 바로 반영됩니다.</p>
 <div class="demo-bar demo-bar--static">
   <span class="demo-label">데모 마지막 단계 · 다른 화면에서 만든 주문/재입고가 반영됐는지 새로고침해서 확인하세요</span>
 </div>
 <div class="dash-controls">
   <button id="refresh" class="btn-primary" type="button">새로고침</button>
   <label class="auto-refresh"><input type="checkbox" id="auto"> 10초마다 자동 새로고침</label>
+  <span class="dash-freshness" id="dash-freshness"></span>
 </div>
 
+<p class="eyebrow" style="margin-top: 0;">오늘의 핵심 지표</p>
 <div class="grid">
-  <div class="card"><h2>오늘 매출</h2><div class="value" id="sales-today">-</div></div>
-  <div class="card"><h2>이번 주 매출</h2><div class="value" id="sales-week">-</div></div>
+  <div class="card card--hero">
+    <h2>오늘 매출</h2>
+    <div class="value" id="sales-today">-</div>
+    <div class="delta" id="sales-today-count"></div>
+  </div>
+  <div class="card card--hero">
+    <h2>이번 주 매출</h2>
+    <div class="value" id="sales-week">-</div>
+    <div class="delta" id="sales-week-count"></div>
+  </div>
+</div>
+
+<p class="eyebrow">정산 · 마진 (오늘)</p>
+<div class="grid">
   <div class="card">
     <h2>정산 요약 (오늘)</h2>
     <table class="kv-table">
@@ -35,29 +50,33 @@
   </div>
 </div>
 
+<p class="eyebrow">트렌드</p>
 <div class="grid">
   <div class="card"><h2>매출 추이 (최근 7일)</h2><canvas id="chart-daily"></canvas></div>
   <div class="card"><h2>인기 메뉴 TOP5 (오늘)</h2><canvas id="chart-top"></canvas></div>
 </div>
 
-<div class="grid">
-  <div class="card"><h2>재고 현황</h2><canvas id="chart-inventory"></canvas></div>
-  <div class="card">
-    <h2>오늘 예약</h2>
-    <table class="data-table">
-      <thead><tr><th>시간</th><th>고객</th><th>서비스</th></tr></thead>
-      <tbody id="table-reservations"></tbody>
-    </table>
-  </div>
-</div>
-
-<div class="grid">
-  <div class="card">
-    <h2>재방문 고객 TOP (전체 기간, 2건 이상)</h2>
-    <table class="data-table">
-      <thead><tr><th>고객</th><th>주문건수</th><th>누적 결제액</th></tr></thead>
-      <tbody id="table-repeat-customers"></tbody>
-    </table>
+<div class="detail-section">
+  <p class="eyebrow">세부 데이터</p>
+  <div class="detail-grid">
+    <div>
+      <h3>재고 현황</h3>
+      <canvas id="chart-inventory"></canvas>
+    </div>
+    <div>
+      <h3>오늘 예약</h3>
+      <table class="data-table">
+        <thead><tr><th>시간</th><th>고객</th><th>서비스</th></tr></thead>
+        <tbody id="table-reservations"></tbody>
+      </table>
+    </div>
+    <div>
+      <h3>재방문 고객 TOP (전체 기간, 2건 이상)</h3>
+      <table class="data-table">
+        <thead><tr><th>고객</th><th>주문건수</th><th>누적 결제액</th></tr></thead>
+        <tbody id="table-repeat-customers"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 {% endblock %}

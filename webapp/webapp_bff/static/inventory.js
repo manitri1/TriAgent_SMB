@@ -8,6 +8,42 @@ async function loadCatalog() {
   return items;
 }
 
+/** 재고 심각도 3단계 — 위험(임계치 절반 이하) > 부족(임계치 이하) > 정상. */
+function stockSeverity(stockQty, threshold) {
+  if (stockQty <= threshold * 0.5) return { label: "위험", cls: "pill-danger", level: 2 };
+  if (stockQty <= threshold) return { label: "부족", cls: "pill-warning", level: 1 };
+  return { label: "정상", cls: "pill-success", level: 0 };
+}
+
+function renderRestockQuickChips(items) {
+  const bar = document.getElementById("restock-quick-chips");
+  if (!bar) return;
+  const concerning = items
+    .map((item) => ({ item, severity: stockSeverity(item.stock_quantity, item.low_stock_threshold ?? 5) }))
+    .filter(({ severity }) => severity.level > 0)
+    .sort((a, b) => b.severity.level - a.severity.level);
+
+  bar.innerHTML = "";
+  if (!concerning.length) return;
+  const label = document.createElement("span");
+  label.className = "chip-row-label";
+  label.textContent = "빠른 선택";
+  bar.appendChild(label);
+  concerning.forEach(({ item, severity }) => {
+    const name = catalogNameById[item.item_id] ?? item.item_id;
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = `quick-chip ${severity.level === 2 ? "quick-chip--danger" : "quick-chip--warning"}`;
+    chip.textContent = name;
+    chip.addEventListener("click", () => {
+      const select = document.getElementById("restock-item");
+      if (select && [...select.options].some((o) => o.value === name)) select.value = name;
+      document.getElementById("restock-qty").focus();
+    });
+    bar.appendChild(chip);
+  });
+}
+
 async function loadInventory() {
   const tbody = document.getElementById("inventory-rows");
   const res = await fetch("/api/pos/inventory");
@@ -23,16 +59,17 @@ async function loadInventory() {
   tbody.innerHTML = "";
   items.forEach((item) => {
     const threshold = item.low_stock_threshold ?? 5;
-    const low = item.stock_quantity <= threshold;
+    const severity = stockSeverity(item.stock_quantity, threshold);
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${catalogNameById[item.item_id] ?? item.item_id}</td>
-      <td class="${low ? "low-stock" : ""}">${item.stock_quantity}</td>
+      <td>${item.stock_quantity}</td>
       <td>${threshold}</td>
-      <td>${low ? "저재고" : "정상"}</td>
+      <td><span class="pill ${severity.cls}">${severity.label}</span></td>
     `;
     tbody.appendChild(tr);
   });
+  renderRestockQuickChips(items);
 }
 
 async function loadCatalogIntoRestockSelect() {

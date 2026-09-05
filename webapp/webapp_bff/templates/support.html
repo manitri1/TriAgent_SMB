@@ -7,6 +7,7 @@
 <section class="panel chat-panel">
   <div id="support-thread" class="chat-thread"></div>
   <div id="support-demo-bar" class="demo-bar"></div>
+  <div id="support-quick-replies" class="chip-row"></div>
   <form id="support-form" class="chat-form">
     <input id="support-input" type="text" autocomplete="off" placeholder="예: 오늘 영업시간이 몇시부터야?">
     <button type="submit" class="btn-primary">보내기</button>
@@ -29,6 +30,13 @@
       { label: "주차 문의", message: "주차 가능한가요?" },
       { label: "와이파이 문의", message: "와이파이 비밀번호 알려주세요" },
       { label: "단체 예약 문의", message: "6명이서 갈 건데 예약 가능해요?" },
+    ],
+    quickRepliesId: "support-quick-replies",
+    quickReplies: [
+      { label: "영업시간", message: "오늘 영업시간이 몇시부터야?" },
+      { label: "주차 가능 여부", message: "주차 가능한가요?" },
+      { label: "와이파이 비밀번호", message: "와이파이 비밀번호 알려주세요" },
+      { label: "단체 예약", message: "6명이서 갈 건데 예약 가능해요?" },
     ],
   });
 </script>

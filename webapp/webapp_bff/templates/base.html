@@ -11,10 +11,13 @@
 </head>
 <body>
   <header class="topnav">
-    <a href="/dashboard" class="brand">
-      <span class="brand-mark">☕</span>
+    <a href="/home" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9Z"/><path d="M16 10.5h1.4a2.3 2.3 0 0 1 0 4.6H16"/><path d="M8.3 6.2c0-.9.8-1.1.8-2S8.3 2.7 8.3 2.7M12.3 6.2c0-.9.8-1.1.8-2s-.8-1.5-.8-1.5"/></svg>
+      </span>
       <span class="brand-text">마니카페 <em>운영 콘솔</em></span>
     </a>
+    {% if active %}
     <nav>
       <a href="/support" class="{{ 'active' if active == 'support' }}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5.5h16a1 1 0 0 1 1 1V16a1 1 0 0 1-1 1H9l-4.5 4V17H4a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1Z"/></svg>
@@ -33,6 +36,9 @@
         <span>대시보드</span>
       </a>
     </nav>
+    {% else %}
+    <span class="hero-status">실시간 연동됨</span>
+    {% endif %}
   </header>
   <main class="page">
     {% block content %}{% endblock %}
