@@ -11,7 +11,7 @@
 - **VPS 운영**: Docker Desktop이 아니라 Docker Engine + `docker compose` 플러그인이면
   충분하다(GUI 불필요, 헤드리스로 동작). `systemctl is-active docker`로 확인한다.
   VPS 특유의 포트 충돌·외부 노출·재부팅 시 자동 기동 등은
-  [16-vps-deployment-notes.md](16-vps-deployment-notes.md)에 별도로 정리했다.
+  [20-vps-deployment-notes.md](20-vps-deployment-notes.md)에 별도로 정리했다.
 - `.hermes/.env`(`OPENAI_API_KEY`, `MOCK_POS_API_KEY`)와 7개 `.hermes/profiles/<role>/.env`가
   채워져 있어야 한다 — top-level `.env`는 프로필에 상속되지 않는다.
 - `.hermes/profiles/*/USER.md`의 "(예시)" 표시를 실제 매장 정보로 교체했는지 확인한다.
@@ -134,7 +134,7 @@ s6 supervisor가 dashboard 서비스를 계속 재시작하는 크래시 루프 
 | 중지 | `docker compose down` |
 | 로그 확인 | `docker compose logs -f hermes` |
 | **내부 서비스가 실제로 살아있는지 확인**(함정 5) | `docker compose logs <서비스> \| grep -icE "error\|refus\|traceback"` (0이어야 정상 — "Up" 상태만으로는 판단 불가) |
-| 대시보드 접속 | `http://localhost:9128` (로그인: `admin`/`smb-dev-2026`, 로컬 개발용 기본값) — VPS에서 내 PC 브라우저로 열려면 `localhost`가 아니라 SSH 터널/서브도메인이 필요함, [16장](16-vps-deployment-notes.md) 참고 |
+| 대시보드 접속 | `http://localhost:9128` (로그인: `admin`/`smb-dev-2026`, 로컬 개발용 기본값) — VPS에서 내 PC 브라우저로 열려면 `localhost`가 아니라 SSH 터널/서브도메인이 필요함, [20장](20-vps-deployment-notes.md) 참고 |
 | Mock POS 단독 테스트 | `cd mock-pos && pytest` (Docker 불필요, [mock-pos/README.md](../mock-pos/README.md)) |
 
 ## 7. 트러블슈팅 빠른 참고

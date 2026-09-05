@@ -1,5 +1,8 @@
 # 08. Docker 배포 — 포트/볼륨 조사와 운영 명령어
 
+> 이 문서는 **로컬 Windows(Docker Desktop)** 배포 기준입니다. 원격 VPS(Linux) 배포는
+> [16-vps-deployment.md](16-vps-deployment.md)를 참고하세요.
+
 ## 조사 방법론
 
 `e:/work/Hermes/` 아래 모든 형제 프로젝트의 `docker-compose.yml`을 정적으로 스캔했습니다.
@@ -127,7 +130,7 @@ Windows처럼 "Docker Desktop을 수동으로 먼저 켜야" 하는 단계가 �
 | **TriAgent_SMB (본 저장소)** | `hermes-triagent-smb*` | `8651`(공개) | `127.0.0.1:9128` | mock-pos `8080`(공개), webapp `127.0.0.1:9131` |
 | adcreator (형제 프로젝트, `/opt/adcreator`) | `hermes-adcreator*` | `8652`(공개) | `127.0.0.1:9130` | **9130은 본 프로젝트 웹앱 포트(9131)와 한 자리 차이라 혼동 주의** — 실제로 14장 문서에 9130으로 잘못 기재된 적이 있었음 |
 | Hostinger 관리형 Hermes Agent 인스턴스 2개 | `hermes-agent-q66p-*`, `hermes-agent-htjj-*` | 호스트 임의 포트(`32769`/`32770`) → 컨테이너 `4860` | — | hPanel의 "VPS Docker Compose Catalog" 기능으로 배포된 별개 인스턴스, `/docker/hermes-agent-<id>/`에 위치 |
-| 공유 인프라 | `traefik-traefik-1` | `80`/`443`(공개, `network_mode: host`) | — | hPanel이 기본 제공하는 리버스 프록시 — Let's Encrypt 자동 발급 + Docker 라벨 기반 라우팅. 자세한 활용법은 [16-vps-deployment-notes.md](16-vps-deployment-notes.md) 참고 |
+| 공유 인프라 | `traefik-traefik-1` | `80`/`443`(공개, `network_mode: host`) | — | hPanel이 기본 제공하는 리버스 프록시 — Let's Encrypt 자동 발급 + Docker 라벨 기반 라우팅. 자세한 활용법은 [20-vps-deployment-notes.md](20-vps-deployment-notes.md) 참고 |
 
 Windows 표(위)는 "형제 Hermes 프로젝트들과 로컬 포트가 겹치지 않는가"를 검증하기
 위한 것이었고, 이 VPS 표는 "이 VPS에 이미 떠 있는 다른 서비스와 겹치지 않는가"를

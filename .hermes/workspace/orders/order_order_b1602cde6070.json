@@ -1,0 +1,43 @@
+{
+  "order_api_response": {
+    "order_id": "order_b1602cde6070",
+    "store_id": "store_demo",
+    "status": "OPEN",
+    "line_items": [
+      {
+        "item_id": "menu_latte",
+        "quantity": 1,
+        "note": null,
+        "unit_price": 4500,
+        "subtotal": 4500
+      },
+      {
+        "item_id": "menu_muffin",
+        "quantity": 1,
+        "note": null,
+        "unit_price": 2800,
+        "subtotal": 2800
+      }
+    ],
+    "total_amount": 7300,
+    "currency": "KRW",
+    "customer_id": null,
+    "created_at": "2026-09-04T05:22:31.411599Z",
+    "updated_at": "2026-09-04T05:22:31.411602Z"
+  },
+  "calculated_total": 7300,
+  "line_items_details": [
+    {
+      "item_id": "menu_latte",
+      "name": "라떼",
+      "quantity": 1,
+      "unit_price": 4500
+    },
+    {
+      "item_id": "menu_muffin",
+      "name": "블루베리 머핀",
+      "quantity": 1,
+      "unit_price": 2800
+    }
+  ]
+}

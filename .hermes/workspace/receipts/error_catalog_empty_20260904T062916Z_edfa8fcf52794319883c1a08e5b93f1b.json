@@ -1,0 +1,89 @@
+{
+  "error": "Catalog returned no items",
+  "body": [
+    {
+      "item_id": "menu_americano",
+      "name": "아메리카노",
+      "unit_price": 3500,
+      "category": "coffee",
+      "cost": 800
+    },
+    {
+      "item_id": "menu_latte",
+      "name": "라떼",
+      "unit_price": 4500,
+      "category": "coffee",
+      "cost": 1000
+    },
+    {
+      "item_id": "menu_cappuccino",
+      "name": "카푸치노",
+      "unit_price": 4700,
+      "category": "coffee",
+      "cost": 1100
+    },
+    {
+      "item_id": "menu_espresso",
+      "name": "에스프레소",
+      "unit_price": 3000,
+      "category": "coffee",
+      "cost": 700
+    },
+    {
+      "item_id": "menu_coldbrew",
+      "name": "콜드브루",
+      "unit_price": 5200,
+      "category": "coffee",
+      "cost": 1200
+    },
+    {
+      "item_id": "menu_matcha_latte",
+      "name": "말차라떼",
+      "unit_price": 5200,
+      "category": "tea",
+      "cost": 1200
+    },
+    {
+      "item_id": "menu_chai_latte",
+      "name": "차이라떼",
+      "unit_price": 4800,
+      "category": "tea",
+      "cost": 1100
+    },
+    {
+      "item_id": "menu_muffin",
+      "name": "블루베리 머핀",
+      "unit_price": 2800,
+      "category": "bakery",
+      "cost": 500
+    },
+    {
+      "item_id": "menu_croissant",
+      "name": "크루아상",
+      "unit_price": 3000,
+      "category": "bakery",
+      "cost": 600
+    },
+    {
+      "item_id": "menu_sandwich",
+      "name": "햄&치즈 샌드위치",
+      "unit_price": 6500,
+      "category": "sandwich",
+      "cost": 1800
+    },
+    {
+      "item_id": "menu_smoothie",
+      "name": "딸기 스무디",
+      "unit_price": 5500,
+      "category": "smoothie",
+      "cost": 1300
+    },
+    {
+      "item_id": "menu_cake",
+      "name": "시즌 케이크(딸기)",
+      "unit_price": 6000,
+      "category": "dessert",
+      "cost": 2000
+    }
+  ]
+}

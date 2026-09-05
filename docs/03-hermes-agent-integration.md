@@ -56,13 +56,21 @@ cp ".hermes/config.yaml" "$HERMES_HOME/config.yaml"
 
 ## 게이트웨이 설정
 
+`docker-compose.yml`의 `hermes` 서비스 `command`가 이미 `["gateway", "run"]`이므로
+게이트웨이 데몬은 컨테이너 기동과 동시에 떠 있습니다. 채널(Discord 등) 연결은 별도의
+대화형 `hermes gateway setup` 명령이 아니라 — 자매 프로젝트 `TriAgent_ADCreator`가
+실제로 검증한 방식대로 — **`$HERMES_HOME/.env`에 `DISCORD_BOT_TOKEN`(+ 접근제어 변수)을
+채운 뒤 `docker compose restart hermes`로 반영**합니다:
+
 ```bash
-hermes gateway setup     # Discord 등 채널 연결
-hermes gateway run       # 게이트웨이 데몬 실행 (docker-compose.yml의 hermes 서비스가 이미 실행)
+docker compose restart hermes
+docker compose exec hermes hermes doctor   # discord 어댑터가 정상인지 확인
 ```
 
 `coordinator`의 HITL 승인 알림과 `reservation-agent`의 리마인더는 이 게이트웨이를 통해
-발송됩니다 — [06-hitl-approval-design.md](06-hitl-approval-design.md) 참고.
+발송됩니다 — [06-hitl-approval-design.md](06-hitl-approval-design.md) 참고. Discord 앱
+생성부터 토큰 발급, `.env` 설정, 검증 방법까지 상세 절차는
+[15-discord-integration.md](15-discord-integration.md) 참고.
 
 ## Mock POS 연동 방식
 

@@ -1,4 +1,4 @@
-# 15. Hermes Desktop 앱을 VPS 배포 인스턴스에 연동하기
+# 19. Hermes Desktop 앱을 VPS 배포 인스턴스에 연동하기
 
 이 문서는 로컬 PC에 설치한 **Hermes Desktop(Electron) 앱**을, VPS에 Docker Compose로
 배포된 이 저장소의 Hermes Agent 인스턴스(`hermes-triagent-smb*` 컨테이너들)에 원격으로
@@ -7,7 +7,7 @@
 
 > 함께 보기: [08-docker-deployment.md](08-docker-deployment.md)(포트/컨테이너 구성),
 > [09-users-guide.md](09-users-guide.md)(챗 사용법), [12-web-gui-demo.md](12-web-gui-demo.md)
-> (브라우저로 대시보드 접속), [16-vps-deployment-notes.md](16-vps-deployment-notes.md)
+> (브라우저로 대시보드 접속), [20-vps-deployment-notes.md](20-vps-deployment-notes.md)
 > (이 VPS 전반의 운영 기준 — 공유 Traefik, 백업, 재부팅 복구 등)
 
 ## 1. 먼저 알아야 할 것 — 연동 대상은 "게이트웨이"가 아니라 "대시보드"
@@ -147,7 +147,7 @@ curl -I https://smb-dashboard.srv1923951.hstgr.cloud/   # 302면 성공
 
 Hermes Desktop 앱에는 이 `https://smb-dashboard.srv1923951.hstgr.cloud` 주소를 원격
 서버로 등록하면 됩니다. 원리, 다른 컨테이너와의 라우터 이름 충돌 방지, 웹앱에 동일하게
-적용하는 방법은 [16-vps-deployment-notes.md](16-vps-deployment-notes.md) 2번에 자세히
+적용하는 방법은 [20-vps-deployment-notes.md](20-vps-deployment-notes.md) 2번에 자세히
 정리했습니다. Traefik은 TLS 종단만 담당하므로 `dashboard.basic_auth`는 방법 B와
 동일하게 계속 켜져 있어야 합니다.
 

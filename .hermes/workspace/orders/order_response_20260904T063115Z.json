@@ -1,0 +1,1 @@
+{"order_id":"order_fce5dc04803b","store_id":"store_demo","status":"OPEN","line_items":[{"item_id":"menu_americano","quantity":2,"note":null,"unit_price":3500,"subtotal":7000}],"total_amount":7000,"currency":"KRW","customer_id":null,"created_at":"2026-09-04T06:31:15.181348Z","updated_at":"2026-09-04T06:31:15.181351Z"}

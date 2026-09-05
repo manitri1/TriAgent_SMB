@@ -22,8 +22,12 @@
 | [12-web-gui-demo.md](12-web-gui-demo.md) | 웹 GUI 시연 방안 — 채팅은 기존 Hermes 대시보드(`/chat`) 재사용, 실적 그래픽 분석은 mock-pos에 신규 페이지 추가 필요(아직 미구현, 절차만 정리됨) |
 | [13-demo-video-script.md](13-demo-video-script.md) | 4분할 동시 재생 10초 데모 영상 촬영·조립 스크립트 — 촬영/합성은 로컬(docker+ffmpeg) 환경 필요, `mock-pos/scripts/seed_demo_video.sh` + `scripts/build_demo_video.sh` 사용 |
 | [14-webapp-users-guide.md](14-webapp-users-guide.md) | `webapp/`(마니카페 운영 콘솔) 사용 가이드 — 고객 문의/주문 접수/재고 관리/대시보드 4화면, 기존 Hermes 대시보드와의 차이, 배포·트러블슈팅 |
-| [15-hermes-desktop-vps-guide.md](15-hermes-desktop-vps-guide.md) | Hermes Desktop(Electron) 앱을 VPS에 배포된 이 저장소 인스턴스에 원격 연동하는 방법 — SSH 터널/리버스 프록시+TLS/이 VPS의 공유 Traefik, 인증(basic_auth/OAuth) 설정, 트러블슈팅 |
-| [16-vps-deployment-notes.md](16-vps-deployment-notes.md) | 08~15장의 Windows 로컬 개발 전제와 실제 Linux VPS 배포의 차이 정리 — 이 VPS의 실체(호스팅사/방화벽/디스크), 공유 Traefik 라벨 활용법, 백업 대상, 재부팅 복구 |
+| [15-discord-integration.md](15-discord-integration.md) | Discord 앱 생성부터 `hermes gateway` 연결까지 — 봇 토큰 발급, `.env` 설정, 검증 방법 (미검증 설계 가이드) |
+| [16-vps-deployment.md](16-vps-deployment.md) | 원격 VPS(Linux)에 Docker Compose로 배포 — 08장(로컬 Windows)과 별도, SSH/방화벽/재부팅 자동기동 (미검증 설계 가이드) |
+| [17-vscode-remote-connection.md](17-vscode-remote-connection.md) | VS Code Remote-SSH로 VPS 컨테이너 개발환경에 접속 — 포트 포워딩 포함 (미검증 설계 가이드) |
+| [18-vps-connect-and-use.md](18-vps-connect-and-use.md) | 실제 VPS 배포(Hostinger, 2026-09-04) 접속·사용 가이드 — 현재 배포 정보, 포트, 트러블슈팅 (실측 완료) |
+| [19-hermes-desktop-vps-guide.md](19-hermes-desktop-vps-guide.md) | Hermes Desktop(Electron) 앱을 VPS에 배포된 이 저장소 인스턴스에 원격 연동하는 방법 — SSH 터널/리버스 프록시+TLS/이 VPS의 공유 Traefik, 인증(basic_auth/OAuth) 설정, 트러블슈팅 |
+| [20-vps-deployment-notes.md](20-vps-deployment-notes.md) | 08~19장의 Windows 로컬 개발 전제와 실제 Linux VPS 배포의 차이 정리 — 이 VPS의 실체(호스팅사/방화벽/디스크), 공유 Traefik 라벨 활용법, 백업 대상, 재부팅 복구 |
 
 ## 한 줄 요약
 

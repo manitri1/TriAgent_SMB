@@ -1,4 +1,4 @@
-# 16. VPS 배포 기준 — 운영 노트
+# 20. VPS 배포 기준 — 운영 노트
 
 `docs/08~15`는 대부분 Windows 로컬 개발(Docker Desktop, `E:/work/Hermes/`)을 전제로
 작성됐습니다. 이 저장소는 실제로는 **Linux VPS 1대**에 배포되어 있고, 몇몇 절차와
@@ -63,13 +63,13 @@ curl -I https://smb-dashboard.srv1923951.hstgr.cloud/
 ```
 
 몇 초 안에 302(로그인 리다이렉트)가 TLS로 돌아오면 성공입니다. 이 방식은
-[15-hermes-desktop-vps-guide.md](15-hermes-desktop-vps-guide.md)에서 다룬 "방법 B —
+[19-hermes-desktop-vps-guide.md](19-hermes-desktop-vps-guide.md)에서 다룬 "방법 B —
 리버스 프록시 + TLS"를 처음부터 손으로 구성하는 대신, 이 VPS에 이미 있는 인프라를
 그대로 재사용하는 버전입니다 — **VPS에서는 이 방법을 우선 검토**하세요.
 
 > ⚠️ **여전히 `dashboard.basic_auth` 인증은 그대로 켜져 있어야 합니다.** Traefik은
 > TLS 종단·라우팅만 담당할 뿐 로그인 자체를 대신 처리하지 않습니다. 공개 서브도메인을
-> 붙이기 전에 [15장](15-hermes-desktop-vps-guide.md) 6번의 기본 비밀번호 교체를
+> 붙이기 전에 [19장](19-hermes-desktop-vps-guide.md) 6번의 기본 비밀번호 교체를
 > 반드시 먼저 하세요.
 
 > 라우터 이름(`smb-dashboard` 등)은 이 VPS의 다른 Traefik 라벨(현재
@@ -86,7 +86,7 @@ curl -I https://smb-dashboard.srv1923951.hstgr.cloud/
 | 수동 nginx + Let's Encrypt | Hostinger 외 VPS(공유 Traefik 없는 환경) | 어디서든 적용 가능 | 인증서 갱신·설정을 직접 관리 |
 | **Traefik 라벨(이 VPS)** | 상시 접속, 여러 사람/기기 | 라벨 몇 줄로 끝, 인증서 자동 갱신 | 이 VPS(Hostinger Docker Compose Catalog 환경)에서만 바로 됨 |
 
-세 방법 모두 [15-hermes-desktop-vps-guide.md](15-hermes-desktop-vps-guide.md)의
+세 방법 모두 [19-hermes-desktop-vps-guide.md](19-hermes-desktop-vps-guide.md)의
 "기본 비밀번호 교체"가 선행돼야 안전합니다. SSH 터널 절차 자체는 15장에 이미 정리돼
 있으므로 반복하지 않습니다.
 
