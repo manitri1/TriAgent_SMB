@@ -47,7 +47,7 @@ for line in \
   '[{"item_id":"menu_muffin","quantity":3}]' \
   '[{"item_id":"menu_latte","quantity":1}]'
 do
-  order_id=$(api POST /orders "{\"line_items\":$line,\"customer_id\":\"cust_demo_01\"}" | python -c "import sys,json;print(json.load(sys.stdin)['order_id'])")
+  order_id=$(api POST /orders "{\"line_items\":$line,\"customer_id\":\"cust_demo_01\"}" | python3 -c "import sys,json;print(json.load(sys.stdin)['order_id'])")
   api POST /payments "{\"order_id\":\"$order_id\"}" > /dev/null
   echo "  주문/결제 완료: $order_id"
 done

@@ -79,7 +79,7 @@ services:
       - hermes
       - mock-pos
     ports:
-      - "127.0.0.1:9130:8090"   # dashboard 서비스와 동일하게 localhost 전용 노출
+      - "127.0.0.1:9131:8090"   # dashboard 서비스와 동일하게 localhost 전용 노출
     environment:
       MOCK_POS_BASE_URL: http://mock-pos:8080
       MOCK_POS_API_KEY: ${MOCK_POS_API_KEY:-dev-key}

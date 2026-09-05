@@ -41,7 +41,7 @@ order_and_pay() {
   # $1: line_items JSON 배열, $2: customer_id
   local order_id
   order_id=$(api POST /orders "{\"line_items\":$1,\"customer_id\":\"$2\"}" \
-    | python -c "import sys,json;print(json.load(sys.stdin)['order_id'])")
+    | python3 -c "import sys,json;print(json.load(sys.stdin)['order_id'])")
   api POST /payments "{\"order_id\":\"$order_id\"}" > /dev/null
   echo "$order_id"
 }
@@ -96,16 +96,16 @@ echo "  주문/결제 20건 완료"
 
 echo "== 환불 데모 (전액 1건 + 부분 1건) =="
 order_id=$(api POST /orders '{"line_items":[{"item_id":"menu_croissant","quantity":1}],"customer_id":"cust_junho"}' \
-  | python -c "import sys,json;print(json.load(sys.stdin)['order_id'])")
+  | python3 -c "import sys,json;print(json.load(sys.stdin)['order_id'])")
 payment_id=$(api POST /payments "{\"order_id\":\"$order_id\"}" \
-  | python -c "import sys,json;print(json.load(sys.stdin)['payment_id'])")
+  | python3 -c "import sys,json;print(json.load(sys.stdin)['payment_id'])")
 api POST "/payments/$payment_id/refund" '{"reason":"고객 단순 변심"}' > /dev/null
 echo "  전액환불 완료: $payment_id"
 
 order_id=$(api POST /orders '{"line_items":[{"item_id":"menu_cake","quantity":1}],"customer_id":"cust_soyeon"}' \
-  | python -c "import sys,json;print(json.load(sys.stdin)['order_id'])")
+  | python3 -c "import sys,json;print(json.load(sys.stdin)['order_id'])")
 payment_id=$(api POST /payments "{\"order_id\":\"$order_id\"}" \
-  | python -c "import sys,json;print(json.load(sys.stdin)['payment_id'])")
+  | python3 -c "import sys,json;print(json.load(sys.stdin)['payment_id'])")
 api POST "/payments/$payment_id/refund" '{"amount":2000,"reason":"케이크 일부 파손"}' > /dev/null
 echo "  부분환불 완료: $payment_id (2,000원)"
 

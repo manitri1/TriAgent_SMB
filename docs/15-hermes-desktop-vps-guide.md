@@ -1,0 +1,233 @@
+# 15. Hermes Desktop 앱을 VPS 배포 인스턴스에 연동하기
+
+이 문서는 로컬 PC에 설치한 **Hermes Desktop(Electron) 앱**을, VPS에 Docker Compose로
+배포된 이 저장소의 Hermes Agent 인스턴스(`hermes-triagent-smb*` 컨테이너들)에 원격으로
+연동하는 방법을 정리합니다. `docker exec`로 컨테이너 내부의 실제 CLI(`hermes --help`)와
+소스(`hermes_cli/main.py`, `config_defaults.py`)를 직접 확인해 검증한 내용입니다.
+
+> 함께 보기: [08-docker-deployment.md](08-docker-deployment.md)(포트/컨테이너 구성),
+> [09-users-guide.md](09-users-guide.md)(챗 사용법), [12-web-gui-demo.md](12-web-gui-demo.md)
+> (브라우저로 대시보드 접속), [16-vps-deployment-notes.md](16-vps-deployment-notes.md)
+> (이 VPS 전반의 운영 기준 — 공유 Traefik, 백업, 재부팅 복구 등)
+
+## 1. 먼저 알아야 할 것 — 연동 대상은 "게이트웨이"가 아니라 "대시보드"
+
+이 저장소의 `docker-compose.yml`은 서로 다른 역할의 컨테이너 2개를 띄웁니다. Hermes
+Desktop 앱이 실제로 붙는 곳은 **대시보드 컨테이너**입니다.
+
+| 컨테이너 | 실행 명령 | 역할 | 호스트 노출 |
+|---|---|---|---|
+| `hermes-triagent-smb` | `gateway run` | Discord/Telegram 등 **메시징 봇** 게이트웨이 | `0.0.0.0:8651 → 8642` |
+| `hermes-triagent-smb-dashboard` | `dashboard --host 0.0.0.0 --no-open` | 브라우저 대시보드 **+ Desktop 앱이 붙는 JSON-RPC/WebSocket 백엔드** | `127.0.0.1:9128 → 9119` |
+
+컨테이너 내부 코드를 보면 `dashboard`와 `serve`(Desktop 전용 headless 백엔드) 명령은
+**같은 함수(`cmd_dashboard`)를 공유**하고, `serve`는 브라우저 UI를 안 띄우는 옵션만 켠
+버전입니다. 즉 지금 떠 있는 대시보드 컨테이너를 그대로 Desktop 앱의 연동 대상으로 쓸 수
+있으며, 별도로 `hermes serve`를 새로 띄울 필요가 없습니다.
+
+문제는 대시보드가 **`127.0.0.1:9128`로만 노출**되어 있다는 점입니다(`docs/08` 참고 —
+`0.0.0.0`으로 열면 인증 provider 없이는 아예 바인딩을 거부해서 크래시 루프가 났던
+이력이 있어 로컬 전용으로 좁혀뒀습니다). VPS 로컬에서만 접근 가능하므로, 내 PC의 Hermes
+Desktop 앱에서 붙으려면 아래 2번 또는 3번 방법으로 "터널" 또는 "공개 노출 + 인증"을
+선택해야 합니다.
+
+## 2. 사전 준비 확인
+
+```bash
+# VPS에서
+cd /opt/smb   # 이 저장소 경로
+docker compose ps
+```
+
+`hermes-triagent-smb-dashboard`가 `Up`인지, 그리고 실제로 살아있는지 확인합니다
+(`Up`이어도 내부 크래시 루프일 수 있다는 게 08장에서 실측된 함정입니다):
+
+```bash
+curl -sI http://127.0.0.1:9128/ | head -1
+# 302(로그인 리다이렉트) 또는 200이면 정상. Empty reply면 로그를 확인하세요:
+docker compose logs dashboard --tail=50
+```
+
+`.hermes/config.yaml`에 이미 `dashboard.basic_auth`(사용자명 + scrypt 해시)가 설정돼
+있어야 합니다 — 이 저장소는 기본값으로 이미 설정돼 있습니다(`admin` / `smb-dev-2026`,
+**개발용 기본값**). Desktop 앱 로그인 시 이 자격증명을 그대로 사용합니다.
+
+## 3. 방법 A — SSH 터널 (1인 운영/개발 중 권장, 가장 간단)
+
+VPS에 SSH로 접속할 수 있다면 별도 리버스 프록시나 TLS 인증서 없이 가장 안전하게 붙을 수
+있습니다. 대시보드가 이미 루프백 전용이라 별다른 설정 변경도 필요 없습니다.
+
+내 PC(로컬)에서:
+
+```bash
+# -N: 셸을 열지 않고 포워딩만, -L 로컬포트:대상호스트:대상포트
+ssh -N -L 9128:127.0.0.1:9128 <ssh사용자>@<VPS_IP_또는_도메인>
+```
+
+터널이 연결된 상태를 유지한 채, Hermes Desktop 앱에서 원격 서버 주소로
+`http://127.0.0.1:9128`을 등록하고 `.hermes/config.yaml`의 `dashboard.basic_auth`
+사용자명/비밀번호로 로그인합니다(연동 화면 세부 절차는 6번 참고).
+
+이 방법은 VPS의 방화벽/보안그룹을 전혀 열 필요가 없다는 것이 장점입니다. 반대로 터널이
+끊기면 앱 연결도 끊어지므로, 상시 원격 접속(모바일 등)이 필요하면 방법 B를 쓰세요.
+
+## 4. 방법 B — 리버스 프록시 + TLS로 공개 노출 (상시/다중 클라이언트용)
+
+여러 기기(다른 PC, 노트북 등)에서 터널 없이 상시 접속하려면 도메인 + HTTPS로 앞단을
+막아야 합니다. Hermes Agent는 `0.0.0.0` 바인딩을 감지하면 인증 provider가 없는 한
+바인딩 자체를 거부하도록 하드코딩돼 있으므로(위 크래시 루프 사례), **인증을 켜지 않은
+채로는 애초에 공개 노출이 불가능**합니다 — 즉 이 문서 2번의 `basic_auth` 설정이 전제
+조건입니다.
+
+1. `docker-compose.yml`에서 대시보드 포트 바인딩을 루프백 전용에서 공개로 바꿉니다
+   (직접 여는 대신 아래 3번의 리버스 프록시만 공개하는 편이 더 안전합니다 — 대시보드
+   컨테이너 포트 자체는 계속 `127.0.0.1`로 두고, nginx/Caddy만 공인 IP에 바인딩):
+
+   ```yaml
+   dashboard:
+     ports:
+       - "127.0.0.1:9128:9119"   # 그대로 유지 — 외부는 프록시를 통해서만 접근
+   ```
+
+2. VPS에 nginx 또는 Caddy로 TLS 종료 + 리버스 프록시를 구성합니다. WebSocket
+   업그레이드(`/api/ws`, `/api/pty`)를 반드시 통과시켜야 합니다(nginx 예시):
+
+   ```nginx
+   server {
+       listen 443 ssl;
+       server_name hermes.example.com;
+       # ssl_certificate ...; ssl_certificate_key ...; (Let's Encrypt 등)
+
+       location / {
+           proxy_pass http://127.0.0.1:9128;
+           proxy_set_header Host $host;
+           proxy_set_header X-Forwarded-Proto $scheme;
+           proxy_set_header X-Forwarded-Host $host;
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection "upgrade";
+       }
+   }
+   ```
+
+3. 프록시가 `X-Forwarded-Host`/`X-Forwarded-Proto`를 위처럼 전달하지 못하는 환경이라면,
+   대시보드 컨테이너 환경변수로 `HERMES_DASHBOARD_PUBLIC_URL=https://hermes.example.com`을
+   직접 지정해야 합니다(OAuth 리다이렉트 URI와 Origin 검증에 사용됨) — `docker-compose.yml`
+   의 `dashboard` 서비스 `environment:`에 추가하세요.
+
+4. Hermes Desktop 앱에서는 `https://hermes.example.com`을 원격 서버 주소로 등록하고
+   `basic_auth` 자격증명(또는 아래 8번의 OAuth)으로 로그인합니다.
+
+방법 B를 쓴다면 반드시 7번의 **기본 비밀번호 교체**를 먼저 하세요 — 인터넷에 노출되는
+순간 `admin`/`smb-dev-2026` 기본값은 위험합니다.
+
+## 5. 방법 C — Traefik 라벨로 자동 HTTPS (이 VPS 권장)
+
+이 VPS(Hostinger)에는 hPanel이 기본 제공하는 **공유 Traefik**이 이미 컨테이너로
+떠서 `80`/`443` 포트를 점유하고 있고, `*.srv1923951.hstgr.cloud` 서브도메인은 DNS
+설정 없이 이 VPS로 자동 라우팅됩니다. nginx를 직접 설치·관리해야 하는 방법 B 대신,
+Docker 라벨 몇 줄만 추가하면 동일한 결과(도메인 + 자동 TLS)를 얻을 수 있습니다 —
+**이 VPS에서는 방법 B보다 이 방법을 먼저 검토하세요.**
+
+```yaml
+# docker-compose.yml의 dashboard 서비스에 추가 (ports:는 그대로 둬도 무방)
+  dashboard:
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.smb-dashboard.entrypoints: websecure
+      traefik.http.routers.smb-dashboard.rule: "Host(`smb-dashboard.srv1923951.hstgr.cloud`)"
+      traefik.http.routers.smb-dashboard.tls.certresolver: letsencrypt
+      traefik.http.services.smb-dashboard.loadbalancer.server.port: "9119"
+```
+
+```bash
+docker compose up -d dashboard          # 라벨만 바뀌었으므로 재생성만 필요
+curl -I https://smb-dashboard.srv1923951.hstgr.cloud/   # 302면 성공
+```
+
+Hermes Desktop 앱에는 이 `https://smb-dashboard.srv1923951.hstgr.cloud` 주소를 원격
+서버로 등록하면 됩니다. 원리, 다른 컨테이너와의 라우터 이름 충돌 방지, 웹앱에 동일하게
+적용하는 방법은 [16-vps-deployment-notes.md](16-vps-deployment-notes.md) 2번에 자세히
+정리했습니다. Traefik은 TLS 종단만 담당하므로 `dashboard.basic_auth`는 방법 B와
+동일하게 계속 켜져 있어야 합니다.
+
+## 6. Hermes Desktop 앱에서 원격 서버 추가하기
+
+Desktop 앱(`hermes desktop` / `hermes gui`로 로컬에서 빌드·실행하거나, 배포된 설치
+파일을 받아 실행)은 프로필별로 로컬 백엔드 대신 원격 게이트웨이에 로그인하는 기능을
+내장하고 있습니다(공식 표현: "per-profile remote-gateway login"). 로그인 화면에서
+로컬 대신 원격 연결을 선택하는 옵션을 찾아:
+
+1. 서버 주소: 방법 A는 `http://127.0.0.1:9128`(터널 경유), 방법 B는
+   `https://hermes.example.com`
+2. 자격증명: `.hermes/config.yaml`의 `dashboard.basic_auth.username`/비밀번호(위에서
+   해시로 저장된 원본 비밀번호)
+3. 로그인에 성공하면 앱은 원격 게이트웨이 토큰을 OS 키체인/자격 증명 저장소에 안전하게
+   보관하고(Linux는 `--password-store` 자동 감지), 다음 실행부터 자동 재연결합니다.
+4. 연결되면 이 VPS의 `.hermes/profiles/*`(coordinator 등 7개 프로필)를 로컬 CLI로
+   `hermes chat`을 치는 것과 동일하게 Desktop 앱 채팅/세션 목록에서 선택해 사용할 수
+   있습니다.
+
+> Desktop 앱 UI 문구(메뉴명 등)는 버전에 따라 달라질 수 있습니다 — 정확한 위치는 설치된
+> 버전의 로그인/설정 화면에서 "원격 서버 추가" 또는 이에 준하는 항목을 찾으면 됩니다.
+
+## 7. 프로덕션 전 필수 — 기본 비밀번호 교체
+
+이 저장소는 로컬 개발용으로 `admin` / `smb-dev-2026` 기본 비밀번호를 커밋해뒀습니다
+(대시보드가 `127.0.0.1` 전용이라 안전하다는 전제). VPS에서 방법 B(공개 노출)를 쓰거나,
+운영 환경으로 전환한다면 반드시 새 해시로 교체하세요.
+
+```bash
+docker compose exec dashboard /opt/hermes/.venv/bin/python3 -c "
+import sys; sys.path.insert(0, '/opt/hermes')
+from plugins.dashboard_auth.basic import hash_password
+print(hash_password('새로운-강력한-비밀번호'))
+"
+```
+
+출력된 `scrypt$...` 문자열을 `.hermes/config.yaml`의 `dashboard.basic_auth.password_hash`
+에 넣고 `username`도 원하는 값으로 바꾼 뒤:
+
+```bash
+docker compose restart dashboard
+```
+
+(대안으로 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `_PASSWORD_HASH` 환경변수로도 같은
+값을 오버라이드할 수 있습니다 — `.env`에 비밀값을 두고 싶지 않다면 이쪽을 권장.)
+
+## 8. OAuth로 대체하고 싶다면
+
+비밀번호 대신 Nous Portal OAuth로 로그인하게 하려면:
+
+```bash
+docker compose exec dashboard hermes dashboard register
+```
+
+이 명령이 OAuth 클라이언트 ID를 `.env`에 기록합니다. 이후 Desktop 앱 로그인 화면에서
+OAuth 옵션을 선택하면 됩니다. 두 방식(`basic_auth`/OAuth)은 동시에 켜둘 수 있습니다.
+
+## 9. 트러블슈팅
+
+- **`curl`이 빈 응답(Empty reply)을 반환한다** → `dashboard.basic_auth`가 비어 있는
+  상태로 `--host 0.0.0.0`을 준 것입니다. 인증 provider가 없으면 Hermes가 바인딩 자체를
+  거부하고 s6가 계속 재시작합니다(`docker compose ps`는 그래도 `Up`으로 보임 — 08장
+  실측 사례). `docker compose logs dashboard`에서 `Refusing to bind dashboard to
+  0.0.0.0` 메시지를 확인하고 2번을 다시 점검하세요.
+- **Desktop 앱에서 로그인은 되는데 세션이 자꾸 끊긴다** → `dashboard.basic_auth.secret`이
+  비어 있으면 프로세스 재시작마다 세션 서명 키가 랜덤으로 바뀝니다. 32바이트 이상의
+  고정값을 `secret`에 넣어두세요.
+- **SSH 터널로는 되는데 도메인으로는 WebSocket이 안 붙는다** → nginx/Caddy 설정에서
+  `Upgrade`/`Connection` 헤더 전달(`/api/ws`, `/api/pty` 경로)이 빠진 경우가 흔합니다.
+  4번의 nginx 예시를 확인하세요.
+- **원격 로그인 후 특정 프로필(coordinator 등)이 안 보인다** → VPS 쪽 `hermes doctor`로
+  프로필 7개가 정상 인식되는지 먼저 확인하세요(`docker compose exec dashboard hermes
+  doctor`). Desktop 앱은 백엔드가 인식한 프로필만 보여줍니다.
+
+## 10. 보안 체크리스트
+
+- [ ] 공개 노출(방법 B) 전에는 반드시 6번으로 기본 비밀번호 교체
+- [ ] 대시보드 컨테이너 포트(9119/9128)는 절대 직접 공인 IP에 바인딩하지 않고, 항상
+      리버스 프록시(TLS 종료) 뒤에 두거나 SSH 터널로만 접근
+- [ ] `dashboard.basic_auth.secret`을 32바이트 이상 랜덤값으로 고정
+- [ ] 게이트웨이 포트(8651, 메시징 봇용)와 대시보드 포트(9128, Desktop/브라우저용)를
+      혼동하지 말 것 — 서로 용도가 다름

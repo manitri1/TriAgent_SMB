@@ -11,9 +11,15 @@
 ## 1. 이게 뭔가요 — 기존 Hermes 대시보드(`:9128`)와 차이
 
 `http://localhost:9128`의 기존 Hermes 대시보드는 **7개 프로필을 전환해가며 자유
-채팅**하는 범용 UI입니다. 이 웹앱(`http://localhost:9130`)은 그 대신 **업무별로
+채팅**하는 범용 UI입니다. 이 웹앱(`http://localhost:9131`)은 그 대신 **업무별로
 설계된 4개 화면**을 제공합니다 — 사장님/직원이 "어떤 프로필에게 뭐라고 말해야
 하는지" 고민할 필요 없이, 화면 자체가 용도를 알려줍니다.
+
+> ⚠️ **포트 번호 주의**: `docker-compose.yml`의 실제 호스트 포트는 `9131`입니다
+> (`127.0.0.1:9131:8090`) — 이 문서에 한때 `9130`으로 잘못 기재돼 있었습니다(수정
+> 완료). VPS에서는 `9130`이 이미 다른 형제 프로젝트(`hermes-adcreator-dashboard`)가
+> 쓰고 있는 포트라 혼동하기 쉬우니, 스크립트나 북마크에 포트를 하드코딩했다면
+> `9131`로 다시 확인하세요.
 
 | 화면 | URL | 연결된 에이전트 | 쓰기 여부 |
 |---|---|---|---|
@@ -43,7 +49,11 @@
 
 ## 2. 사전 준비
 
-- Docker Desktop이 실행 중이어야 한다.
+- **로컬(Windows/Mac) 개발**: Docker Desktop이 실행 중이어야 한다.
+- **VPS 운영**: Docker Desktop이 아니라 Docker Engine + `docker compose` 플러그인이면
+  충분하다(GUI 불필요). `systemctl is-active docker`로 확인 — 대부분의 VPS는 이미
+  `docker.service`가 `enabled`·`active` 상태로 설치돼 있다. 자세한 VPS 운영 기준은
+  [16-vps-deployment-notes.md](16-vps-deployment-notes.md) 참고.
 - `mock-pos` 컨테이너가 떠 있어야 한다(주문/재고/매출 데이터 원본).
 - 웹앱 자체 로그인 비밀번호 해시가 `.env`(저장소 루트, gitignore됨)에 설정돼
   있어야 한다.
@@ -76,7 +86,7 @@ docker compose build webapp
 docker compose up -d webapp
 
 # 3) 확인
-curl http://localhost:9130/health
+curl http://localhost:9131/health
 ```
 
 `{"status":"ok"}`가 나오면 정상입니다.
@@ -106,9 +116,13 @@ cd mock-pos/scripts
 
 ## 4. 로그인
 
-`http://localhost:9130` 접속 → HTTP Basic Auth 팝업에 아이디(기본 `admin`)와
+`http://localhost:9131` 접속 → HTTP Basic Auth 팝업에 아이디(기본 `admin`)와
 2단계에서 정한 비밀번호 입력. 로그인은 웹앱 전체(화면 + API)에 공통으로
 적용되며, 기존 Hermes 대시보드 계정과는 **별개**입니다.
+
+> VPS에서 이 화면을 사장님/직원 개인 기기로 열려면 `localhost`가 아니라 SSH 터널
+> 또는 Traefik 서브도메인이 필요합니다 — [16-vps-deployment-notes.md](16-vps-deployment-notes.md)
+> "웹앱·대시보드를 외부에 노출하기" 참고.
 
 ## 5. 화면별 사용법
 

@@ -13,12 +13,11 @@ platforms:
 dashboard:
   basic_auth:
     username: admin
-    # 대시보드는 호스트에서 127.0.0.1:9128로만 노출되므로(외부 접근 불가) 위험도는
-    # 낮지만, 로컬 개발 외 용도로 쓰기 전에는 반드시 새 해시로 교체할 것:
-    #   docker compose exec hermes python3 -c \
-    #     "from plugins.dashboard_auth.basic import hash_password; print(hash_password('새 비밀번호'))"
-    password_hash: "scrypt$16384$8$1$U/l7DmXPK0c6Mu3unmO63g==$BZo1zoQQylL74M4O9j0Dx4t4whqrE5Diz9SPMJc3XQ0="
-_config_version: 33
+    password_hash: scrypt$16384$8$1$1c5JtZshpKbjSTEStbv6iQ==$OAEv0YGZkhgg4uf9G+A7e0PwpJ44BsIXNClE0l7R7a4=
+_config_version: 40
+onboarding:
+  seen:
+    profile_build_offered: true
 
 # ── Security ──────────────────────────────────────────────────────────
 # Secret redaction is ON by default — strings that look like API keys,

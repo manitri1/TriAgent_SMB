@@ -109,3 +109,27 @@ docker compose down
 `grep -icE "error|refus|traceback|exception"`, s6 서비스 재시작 횟수 확인)으로
 재점검해 실제로 깨끗함을 확인했습니다 — 배포 직후 한 번 확인했다고 끝이 아니라, 시간이
 지난 뒤에도 로그 기반으로 재점검하는 습관이 필요합니다.
+
+## VPS 배포 현황 실측 (2026-09-05)
+
+위 조사는 원래 Windows 로컬 개발 환경(`e:/work/Hermes/`) 기준이었지만, 이 저장소는
+실제로 **Linux VPS 1대**(Hostinger, 호스트명 `srv1923951`, Ubuntu, Docker Engine +
+`docker compose` 플러그인)에 배포되어 있습니다. Windows Docker Desktop은 이 VPS에는
+설치되어 있지 않고 필요하지도 않습니다 — `docker.service`가 systemd로
+`enabled`/`active` 상태이므로 VPS가 재부팅돼도 Docker 자체는 자동으로 다시
+올라오고(각 서비스의 `restart: unless-stopped`와 결합해 컨테이너도 자동 복구됩니다),
+Windows처럼 "Docker Desktop을 수동으로 먼저 켜야" 하는 단계가 없습니다.
+
+**이 VPS의 실제 포트/컨테이너 점유 현황**(`docker ps -a` 실측, Windows 표와 별개):
+
+| 프로젝트 | 컨테이너명 | 앱/게이트웨이 포트 | 대시보드 포트 | 비고 |
+|---|---|---|---|---|
+| **TriAgent_SMB (본 저장소)** | `hermes-triagent-smb*` | `8651`(공개) | `127.0.0.1:9128` | mock-pos `8080`(공개), webapp `127.0.0.1:9131` |
+| adcreator (형제 프로젝트, `/opt/adcreator`) | `hermes-adcreator*` | `8652`(공개) | `127.0.0.1:9130` | **9130은 본 프로젝트 웹앱 포트(9131)와 한 자리 차이라 혼동 주의** — 실제로 14장 문서에 9130으로 잘못 기재된 적이 있었음 |
+| Hostinger 관리형 Hermes Agent 인스턴스 2개 | `hermes-agent-q66p-*`, `hermes-agent-htjj-*` | 호스트 임의 포트(`32769`/`32770`) → 컨테이너 `4860` | — | hPanel의 "VPS Docker Compose Catalog" 기능으로 배포된 별개 인스턴스, `/docker/hermes-agent-<id>/`에 위치 |
+| 공유 인프라 | `traefik-traefik-1` | `80`/`443`(공개, `network_mode: host`) | — | hPanel이 기본 제공하는 리버스 프록시 — Let's Encrypt 자동 발급 + Docker 라벨 기반 라우팅. 자세한 활용법은 [16-vps-deployment-notes.md](16-vps-deployment-notes.md) 참고 |
+
+Windows 표(위)는 "형제 Hermes 프로젝트들과 로컬 포트가 겹치지 않는가"를 검증하기
+위한 것이었고, 이 VPS 표는 "이 VPS에 이미 떠 있는 다른 서비스와 겹치지 않는가"를
+검증하기 위한 것입니다 — 목적은 같지만 대상이 다르므로 VPS에 새로 배포할 때는 반드시
+`docker ps -a`로 이 표를 다시 확인하세요.
