@@ -48,9 +48,11 @@ curl -sI http://127.0.0.1:19128/ | head -1
 docker compose logs dashboard --tail=50
 ```
 
-`.hermes/config.yaml`에 이미 `dashboard.basic_auth`(사용자명 + scrypt 해시)가 설정돼
-있어야 합니다 — 이 저장소는 기본값으로 이미 설정돼 있습니다(`admin` / `smb-dev-2026`,
-**개발용 기본값**). Desktop 앱 로그인 시 이 자격증명을 그대로 사용합니다.
+`dashboard.basic_auth`(사용자명 + scrypt 해시 + 서명 시크릿)가 이미 설정돼 있어야
+합니다 — 이 저장소는 공개 저장소라 2026-09-07부터 그 값을 `.hermes/config.yaml`이
+아니라 `.hermes/.env`의 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`/`_PASSWORD_HASH`/
+`_SECRET`로 관리합니다. Desktop 앱 로그인 시 그 파일에 적힌 사용자명/비밀번호를
+그대로 사용합니다.
 
 ## 3. 방법 A — SSH 터널 (1인 운영/개발 중 권장, 가장 간단)
 
@@ -118,8 +120,8 @@ ssh -N -L 19128:127.0.0.1:19128 <ssh사용자>@<VPS_IP_또는_도메인>
 4. Hermes Desktop 앱에서는 `https://hermes.example.com`을 원격 서버 주소로 등록하고
    `basic_auth` 자격증명(또는 아래 8번의 OAuth)으로 로그인합니다.
 
-방법 B를 쓴다면 반드시 7번의 **기본 비밀번호 교체**를 먼저 하세요 — 인터넷에 노출되는
-순간 `admin`/`smb-dev-2026` 기본값은 위험합니다.
+방법 B를 쓴다면 반드시 7번을 먼저 확인하세요 — 인터넷에 노출되는 서비스의 로그인
+자격증명이 공개 저장소에 커밋돼 있으면 위험합니다.
 
 ## 5. 방법 C — Traefik 라벨로 자동 HTTPS (이 VPS 권장)
 
@@ -160,8 +162,8 @@ Desktop 앱(`hermes desktop` / `hermes gui`로 로컬에서 빌드·실행하거
 
 1. 서버 주소: 방법 A는 `http://127.0.0.1:19128`(터널 경유), 방법 B는
    `https://hermes.example.com`
-2. 자격증명: `.hermes/config.yaml`의 `dashboard.basic_auth.username`/비밀번호(위에서
-   해시로 저장된 원본 비밀번호)
+2. 자격증명: `.hermes/.env`의 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`/원본 비밀번호
+   (`_PASSWORD_HASH`는 그 비밀번호의 scrypt 해시)
 3. 로그인에 성공하면 앱은 원격 게이트웨이 토큰을 OS 키체인/자격 증명 저장소에 안전하게
    보관하고(Linux는 `--password-store` 자동 감지), 다음 실행부터 자동 재연결합니다.
 4. 연결되면 이 VPS의 `.hermes/profiles/*`(coordinator 등 7개 프로필)를 로컬 CLI로
@@ -171,11 +173,25 @@ Desktop 앱(`hermes desktop` / `hermes gui`로 로컬에서 빌드·실행하거
 > Desktop 앱 UI 문구(메뉴명 등)는 버전에 따라 달라질 수 있습니다 — 정확한 위치는 설치된
 > 버전의 로그인/설정 화면에서 "원격 서버 추가" 또는 이에 준하는 항목을 찾으면 됩니다.
 
-## 7. 프로덕션 전 필수 — 기본 비밀번호 교체
+## 7. 로그인 자격증명 보관 위치 — `.hermes/config.yaml`이 아니라 `.hermes/.env`
 
-이 저장소는 로컬 개발용으로 `admin` / `smb-dev-2026` 기본 비밀번호를 커밋해뒀습니다
-(대시보드가 `127.0.0.1` 전용이라 안전하다는 전제). VPS에서 방법 B(공개 노출)를 쓰거나,
-운영 환경으로 전환한다면 반드시 새 해시로 교체하세요.
+이 저장소는 **공개 GitHub 저장소**입니다. 초기에는 개발 편의상 `admin` / `smb-dev-2026`
+기본 비밀번호 해시를 `.hermes/config.yaml`(git 추적 대상)에 직접 커밋했었는데,
+2026-09-07에 이를 발견하고 방법 C(Traefik로 상시 HTTPS 노출)를 적용하면서 함께
+정리했습니다 — `config.yaml`은 계속 공개 저장소에 커밋되므로, 실제 로그인
+자격증명(사용자명/비밀번호 해시/서명 시크릿)은 그 파일에 두면 안 됩니다.
+
+지금은 세 값 모두 `.hermes/.env`(`.gitignore`에 등록돼 있어 커밋되지 않음)에
+환경변수로 들어 있습니다:
+
+```
+HERMES_DASHBOARD_BASIC_AUTH_USERNAME=...
+HERMES_DASHBOARD_BASIC_AUTH_PASSWORD_HASH=scrypt$...
+HERMES_DASHBOARD_BASIC_AUTH_SECRET=...
+```
+
+(env가 `config.yaml`보다 항상 우선합니다 — `plugins/dashboard_auth/basic/__init__.py`
+참고.) 비밀번호를 새로 바꾸고 싶다면:
 
 ```bash
 docker compose exec dashboard /opt/hermes/.venv/bin/python3 -c "
@@ -185,15 +201,17 @@ print(hash_password('새로운-강력한-비밀번호'))
 "
 ```
 
-출력된 `scrypt$...` 문자열을 `.hermes/config.yaml`의 `dashboard.basic_auth.password_hash`
-에 넣고 `username`도 원하는 값으로 바꾼 뒤:
+출력된 `scrypt$...` 문자열을 `.hermes/.env`의 `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD_HASH`에
+넣고(`username`도 원하면 함께 교체) 재시작합니다:
 
 ```bash
 docker compose restart dashboard
 ```
 
-(대안으로 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `_PASSWORD_HASH` 환경변수로도 같은
-값을 오버라이드할 수 있습니다 — `.env`에 비밀값을 두고 싶지 않다면 이쪽을 권장.)
+> 예전에 `config.yaml`에 커밋됐던 `admin`/`smb-dev-2026` 해시는 git 히스토리에 여전히
+> 남아있지만, 그 해시는 위 정리 시점에 이미 새 값으로 교체되어 더 이상 유효한 로그인
+> 자격증명이 아닙니다 — 다만 완전히 새 프로젝트로 이 구조를 복제한다면 처음부터
+> `.env`에만 비밀번호를 두고 절대 `config.yaml`에 커밋하지 마세요.
 
 ## 8. OAuth로 대체하고 싶다면
 

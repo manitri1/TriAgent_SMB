@@ -61,7 +61,8 @@ Hermes 인증 체계 안에 넣으려면 불필요하게 복잡해집니다. 대
 
 ## 4. 채팅 화면 사용법 (구현 불필요 — 지금 바로 가능)
 
-1. `http://localhost:19128` 접속 → 로그인(`admin` / `smb-dev-2026`, `docs/08-docker-deployment.md`
+1. `http://localhost:19128` 접속 → 로그인(계정은 `.hermes/.env`의
+   `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`/`_PASSWORD_HASH` 참고, `docs/08-docker-deployment.md`
    에서 설정한 로컬 개발용 기본 계정 — 로컬 데모 외 용도로는 반드시 교체).
 2. `/profiles`(또는 상단 네비게이션)에서 대화할 프로필 선택 — 시연 시작은
    `coordinator` 권장(`docs/03-hermes-agent-integration.md` 참고, 유일한 대화

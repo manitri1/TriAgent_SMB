@@ -118,10 +118,11 @@ Mock POS에 실제로 반영되지 않았음을 API로 재확인함. 정상 동�
 s6 supervisor가 dashboard 서비스를 계속 재시작하는 크래시 루프 상태였다(인증 provider
 미설정 때문). `docker compose ps`/`RestartCount`로는 이 상태를 알 수 없다 — 반드시
 `docker compose logs dashboard`로 확인해야 한다.
-조치: `.hermes/config.yaml`에 `dashboard.basic_auth`(사용자명 + scrypt 해시)를 설정
-후 `docker compose restart dashboard` — 이미 반영되어 있으므로 추가 조치 불필요
-(`docs/08-docker-deployment.md` 참고). 기본 로그인: `admin` / `smb-dev-2026`
-(로컬 개발 외 용도로는 반드시 교체할 것).
+조치: `dashboard.basic_auth`(사용자명 + scrypt 해시 + 서명 시크릿)를 설정 후
+`docker compose restart dashboard` — 이미 반영되어 있으므로 추가 조치 불필요
+(`docs/08-docker-deployment.md` 참고). 2026-09-07부터 이 값들은 저장소가 공개인 점을
+고려해 `.hermes/config.yaml`이 아니라 `.hermes/.env`의 `HERMES_DASHBOARD_BASIC_AUTH_*`
+환경변수로 관리합니다 — 로그인 계정은 해당 파일에서 확인하세요.
 
 ## 6. 관리 명령어 요약
 
@@ -134,7 +135,7 @@ s6 supervisor가 dashboard 서비스를 계속 재시작하는 크래시 루프 
 | 중지 | `docker compose down` |
 | 로그 확인 | `docker compose logs -f hermes` |
 | **내부 서비스가 실제로 살아있는지 확인**(함정 5) | `docker compose logs <서비스> \| grep -icE "error\|refus\|traceback"` (0이어야 정상 — "Up" 상태만으로는 판단 불가) |
-| 대시보드 접속 | `http://localhost:19128` (로그인: `admin`/`smb-dev-2026`, 로컬 개발용 기본값) — VPS에서 내 PC 브라우저로 열려면 `localhost`가 아니라 SSH 터널/서브도메인이 필요함, [20장](20-vps-deployment-notes.md) 참고 |
+| 대시보드 접속 | `http://localhost:19128` (로그인 계정: `.hermes/.env`의 `HERMES_DASHBOARD_BASIC_AUTH_*`) — VPS에서 내 PC 브라우저로 열려면 `localhost`가 아니라 SSH 터널/서브도메인이 필요함, [20장](20-vps-deployment-notes.md) 참고 |
 | Mock POS 단독 테스트 | `cd mock-pos && pytest` (Docker 불필요, [mock-pos/README.md](../mock-pos/README.md)) |
 
 ## 7. 트러블슈팅 빠른 참고

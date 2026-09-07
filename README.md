@@ -84,8 +84,9 @@ docker compose exec -it hermes hermes -p coordinator chat
 
 기본 모델은 OpenAI `gpt-5-mini`(`provider: openai-api`, `OPENAI_API_KEY` 환경변수 필요)입니다.
 
-**웹 GUI로 채팅/시연하려면**: `http://localhost:19128`(Hermes 대시보드, 로그인
-`admin`/`smb-dev-2026`)에 이미 브라우저 채팅 화면(`/chat`)이 내장되어 있습니다 —
+**웹 GUI로 채팅/시연하려면**: `http://localhost:19128`(Hermes 대시보드, 로그인 계정은
+`.hermes/.env`의 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`/`_PASSWORD_HASH` 참고)에 이미
+브라우저 채팅 화면(`/chat`)이 내장되어 있습니다 —
 추가 구현 없이 바로 사용 가능합니다. 매출/재고 같은 실적을 그래프로 보는 대시보드는
 아직 미구현이며, 절차는 [docs/12-web-gui-demo.md](docs/12-web-gui-demo.md)에
 정리되어 있습니다.
@@ -143,9 +144,11 @@ uvicorn mock_pos.main:app --reload --port 8080
   — 실제로 배포 몇 시간 뒤 발견: 인증 provider 미설정으로 s6가 dashboard 서비스를
   계속 재시작하는 크래시 루프였지만, 컨테이너 프로세스 자체는 종료되지 않아
   `RestartCount=0`, `Up`으로만 보였습니다. `.hermes/config.yaml`에
-  `dashboard.basic_auth`를 설정해 해결했습니다(기본 로그인 `admin`/`smb-dev-2026`, 로컬
-  개발 외 용도로는 교체 필요) — [docs/08-docker-deployment.md](docs/08-docker-deployment.md)
-  참고.
+  `dashboard.basic_auth`를 설정해 해결했습니다. 2026-09-07부터는 이 저장소가 공개
+  저장소인 점을 고려해 실제 로그인 자격증명(사용자명/비밀번호 해시/서명 시크릿)을
+  `config.yaml`에 커밋하지 않고 `.hermes/.env`(gitignore 대상)의
+  `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`/`_PASSWORD_HASH`/`_SECRET`로 관리합니다 —
+  [docs/08-docker-deployment.md](docs/08-docker-deployment.md) 참고.
 - 실 POS 벤더(토스플레이스/카카오페이) 연동은 아직 없습니다 — 현재는 Mock POS로 기능
   검증까지만 수행합니다.
 - **HITL 승인 게이트는 총 3개이며(프로모션/캠페인 집행·재고 대량 발주·결제 환불/주문

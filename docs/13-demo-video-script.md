@@ -32,8 +32,8 @@ cd mock-pos/scripts && ./seed_demo_video.sh
 | 좌하단 ③ | `cell3_inventory.mp4` | 동일 `/chat` (inventory-agent) | "재고 확인해줘" → 아메리카노 재고 0개(부족) 확인 → 발주 요청 응답 |
 | 우하단 ④ | `cell4_dashboard.mp4` | `localhost:18080/dashboard` | ②③ 녹화 직후 새로고침 → 매출/재고 변화가 반영되는 순간 |
 
-로그인: `admin` / `smb-dev-2026` (`docs/08-docker-deployment.md`, 로컬 데모 전용 계정 —
-다른 용도로는 반드시 교체).
+로그인 계정: `.hermes/.env`의 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`/`_PASSWORD_HASH` 참고
+(`docs/08-docker-deployment.md`) — 저장소가 공개라 여기엔 값을 적지 않음.
 
 ## 3. 녹화 설정
 

@@ -10,10 +10,10 @@ plugins:
 platforms:
   webhook:
     enabled: false
-dashboard:
-  basic_auth:
-    username: admin
-    password_hash: scrypt$16384$8$1$1c5JtZshpKbjSTEStbv6iQ==$OAEv0YGZkhgg4uf9G+A7e0PwpJ44BsIXNClE0l7R7a4=
+# dashboard.basic_auth (username/password_hash/secret) is intentionally NOT stored here —
+# this file is git-tracked and the repo is public. Those three values live in
+# .hermes/.env instead (gitignored) as HERMES_DASHBOARD_BASIC_AUTH_USERNAME /
+# _PASSWORD_HASH / _SECRET — env always wins over config.yaml for this plugin.
 _config_version: 40
 onboarding:
   seen:
