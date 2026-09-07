@@ -16,8 +16,9 @@
 | `docker-compose.yml`/포트/컨테이너명 | 동일 | **동일** — 파일을 바꾸지 않고 그대로 사용 |
 
 이미지·포트·컨테이너명·bind mount 전략은 08장에서 정한 값을 그대로 재사용합니다
-(게이트웨이 `8651`→`8642`, 대시보드 `127.0.0.1:9128`→`9119`, mock-pos `8080`, webapp
-`127.0.0.1:9130`→`8090`, 컨테이너명 `hermes-triagent-smb*`).
+(게이트웨이 `18651`→`8642`, 대시보드 `127.0.0.1:19128`→`9119`, mock-pos `18080`→`8080`,
+webapp `127.0.0.1:19131`→`8090`, 컨테이너명 `hermes-triagent-smb*`; 2026-09-07 호스트
+포트를 1xxxx 대역으로 재배치, 컨테이너 내부 포트는 불변).
 
 ## 1. VPS 준비
 
@@ -45,20 +46,20 @@ docker compose version   # Compose plugin 포함 확인
 
 ## 3. 방화벽 (`ufw`)
 
-이 프로젝트의 설계상 대시보드(9128)와 webapp(9130)은 원래도 `127.0.0.1` 전용으로만
+이 프로젝트의 설계상 대시보드(19128)와 webapp(19131)은 원래도 `127.0.0.1` 전용으로만
 노출됩니다 — 즉 **VPS 자체 방화벽 이전에 이미 외부 접근이 불가능**합니다. 이 두 서비스는
 [17-vscode-remote-connection.md](17-vscode-remote-connection.md)의 SSH 포트 포워딩으로
 접근합니다.
 
 ```bash
 sudo ufw allow OpenSSH
-sudo ufw allow 8651/tcp   # 게이트웨이(Discord 등)를 실제로 외부에 노출해야 할 때만
+sudo ufw allow 18651/tcp   # 게이트웨이(Discord 등)를 실제로 외부에 노출해야 할 때만
 sudo ufw enable
 sudo ufw status
 ```
 
-> 게이트웨이 자체는 Discord 같은 아웃바운드 연결 방식이면 8651을 굳이 외부에 열 필요가
-> 없는 경우가 많습니다. 웹훅 등 인바운드 채널을 쓰지 않는다면 8651도 열지 말고
+> 게이트웨이 자체는 Discord 같은 아웃바운드 연결 방식이면 18651을 굳이 외부에 열 필요가
+> 없는 경우가 많습니다. 웹훅 등 인바운드 채널을 쓰지 않는다면 18651도 열지 말고
 > SSH(22)만 허용하는 것이 가장 안전합니다.
 
 ## 4. 저장소 배포
@@ -105,13 +106,13 @@ sudo systemctl is-enabled docker   # enabled 여야 함 (2번 단계의 enable -
 
 ## 6. (선택) 외부 도메인 + TLS
 
-게이트웨이(8651)를 도메인으로 외부에 노출해야 하는 경우(예: 웹훅 기반 채널)에는 앞단에
+게이트웨이(18651)를 도메인으로 외부에 노출해야 하는 경우(예: 웹훅 기반 채널)에는 앞단에
 리버스 프록시를 두고 TLS를 종료시킵니다. 예를 들어 [Caddy](https://caddyserver.com/)를
 쓰면 `Caddyfile` 하나로 Let's Encrypt 인증서 발급까지 자동 처리됩니다:
 
 ```
 gateway.example.com {
-    reverse_proxy localhost:8651
+    reverse_proxy localhost:18651
 }
 ```
 

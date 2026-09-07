@@ -73,7 +73,7 @@ docker compose exec -it hermes hermes -p coordinator chat
 ```
 
 `e:/work/Hermes/` 아래 다른 형제 Hermes 프로젝트와 포트/컨테이너명이 겹치지 않도록 조사해
-구성했습니다(게이트웨이 `8651`, 대시보드 `127.0.0.1:9128`, 컨테이너명
+구성했습니다(게이트웨이 `18651`, 대시보드 `127.0.0.1:19128`, 컨테이너명
 `hermes-triagent-smb*` — 기존 `HermesSMBStaff`의 `hermes-smb*`/8643/9120과는 별개입니다).
 조사 근거와 운영 명령어 전체는 [docs/08-docker-deployment.md](docs/08-docker-deployment.md),
 챗 사용법은 [docs/09-users-guide.md](docs/09-users-guide.md) 참고.
@@ -84,7 +84,7 @@ docker compose exec -it hermes hermes -p coordinator chat
 
 기본 모델은 OpenAI `gpt-5-mini`(`provider: openai-api`, `OPENAI_API_KEY` 환경변수 필요)입니다.
 
-**웹 GUI로 채팅/시연하려면**: `http://localhost:9128`(Hermes 대시보드, 로그인
+**웹 GUI로 채팅/시연하려면**: `http://localhost:19128`(Hermes 대시보드, 로그인
 `admin`/`smb-dev-2026`)에 이미 브라우저 채팅 화면(`/chat`)이 내장되어 있습니다 —
 추가 구현 없이 바로 사용 가능합니다. 매출/재고 같은 실적을 그래프로 보는 대시보드는
 아직 미구현이며, 절차는 [docs/12-web-gui-demo.md](docs/12-web-gui-demo.md)에

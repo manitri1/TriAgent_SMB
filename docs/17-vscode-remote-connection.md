@@ -27,7 +27,7 @@
 
 ## 3. 포트 포워딩 — 대시보드/webapp 브라우저 접속
 
-`docker-compose.yml` 설계상 대시보드(`127.0.0.1:9128`)와 webapp(`127.0.0.1:9130`)은
+`docker-compose.yml` 설계상 대시보드(`127.0.0.1:19128`)와 webapp(`127.0.0.1:19131`)은
 VPS 자체에서도 localhost로만 노출됩니다(외부 직접 접근 불가 — [16장](16-vps-deployment.md)
 3절 참고). VS Code Remote-SSH로 접속하면 이 포트들을 로컬 브라우저로 그대로 가져올 수
 있습니다.
@@ -35,14 +35,14 @@ VPS 자체에서도 localhost로만 노출됩니다(외부 직접 접근 불가 
 **방법 A — VS Code `PORTS` 패널 (권장)**
 
 1. 원격 창 하단의 **PORTS** 탭 → **Forward a Port**
-2. `9128`(대시보드), `9130`(webapp) 각각 추가
-3. 로컬 브라우저에서 `http://localhost:9128`, `http://localhost:9130`으로 그대로 접속
+2. `19128`(대시보드), `19131`(webapp) 각각 추가
+3. 로컬 브라우저에서 `http://localhost:19128`, `http://localhost:19131`으로 그대로 접속
    (VS Code가 자동으로 SSH 터널을 유지)
 
 **방법 B — 수동 SSH 터널** (VS Code 없이도 가능):
 
 ```bash
-ssh -L 9128:127.0.0.1:9128 -L 9130:127.0.0.1:9130 deploy@<VPS_IP>
+ssh -L 19128:127.0.0.1:19128 -L 19131:127.0.0.1:19131 deploy@<VPS_IP>
 ```
 
 ## 4. (참고) Dev Containers로 컨테이너 내부까지 들어가기

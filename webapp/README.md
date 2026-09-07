@@ -3,7 +3,7 @@
 Hermes 에이전트 7개 + Mock POS와 연동되는, 업무별로 설계된 4화면 웹앱
 (고객 문의 상담 / 주문 접수 / 재고 파악·주문관리 / 실시간 대시보드).
 설계 배경과 아키텍처 결정은 `curried-percolating-ocean.md`(plan 문서) 참고.
-기존 Hermes 대시보드(`:9128`)의 범용 채팅 UI를 대체하는 게 아니라, 그와
+기존 Hermes 대시보드(`:19128`)의 범용 채팅 UI를 대체하는 게 아니라, 그와
 별개로 업무별 화면을 제공하는 것이 목적이다.
 
 ## 로컬 실행
@@ -35,7 +35,7 @@ uvicorn webapp_bff.main:app --reload --port 8090
 ```bash
 docker compose build webapp
 docker compose up -d webapp
-curl -u admin:<비밀번호> http://localhost:9130/health
+curl -u admin:<비밀번호> http://localhost:19131/health
 ```
 
 ## 인증

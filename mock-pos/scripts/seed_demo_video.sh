@@ -8,7 +8,7 @@
 #   cd mock-pos/scripts && ./seed_demo_video.sh
 set -euo pipefail
 
-BASE="${MOCK_POS_BASE_URL:-http://localhost:8080}"
+BASE="${MOCK_POS_BASE_URL:-http://localhost:18080}"
 KEY="${MOCK_POS_API_KEY:-dev-key}"
 STORE="${MOCK_POS_STORE_ID:-store_demo}"
 

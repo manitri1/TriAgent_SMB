@@ -27,10 +27,10 @@ cd mock-pos/scripts && ./seed_demo_video.sh
 
 | 위치 | 파일명 | 화면(URL) | 대사/액션 |
 |---|---|---|---|
-| 좌상단 ① | `cell1_chat.mp4` | `localhost:9128/chat` (customer-service-agent) | 손님 채팅 예: "매장 영업시간이 어떻게 되나요?" → 응답 |
+| 좌상단 ① | `cell1_chat.mp4` | `localhost:19128/chat` (customer-service-agent) | 손님 채팅 예: "매장 영업시간이 어떻게 되나요?" → 응답 |
 | 우상단 ② | `cell2_order.mp4` | 동일 `/chat` (coordinator) | "아메리카노 2잔 주문 들어왔어, 결제까지 처리해줘" → 완료 응답 |
 | 좌하단 ③ | `cell3_inventory.mp4` | 동일 `/chat` (inventory-agent) | "재고 확인해줘" → 아메리카노 재고 0개(부족) 확인 → 발주 요청 응답 |
-| 우하단 ④ | `cell4_dashboard.mp4` | `localhost:8080/dashboard` | ②③ 녹화 직후 새로고침 → 매출/재고 변화가 반영되는 순간 |
+| 우하단 ④ | `cell4_dashboard.mp4` | `localhost:18080/dashboard` | ②③ 녹화 직후 새로고침 → 매출/재고 변화가 반영되는 순간 |
 
 로그인: `admin` / `smb-dev-2026` (`docs/08-docker-deployment.md`, 로컬 데모 전용 계정 —
 다른 용도로는 반드시 교체).
@@ -58,4 +58,4 @@ cd mock-pos/scripts && ./seed_demo_video.sh
 - `ffprobe -v error -show_entries format=duration -of csv=p=0 demo_10s_grid.mp4` → `10.0` 근처
 - 재생해서 4분할이 모두 동시에 움직이는지, 자막이 잘리지 않는지 육안 확인
 - 대시보드(④) 화면 값이 실제로 ②③에서 만든 주문/재고와 일치하는지 확인:
-  `curl -s -H "X-API-Key: dev-key" http://localhost:8080/v1/stores/store_demo/inventory/menu_americano`
+  `curl -s -H "X-API-Key: dev-key" http://localhost:18080/v1/stores/store_demo/inventory/menu_americano`

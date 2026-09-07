@@ -22,7 +22,7 @@
 ## 2. 조사 결과 (설계를 결정한 핵심 발견)
 
 `docs/08-docker-deployment.md`에서 크래시 루프를 고쳐 정상 기동시켜 둔 Hermes
-대시보드(`docker-compose`의 `dashboard` 서비스, `http://localhost:9128`)가 **단순
+대시보드(`docker-compose`의 `dashboard` 서비스, `http://localhost:19128`)가 **단순
 설정 화면이 아니라 실제 채팅 UI를 내장하고 있다**는 것을 이번에 확인했습니다.
 컨테이너 안에 번들된 웹 UI(`/opt/hermes/hermes_cli/web_dist/assets/*.js`)에서 프론트
 엔드 라우트를 직접 뽑아보면:
@@ -50,10 +50,10 @@
 
 | 요구사항 | 방법 | 이유 |
 |---|---|---|
-| 웹에서 채팅 | 기존 Hermes 대시보드 `/chat` 재사용 (`localhost:9128`) | 이미 구현되어 있음 — 새 코드 불필요 |
+| 웹에서 채팅 | 기존 Hermes 대시보드 `/chat` 재사용 (`localhost:19128`) | 이미 구현되어 있음 — 새 코드 불필요 |
 | 실적 그래픽 분석 | `mock-pos`에 `GET /dashboard` HTML 페이지 신규 추가 (Chart.js) | mock-pos 자신의 REST API를 같은 오리진(origin)에서 호출하므로 CORS 문제가 없고, 새 포트/서비스도 필요 없음 |
 
-두 화면을 억지로 한 앱에 통합하지 않고 **URL 두 개**(`:9128` 채팅, `:8080/dashboard`
+두 화면을 억지로 한 앱에 통합하지 않고 **URL 두 개**(`:19128` 채팅, `:18080/dashboard`
 실적)로 시연하는 것을 권장합니다. 왜 합치지 않는가: 대시보드(채팅)는 Hermes가 소유한
 번들 앱이라 우리가 그 안에 임의 페이지를 끼워 넣기 어렵고, 반대로 실적 페이지를
 Hermes 인증 체계 안에 넣으려면 불필요하게 복잡해집니다. 대신 시연 시나리오 자체가
@@ -61,7 +61,7 @@ Hermes 인증 체계 안에 넣으려면 불필요하게 복잡해집니다. 대
 
 ## 4. 채팅 화면 사용법 (구현 불필요 — 지금 바로 가능)
 
-1. `http://localhost:9128` 접속 → 로그인(`admin` / `smb-dev-2026`, `docs/08-docker-deployment.md`
+1. `http://localhost:19128` 접속 → 로그인(`admin` / `smb-dev-2026`, `docs/08-docker-deployment.md`
    에서 설정한 로컬 개발용 기본 계정 — 로컬 데모 외 용도로는 반드시 교체).
 2. `/profiles`(또는 상단 네비게이션)에서 대화할 프로필 선택 — 시연 시작은
    `coordinator` 권장(`docs/03-hermes-agent-integration.md` 참고, 유일한 대화
@@ -249,11 +249,11 @@ Tier 1/2와 동일하게 **추가만**(기존 응답 스키마·엔드포인트 
 
 **Tier 1까지 구현 완료 후:**
 
-1. `http://localhost:9128`에서 coordinator에게 채팅으로 주문 요청
+1. `http://localhost:19128`에서 coordinator에게 채팅으로 주문 요청
    (예: "아메리카노 2잔 주문 들어왔어, 결제까지 처리해줘").
 2. coordinator가 order-payment-agent에게 위임 → Mock POS에 실제 주문/결제 생성됨
    (`docs/10-usecase-tests.md` TC-22에서 이미 실측 검증된 경로).
-3. `http://localhost:8080/dashboard`를 열거나 새로고침 → 방금 발생한 매출이 차트에
+3. `http://localhost:18080/dashboard`를 열거나 새로고침 → 방금 발생한 매출이 차트에
    반영된 것을 확인.
 4. (선택) 재고가 임계치 이하로 떨어지는 시나리오를 만들어 재고 그래프의 강조 표시도
    함께 시연.
@@ -321,7 +321,7 @@ Tier 1/2와 동일하게 **추가만**(기존 응답 스키마·엔드포인트 
 - `/dashboard`는 Tier 1·2·3 기능까지 구현·curl 검증을 마쳤습니다(2026-08-23,
   [6번](#6-실적-대시보드-구현-가이드) 참고). 다만 브라우저로 직접 열어 차트가
   시각적으로 정상 렌더링되는지는 이 환경이 헤드리스라 확인하지 못했습니다 — 실제
-  사용 전 한 번 `http://localhost:8080/dashboard`를 직접 열어 확인하는 것을
+  사용 전 한 번 `http://localhost:18080/dashboard`를 직접 열어 확인하는 것을
   권장합니다.
 - Tier 2/3 신규 엔드포인트(주문 목록, 인기 메뉴 TOP5, 일별 매출, 마진, 고객,
   재방문 고객)도 mock-pos의 다른 데이터와 동일하게 **인메모리 저장소**를 사용하므로,

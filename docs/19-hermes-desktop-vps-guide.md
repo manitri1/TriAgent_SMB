@@ -17,15 +17,15 @@ Desktop 앱이 실제로 붙는 곳은 **대시보드 컨테이너**입니다.
 
 | 컨테이너 | 실행 명령 | 역할 | 호스트 노출 |
 |---|---|---|---|
-| `hermes-triagent-smb` | `gateway run` | Discord/Telegram 등 **메시징 봇** 게이트웨이 | `0.0.0.0:8651 → 8642` |
-| `hermes-triagent-smb-dashboard` | `dashboard --host 0.0.0.0 --no-open` | 브라우저 대시보드 **+ Desktop 앱이 붙는 JSON-RPC/WebSocket 백엔드** | `127.0.0.1:9128 → 9119` |
+| `hermes-triagent-smb` | `gateway run` | Discord/Telegram 등 **메시징 봇** 게이트웨이 | `0.0.0.0:18651 → 8642` |
+| `hermes-triagent-smb-dashboard` | `dashboard --host 0.0.0.0 --no-open` | 브라우저 대시보드 **+ Desktop 앱이 붙는 JSON-RPC/WebSocket 백엔드** | `127.0.0.1:19128 → 9119` |
 
 컨테이너 내부 코드를 보면 `dashboard`와 `serve`(Desktop 전용 headless 백엔드) 명령은
 **같은 함수(`cmd_dashboard`)를 공유**하고, `serve`는 브라우저 UI를 안 띄우는 옵션만 켠
 버전입니다. 즉 지금 떠 있는 대시보드 컨테이너를 그대로 Desktop 앱의 연동 대상으로 쓸 수
 있으며, 별도로 `hermes serve`를 새로 띄울 필요가 없습니다.
 
-문제는 대시보드가 **`127.0.0.1:9128`로만 노출**되어 있다는 점입니다(`docs/08` 참고 —
+문제는 대시보드가 **`127.0.0.1:19128`로만 노출**되어 있다는 점입니다(`docs/08` 참고 —
 `0.0.0.0`으로 열면 인증 provider 없이는 아예 바인딩을 거부해서 크래시 루프가 났던
 이력이 있어 로컬 전용으로 좁혀뒀습니다). VPS 로컬에서만 접근 가능하므로, 내 PC의 Hermes
 Desktop 앱에서 붙으려면 아래 2번 또는 3번 방법으로 "터널" 또는 "공개 노출 + 인증"을
@@ -43,7 +43,7 @@ docker compose ps
 (`Up`이어도 내부 크래시 루프일 수 있다는 게 08장에서 실측된 함정입니다):
 
 ```bash
-curl -sI http://127.0.0.1:9128/ | head -1
+curl -sI http://127.0.0.1:19128/ | head -1
 # 302(로그인 리다이렉트) 또는 200이면 정상. Empty reply면 로그를 확인하세요:
 docker compose logs dashboard --tail=50
 ```
@@ -61,11 +61,11 @@ VPS에 SSH로 접속할 수 있다면 별도 리버스 프록시나 TLS 인증�
 
 ```bash
 # -N: 셸을 열지 않고 포워딩만, -L 로컬포트:대상호스트:대상포트
-ssh -N -L 9128:127.0.0.1:9128 <ssh사용자>@<VPS_IP_또는_도메인>
+ssh -N -L 19128:127.0.0.1:19128 <ssh사용자>@<VPS_IP_또는_도메인>
 ```
 
 터널이 연결된 상태를 유지한 채, Hermes Desktop 앱에서 원격 서버 주소로
-`http://127.0.0.1:9128`을 등록하고 `.hermes/config.yaml`의 `dashboard.basic_auth`
+`http://127.0.0.1:19128`을 등록하고 `.hermes/config.yaml`의 `dashboard.basic_auth`
 사용자명/비밀번호로 로그인합니다(연동 화면 세부 절차는 6번 참고).
 
 이 방법은 VPS의 방화벽/보안그룹을 전혀 열 필요가 없다는 것이 장점입니다. 반대로 터널이
@@ -86,7 +86,7 @@ ssh -N -L 9128:127.0.0.1:9128 <ssh사용자>@<VPS_IP_또는_도메인>
    ```yaml
    dashboard:
      ports:
-       - "127.0.0.1:9128:9119"   # 그대로 유지 — 외부는 프록시를 통해서만 접근
+       - "127.0.0.1:19128:9119"   # 그대로 유지 — 외부는 프록시를 통해서만 접근
    ```
 
 2. VPS에 nginx 또는 Caddy로 TLS 종료 + 리버스 프록시를 구성합니다. WebSocket
@@ -99,7 +99,7 @@ ssh -N -L 9128:127.0.0.1:9128 <ssh사용자>@<VPS_IP_또는_도메인>
        # ssl_certificate ...; ssl_certificate_key ...; (Let's Encrypt 등)
 
        location / {
-           proxy_pass http://127.0.0.1:9128;
+           proxy_pass http://127.0.0.1:19128;
            proxy_set_header Host $host;
            proxy_set_header X-Forwarded-Proto $scheme;
            proxy_set_header X-Forwarded-Host $host;
@@ -158,7 +158,7 @@ Desktop 앱(`hermes desktop` / `hermes gui`로 로컬에서 빌드·실행하거
 내장하고 있습니다(공식 표현: "per-profile remote-gateway login"). 로그인 화면에서
 로컬 대신 원격 연결을 선택하는 옵션을 찾아:
 
-1. 서버 주소: 방법 A는 `http://127.0.0.1:9128`(터널 경유), 방법 B는
+1. 서버 주소: 방법 A는 `http://127.0.0.1:19128`(터널 경유), 방법 B는
    `https://hermes.example.com`
 2. 자격증명: `.hermes/config.yaml`의 `dashboard.basic_auth.username`/비밀번호(위에서
    해시로 저장된 원본 비밀번호)
@@ -226,8 +226,8 @@ OAuth 옵션을 선택하면 됩니다. 두 방식(`basic_auth`/OAuth)은 동시
 ## 10. 보안 체크리스트
 
 - [ ] 공개 노출(방법 B) 전에는 반드시 6번으로 기본 비밀번호 교체
-- [ ] 대시보드 컨테이너 포트(9119/9128)는 절대 직접 공인 IP에 바인딩하지 않고, 항상
+- [ ] 대시보드 컨테이너 포트(9119/19128)는 절대 직접 공인 IP에 바인딩하지 않고, 항상
       리버스 프록시(TLS 종료) 뒤에 두거나 SSH 터널로만 접근
 - [ ] `dashboard.basic_auth.secret`을 32바이트 이상 랜덤값으로 고정
-- [ ] 게이트웨이 포트(8651, 메시징 봇용)와 대시보드 포트(9128, Desktop/브라우저용)를
+- [ ] 게이트웨이 포트(18651, 메시징 봇용)와 대시보드 포트(19128, Desktop/브라우저용)를
       혼동하지 말 것 — 서로 용도가 다름

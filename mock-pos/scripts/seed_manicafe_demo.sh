@@ -16,7 +16,7 @@
 # 부분이 아니다(docs/14-webapp-users-guide.md 참고).
 set -euo pipefail
 
-BASE="${MOCK_POS_BASE_URL:-http://localhost:8080}"
+BASE="${MOCK_POS_BASE_URL:-http://localhost:18080}"
 KEY="${MOCK_POS_API_KEY:-dev-key}"
 STORE="${MOCK_POS_STORE_ID:-store_demo}"
 

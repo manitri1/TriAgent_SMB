@@ -33,7 +33,7 @@ docker compose up -d
 ```bash
 docker compose ps                         # hermes, dashboard, mock-pos 컨테이너가 Up 상태인지
 docker compose exec hermes hermes doctor  # "Profiles" 섹션에 7개 모두 떠야 정상
-curl http://localhost:8080/health         # Mock POS 헬스체크
+curl http://localhost:18080/health        # Mock POS 헬스체크
 ```
 
 ## 3. 프로필별 대화 진입점
@@ -112,8 +112,8 @@ order-payment-agent) 모두 명시적으로 거부하고 coordinator 승인이 �
 Mock POS에 실제로 반영되지 않았음을 API로 재확인함. 정상 동작.
 
 **함정 5 — 대시보드가 `docker compose ps`에서는 "Up"인데 실제로는 죽어 있음**
-목적: `http://localhost:9128`(대시보드)에 접속하려 함.
-실행 방법: `curl http://localhost:9128/` 또는 브라우저 접속.
+목적: `http://localhost:19128`(대시보드)에 접속하려 함.
+실행 방법: `curl http://localhost:19128/` 또는 브라우저 접속.
 결과(2026-08-19 실측): 빈 응답(`Empty reply`)만 돌아옴 — 컨테이너는 "Up"이지만 내부
 s6 supervisor가 dashboard 서비스를 계속 재시작하는 크래시 루프 상태였다(인증 provider
 미설정 때문). `docker compose ps`/`RestartCount`로는 이 상태를 알 수 없다 — 반드시
@@ -134,7 +134,7 @@ s6 supervisor가 dashboard 서비스를 계속 재시작하는 크래시 루프 
 | 중지 | `docker compose down` |
 | 로그 확인 | `docker compose logs -f hermes` |
 | **내부 서비스가 실제로 살아있는지 확인**(함정 5) | `docker compose logs <서비스> \| grep -icE "error\|refus\|traceback"` (0이어야 정상 — "Up" 상태만으로는 판단 불가) |
-| 대시보드 접속 | `http://localhost:9128` (로그인: `admin`/`smb-dev-2026`, 로컬 개발용 기본값) — VPS에서 내 PC 브라우저로 열려면 `localhost`가 아니라 SSH 터널/서브도메인이 필요함, [20장](20-vps-deployment-notes.md) 참고 |
+| 대시보드 접속 | `http://localhost:19128` (로그인: `admin`/`smb-dev-2026`, 로컬 개발용 기본값) — VPS에서 내 PC 브라우저로 열려면 `localhost`가 아니라 SSH 터널/서브도메인이 필요함, [20장](20-vps-deployment-notes.md) 참고 |
 | Mock POS 단독 테스트 | `cd mock-pos && pytest` (Docker 불필요, [mock-pos/README.md](../mock-pos/README.md)) |
 
 ## 7. 트러블슈팅 빠른 참고
