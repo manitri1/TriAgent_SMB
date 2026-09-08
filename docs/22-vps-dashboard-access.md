@@ -21,11 +21,14 @@
 
 | 프로젝트 | 저장소 | 공개여부 | 게이트웨이 | 대시보드(로컬) | 대시보드(HTTPS, 터널 불필요) | 자격증명 위치 | 상태 |
 |---|---|---|---|---|---|---|---|
-| **TriAgent_SMB** | `/opt/smb` | 공개 | `18651` | `127.0.0.1:19128` | `https://smb-dashboard.srv1923951.hstgr.cloud` | `.hermes/.env`의 `HERMES_DASHBOARD_BASIC_AUTH_*` | ✅ 완료·검증됨 |
-| **TriAgent_MICE** | `/opt/mice` | 공개 | `18648` | `127.0.0.1:19125`(예정) | `https://mice-dashboard.srv1923951.hstgr.cloud`(예정) | 이미 `.hermes/.env`에 있음(수정 불필요) | ⬜ 안내만 함, 미적용 |
-| **TriAgent_ADCreator** | `/opt/adcreator` | 비공개 | `18652`(예정, 기존 `8652`도 localhost 전용이라 긴급도 낮음) | `127.0.0.1:19130`(이미 1xxxx) | `https://adcreator-dashboard.srv1923951.hstgr.cloud`(예정) | `.hermes/config.yaml`→`.hermes/.env`로 이전 필요 | ⬜ 안내만 함, 미적용 |
+| **TriAgent_SMB** | `/opt/smb` | 공개 | `18651`(⚠️ 내부 loopback 바인딩 문제로 현재 불통 — 8번 참고) | `127.0.0.1:19128` | `https://smb-dashboard.srv1923951.hstgr.cloud` | `.hermes/.env`의 `HERMES_DASHBOARD_BASIC_AUTH_*` | ✅ 완료·검증됨 |
+| **TriAgent_MICE** | `/opt/mice` | 공개 | `18648` | `127.0.0.1:9125`(포트 변경 없이 그대로 사용) | `https://mice-dashboard.srv1923951.hstgr.cloud` | 이미 `.hermes/.env`에 있음(그대로 사용) | ✅ 완료·검증됨(2026-09-08) |
+| **TriAgent_ADCreator** | `/opt/adcreator` | 비공개 | `8652`(localhost 전용이라 그대로 유지) | `127.0.0.1:19130` | `https://adcreator-dashboard.srv1923951.hstgr.cloud` | `.hermes/config.yaml`의 `dashboard.basic_auth`(⚠️ `.env`로 아직 안 옮김 — 8번 참고) | ✅ 완료·검증됨(2026-09-08) |
 
 Mock POS(`18080`)·webapp(`19131`)은 SMB 전용 서비스라 다른 프로젝트에는 해당 없음.
+webapp도 같은 방식으로 `https://smb-webapp.srv1923951.hstgr.cloud`가 이미 열려 있습니다
+(단, Hermes Desktop 앱이 아니라 브라우저로 쓰는 커스텀 운영 콘솔이라 이 문서의 Desktop
+연동 대상은 아닙니다 — [14-webapp-users-guide.md](14-webapp-users-guide.md) 참고).
 
 Hostinger hPanel이 관리하는 `hermes-agent-q66p`/`hermes-agent-htjj`(포트 `32769`/`32770`,
 컨테이너 내부 `4860`)와 공유 Traefik 자체는 건드리지 않았다 — 관리 체계가 달라 직접
@@ -33,14 +36,27 @@ Hostinger hPanel이 관리하는 `hermes-agent-q66p`/`hermes-agent-htjj`(포트 
 
 ## Hermes Desktop 앱에서 접속하기
 
-1. Desktop 앱 로그인 화면에서 "원격 서버 추가"(또는 이에 준하는 메뉴) 선택
-2. 서버 주소: 위 표의 "대시보드(HTTPS)" 열 값 (예: SMB는
+2026-09-08 실측(버전 0.21.0) — 이 앱은 "여러 서버를 이름 붙여 목록에 저장"하는 구조가
+**아닙니다**. `Settings → Gateway` 화면 하나에서 `Remote URL`을 직접 바꿔 끼우는 방식이라,
+별도의 "이름/닉네임" 입력칸이 없습니다. 프로젝트를 바꾼다는 건 곧 이 URL 값을 바꾼다는
+뜻입니다.
+
+1. `Settings` → 왼쪽 메뉴 `Gateway`
+2. **Applies to**: `All profiles`(기본값) 그대로 두거나, 특정 프로필에만 다른 원격지를
+   쓰고 싶으면 그 프로필 칩만 선택
+3. **Connection mode**: `Remote gateway` 카드 선택
+4. **Remote URL**: 위 표의 "대시보드(HTTPS)" 열 값 (예: SMB는
    `https://smb-dashboard.srv1923951.hstgr.cloud`)
-3. 계정: 해당 프로젝트의 `.hermes/.env`에 적힌 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`/
-   비밀번호(평문 비밀번호를 직접 입력하는 원격 서버 쪽에선 `_PASSWORD_HASH`가 아니라
-   실제 비밀번호가 필요 — `_PASSWORD_HASH`는 해시라서 로그인 폼에 넣을 수 없음.
-   비밀번호 자체를 모른다면 아래 "비밀번호 재발급" 참고)
-4. 로그인 성공 시 앱이 토큰을 OS 자격 증명 저장소에 저장하고 다음부터 자동 재연결
+5. **Authentication** 쪽 `Sign in` 클릭 → 해당 프로젝트의 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`
+   /실제 비밀번호 입력(`_PASSWORD_HASH`는 해시라 로그인 폼에 못 씀 — 모르면 아래 "비밀번호
+   재발급" 참고)
+6. `Test remote`로 확인 후 `Save and reconnect`
+7. 성공하면 `Authentication`이 `✓ Signed in`으로 바뀌고, 토큰이 OS 자격 증명 저장소에
+   저장되어 다음부터 자동 재연결됩니다.
+
+**다른 프로젝트로 바꾸려면** 같은 Gateway 화면으로 돌아와 `Remote URL`만 다른 프로젝트
+주소로 교체하고 다시 로그인하면 됩니다. 세 프로젝트를 동시에 쓰고 싶다면 PC마다(또는
+프로필 칩별로) 원하는 프로젝트를 고정해두는 방식을 권장합니다.
 
 SSH 터널이 여전히 필요 없다는 것이 핵심 — VPN/터널 프로그램을 매번 켤 필요가 없다.
 (SSH 터널 방식 자체는 여전히 가능하며 [19장](19-hermes-desktop-vps-guide.md) 3번에
@@ -60,23 +76,32 @@ print(hash_password('새로운-강력한-비밀번호'))
 출력된 `scrypt$...` 문자열을 해당 프로젝트의 `.hermes/.env`의
 `HERMES_DASHBOARD_BASIC_AUTH_PASSWORD_HASH`에 넣고 `docker compose restart dashboard`.
 
-## MICE / ADCreator에 아직 적용 안 된 이유
+## MICE / ADCreator 적용 내역 (2026-09-08)
 
 `/opt/smb` 바깥 경로(다른 git 저장소) 파일 수정은 이 세션의 자동 모드 권한 분류기가
-차단해, 정확한 변경 내용(설정 diff + 실행할 명령)만 안내하고 실제 적용은 사용자가
-직접 하기로 했다(2026-09-07 대화 참고). 안내한 그대로 실행하면 위 표의 "예정" 값이
-그대로 반영된다 — 안내 내용 요지:
+한 번 차단했지만, 사용자가 "계속 진행해"로 재승인해 두 프로젝트 모두 실제로 적용을
+완료했다. 다만 애초에 계획했던 것보다 **범위를 최소화**했다 — 라우터 이름 충돌 여부만
+확인 후 Traefik 라벨만 추가했고, 포트 재배치나 자격증명 이전 같은 부가 정리는 하지
+않았다. 실제로 바뀐 것과 아직 남은 것을 구분해 둔다.
 
-- **MICE**: `docker-compose.yml`의 dashboard 포트를 `9125→19125`로, Traefik 라벨(라우터명
-  `mice-dashboard`, 호스트 `mice-dashboard.srv1923951.hstgr.cloud`)을 추가하고
-  `docker compose up -d` → 헬스체크 → `docker-compose.yml`만 git add/commit/push
-  (이 저장소엔 무관한 대량의 pending 변경사항이 있어 그 파일만 골라 커밋해야 함).
-- **ADCreator**: `.hermes/config.yaml`에 커밋돼 있던 `dashboard.basic_auth`
-  (username/password_hash/secret)를 실제 값 그대로 `.hermes/.env`로 옮기고
-  config.yaml에서는 삭제, 게이트웨이 포트를 `8652→18652`로, Traefik 라벨(라우터명
-  `adcreator-dashboard`)을 추가 → `docker compose up -d` → 헬스체크 → `config.yaml`은
-  basic_auth 삭제 hunk만 `git add -p`로 골라 커밋(같은 파일에 무관한 Notion MCP 서버
-  추가가 섞여 있어 그 부분은 건드리지 않음), `docker-compose.yml`은 통째로 커밋.
+- **MICE**: `docker-compose.yml`의 `dashboard` 서비스에 Traefik 라벨(라우터명
+  `mice-dashboard`, 호스트 `mice-dashboard.srv1923951.hstgr.cloud`)만 추가하고
+  `docker compose up -d dashboard`로 재생성. **포트는 `9125` 그대로** — HTTPS 접속은
+  포트 번호와 무관하므로 애초 계획했던 `19125` 재배치는 하지 않았다(불필요 판단).
+  인증은 이미 `.hermes/.env`에 있던 값을 그대로 썼다. `https://mice-dashboard...`가
+  `302`를 반환하는 것까지 확인함. **⬜ 남은 일**: `docker-compose.yml`의 이 변경사항
+  git commit(다른 pending 변경과 섞여 있으니 그 파일만 골라서).
+- **ADCreator**: `docker-compose.yml`의 `dashboard` 서비스에 Traefik 라벨(라우터명
+  `adcreator-dashboard`)만 추가하고 재생성. **게이트웨이 포트(`8652`)와 인증 위치는
+  손대지 않았다** — `dashboard.basic_auth`(username/password_hash/secret)가 여전히
+  `.hermes/config.yaml`에 평문 해시로 커밋되어 있다(이 저장소는 비공개라 당장 위험도는
+  낮지만, TriAgent_SMB에서 겪었던 것과 같은 패턴이므로 정리 권장). **⬜ 남은 일**:
+  (1) `docker-compose.yml` 변경사항 git commit, (2) 원하면 `config.yaml`의
+  `dashboard.basic_auth` 값을 `.hermes/.env`로 옮기고 config.yaml에서 삭제(SMB가
+  했던 방식, [19장](19-hermes-desktop-vps-guide.md) 7번 참고).
+
+두 프로젝트 모두 `docs/13-hermes-desktop-connect.md`(ADCreator 저장소, 세 프로젝트를
+아우르는 Desktop 연동 가이드)에도 이번 HTTPS 방식을 반영해 두었다.
 
 ## 헬스체크 명령 모음
 
@@ -85,11 +110,11 @@ print(hash_password('새로운-강력한-비밀번호'))
 curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:19128/
 curl -s -o /dev/null -w "%{http_code}\n" https://smb-dashboard.srv1923951.hstgr.cloud/
 
-# MICE (적용 후)
-curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:19125/
+# MICE
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:9125/
 curl -s -o /dev/null -w "%{http_code}\n" https://mice-dashboard.srv1923951.hstgr.cloud/
 
-# ADCreator (적용 후)
+# ADCreator
 curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:19130/
 curl -s -o /dev/null -w "%{http_code}\n" https://adcreator-dashboard.srv1923951.hstgr.cloud/
 ```

@@ -111,3 +111,13 @@ services:
       # 되는 트레이드오프를 127.0.0.1 전용 포트 노출로 완화한다(webapp/README.md,
       # docs/06-hitl-approval-design.md와 별개의 알려진 위험 요소로 문서화됨).
       - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      # dashboard 서비스와 동일한 패턴 — 여러 PC에서 터널 없이 상시 접속할 수 있도록
+      # 공유 Traefik(80/443)이 라벨만으로 라우팅 + Let's Encrypt TLS를 처리한다.
+      # 컨테이너 포트 자체(127.0.0.1:19131)는 그대로 두고 Traefik만 공개 노출한다.
+      # WEBAPP_BASIC_AUTH_*(.env)가 이미 켜져 있어 인증 없이는 접근 불가.
+      traefik.enable: "true"
+      traefik.http.routers.smb-webapp.entrypoints: websecure
+      traefik.http.routers.smb-webapp.rule: "Host(`smb-webapp.srv1923951.hstgr.cloud`)"
+      traefik.http.routers.smb-webapp.tls.certresolver: letsencrypt
+      traefik.http.services.smb-webapp.loadbalancer.server.port: "8090"

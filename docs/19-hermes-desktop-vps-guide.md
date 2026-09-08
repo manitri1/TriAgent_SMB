@@ -155,23 +155,35 @@ Hermes Desktop 앱에는 이 `https://smb-dashboard.srv1923951.hstgr.cloud` 주�
 
 ## 6. Hermes Desktop 앱에서 원격 서버 추가하기
 
-Desktop 앱(`hermes desktop` / `hermes gui`로 로컬에서 빌드·실행하거나, 배포된 설치
-파일을 받아 실행)은 프로필별로 로컬 백엔드 대신 원격 게이트웨이에 로그인하는 기능을
-내장하고 있습니다(공식 표현: "per-profile remote-gateway login"). 로그인 화면에서
-로컬 대신 원격 연결을 선택하는 옵션을 찾아:
+2026-09-08 실측(버전 0.21.0 기준) — Desktop 앱은 "여러 서버를 목록에 저장해두고
+이름으로 전환"하는 구조가 **아닙니다**. 대신 **Settings → Gateway** 화면 하나에서
+연결 대상 URL을 직접 바꿔 끼우는 방식입니다. 별도의 "이름/닉네임" 입력칸은 없고,
+`Remote URL`에 넣은 주소 자체가 지금 연결된 대상입니다.
 
-1. 서버 주소: 방법 A는 `http://127.0.0.1:19128`(터널 경유), 방법 B는
-   `https://hermes.example.com`
-2. 자격증명: `.hermes/.env`의 `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`/원본 비밀번호
-   (`_PASSWORD_HASH`는 그 비밀번호의 scrypt 해시)
-3. 로그인에 성공하면 앱은 원격 게이트웨이 토큰을 OS 키체인/자격 증명 저장소에 안전하게
-   보관하고(Linux는 `--password-store` 자동 감지), 다음 실행부터 자동 재연결합니다.
-4. 연결되면 이 VPS의 `.hermes/profiles/*`(coordinator 등 7개 프로필)를 로컬 CLI로
-   `hermes chat`을 치는 것과 동일하게 Desktop 앱 채팅/세션 목록에서 선택해 사용할 수
+1. 앱 상단/좌측 **Settings** → 왼쪽 메뉴 **Gateway** 선택
+2. **Applies to**: 보통 `All profiles`(기본값, 모든 프로필에 적용)를 선택합니다.
+   특정 프로필(예: `coordinator`)만 다른 원격지에 붙이고 싶을 때만 그 프로필 칩을
+   따로 선택해서 개별 설정할 수 있습니다.
+3. **Connection mode**: `Remote gateway` 카드 선택 (체크 표시로 확인)
+4. **Remote URL**: `https://smb-dashboard.srv1923951.hstgr.cloud` 입력 (방법 C 기준.
+   터널 경유라면 `http://127.0.0.1:19128`)
+5. **Authentication**: `Sign in` 클릭 → `.hermes/.env`의
+   `HERMES_DASHBOARD_BASIC_AUTH_USERNAME`(기본 `admin`)과 원본 비밀번호 입력
+   (`_PASSWORD_HASH`는 그 비밀번호의 scrypt 해시라 로그인 폼에는 못 씁니다)
+6. `Test remote`로 연결을 확인한 뒤 `Save and reconnect` 클릭
+7. 로그인에 성공하면 `Authentication`이 `✓ Signed in`으로 바뀌고, 토큰이 OS
+   자격 증명 저장소에 저장되어 다음 실행부터 자동 재연결됩니다. 연결되면 이 VPS의
+   `.hermes/profiles/*`(coordinator 등 7개 프로필)를 채팅/세션 목록에서 선택해 쓸 수
    있습니다.
 
-> Desktop 앱 UI 문구(메뉴명 등)는 버전에 따라 달라질 수 있습니다 — 정확한 위치는 설치된
-> 버전의 로그인/설정 화면에서 "원격 서버 추가" 또는 이에 준하는 항목을 찾으면 됩니다.
+> **다른 VPS 프로젝트(ADCreator/MICE)로 전환하려면?** 같은 Gateway 화면에서
+> `Remote URL`을 그 프로젝트의 도메인으로 바꾸고 다시 로그인하면 됩니다 — "회사
+> 전환"은 이 URL을 바꾸는 것이고, 프로필 전환(직원 바꾸기)과는 다른 조작입니다.
+> 세 프로젝트의 주소·계정 정리와 전환 방법은
+> [22-vps-dashboard-access.md](22-vps-dashboard-access.md)를 참고하세요.
+>
+> Desktop 앱 UI 문구(메뉴명 등)는 버전에 따라 달라질 수 있습니다 — 위 절차는 0.21.0
+> 기준 실측입니다.
 
 ## 7. 로그인 자격증명 보관 위치 — `.hermes/config.yaml`이 아니라 `.hermes/.env`
 
