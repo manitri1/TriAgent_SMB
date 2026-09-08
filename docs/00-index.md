@@ -28,6 +28,8 @@
 | [18-vps-connect-and-use.md](18-vps-connect-and-use.md) | 실제 VPS 배포(Hostinger, 2026-09-04) 접속·사용 가이드 — 현재 배포 정보, 포트, 트러블슈팅 (실측 완료) |
 | [19-hermes-desktop-vps-guide.md](19-hermes-desktop-vps-guide.md) | Hermes Desktop(Electron) 앱을 VPS에 배포된 이 저장소 인스턴스에 원격 연동하는 방법 — SSH 터널/리버스 프록시+TLS/이 VPS의 공유 Traefik, 인증(basic_auth/OAuth) 설정, 트러블슈팅 |
 | [20-vps-deployment-notes.md](20-vps-deployment-notes.md) | 08~19장의 Windows 로컬 개발 전제와 실제 Linux VPS 배포의 차이 정리 — 이 VPS의 실체(호스팅사/방화벽/디스크), 공유 Traefik 라벨 활용법, 백업 대상, 재부팅 복구 |
+| [21-live-demo-plan.md](21-live-demo-plan.md) | "마니카페 사장님의 하루"(`course/`) 타임라인을 실제 VPS 배포 위에서 라이브 시연하기 위한 실행 계획 — 블로커(Discord 명령 차단 미확인, 미실행 프로필 3개, 빈 mock-pos 시드), 재현 가능한 시연 데이터, 타임라인별 채널 매핑, Gmail/Sheets/Notion 실제 연동 (실행 전, 계획 단계) |
+| [22-vps-dashboard-access.md](22-vps-dashboard-access.md) | 이 VPS의 Hermes 프로젝트 3개(SMB/MICE/ADCreator) 대시보드 접속 한눈에 보기 — 2026-09-07 포트 1xxxx 이전 + 자격증명 `.env` 이전 + 공유 Traefik HTTPS 상시 접속. SMB는 적용·검증 완료, MICE/ADCreator는 안내만 하고 적용은 대기 중 |
 
 ## 한 줄 요약
 
