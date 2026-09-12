@@ -1,0 +1,630 @@
+<title>마니카페 사장님의 하루</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#EFE9DF;
+    --surface:#FFFFFF;
+    --surface-muted:#E4DCC9;
+    --surface-ai:#E1F1EF;
+    --ink:#241C15;
+    --ink-soft:#62574A;
+    --ink-faint:#8C8072;
+    --border:#D9D0BE;
+    --before:#6B5B4B;
+    --after:#0E7C7E;
+    --after-soft:#128F91;
+    --gold:#A9701A;
+    --spine:#C9BEA9;
+    --shadow: 0 1px 2px rgba(36,28,21,0.06), 0 8px 20px -12px rgba(36,28,21,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#16120E;
+      --surface:#1E1811;
+      --surface-muted:#2A2118;
+      --surface-ai:#12262A;
+      --ink:#F2ECE1;
+      --ink-soft:#C7BBA9;
+      --ink-faint:#8F8371;
+      --border:#3A2F23;
+      --before:#B9A48C;
+      --after:#4FD1CC;
+      --after-soft:#35B6B2;
+      --gold:#E3A94A;
+      --spine:#46392A;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 10px 24px -12px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#16120E;
+    --surface:#1E1811;
+    --surface-muted:#2A2118;
+    --surface-ai:#12262A;
+    --ink:#F2ECE1;
+    --ink-soft:#C7BBA9;
+    --ink-faint:#8F8371;
+    --border:#3A2F23;
+    --before:#B9A48C;
+    --after:#4FD1CC;
+    --after-soft:#35B6B2;
+    --gold:#E3A94A;
+    --spine:#46392A;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 10px 24px -12px rgba(0,0,0,0.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    line-height:1.55;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces', Georgia, serif;
+    text-wrap:balance;
+    margin:0;
+  }
+  .mono{
+    font-family:'IBM Plex Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .wrap{
+    max-width:1040px;
+    margin:0 auto;
+    padding:0 24px 96px;
+  }
+  a{color:var(--after-soft);}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:72px 0 40px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+    border-bottom:1px solid var(--border);
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--after-soft);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:7px;height:7px;border-radius:50%;
+    background:var(--after);
+    display:inline-block;
+  }
+  .hero h1{
+    font-size:clamp(34px, 5vw, 52px);
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .hero p.lede{
+    max-width:640px;
+    font-size:17px;
+    color:var(--ink-soft);
+  }
+  .hero .note{
+    max-width:640px;
+    font-size:14px;
+    color:var(--ink-faint);
+    border-left:2px solid var(--gold);
+    padding-left:14px;
+  }
+  .hero .note b{color:var(--ink);font-weight:600;}
+
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    margin-top:8px;
+  }
+  .stat{
+    background:var(--surface);
+    padding:20px 20px 18px;
+  }
+  .stat .num{
+    font-family:'Fraunces', serif;
+    font-size:40px;
+    font-weight:600;
+    line-height:1;
+  }
+  .stat.gold .num{color:var(--gold);}
+  .stat .label{
+    margin-top:6px;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+
+  /* ---------- Pain legend ---------- */
+  .legend-section{padding:40px 0 8px;}
+  .legend-section h2{font-size:20px;font-weight:600;margin-bottom:6px;}
+  .legend-section .sub{color:var(--ink-faint);font-size:14px;margin-bottom:18px;}
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .chip{
+    display:flex;
+    align-items:baseline;
+    gap:7px;
+    padding:8px 13px;
+    border:1px solid var(--border);
+    border-radius:3px;
+    background:var(--surface);
+    font-size:13.5px;
+    color:var(--ink-soft);
+  }
+  .chip .n{
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--ink-faint);
+    font-size:12px;
+  }
+
+  /* ---------- Column headers ---------- */
+  .cols-head{
+    display:flex;
+    align-items:center;
+    gap:28px;
+    margin:52px 0 6px;
+  }
+  .cols-head .time-sp{width:58px;flex:none;}
+  .cols-head .colhead{
+    flex:1;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+  .cols-head .node-sp{width:28px;flex:none;}
+  .colhead.old{color:var(--before);}
+  .colhead.new{color:var(--after-soft);}
+  .colhead .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .colhead.old .dot{background:var(--before);}
+  .colhead.new .dot{background:var(--after);}
+
+  /* ---------- Timeline ---------- */
+  .timeline{
+    display:flex;
+    flex-direction:column;
+    border-top:1px solid var(--border);
+  }
+  .day-row{
+    display:flex;
+    align-items:stretch;
+    gap:28px;
+    padding:26px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .day-row .time{
+    flex:none;
+    width:58px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink-faint);
+    padding-top:4px;
+  }
+  .day-row .node-col{
+    flex:none;
+    width:28px;
+    position:relative;
+  }
+  .day-row .node-col::before{
+    content:'';
+    position:absolute;
+    left:50%;
+    top:0; bottom:0;
+    width:2px;
+    background:var(--spine);
+    transform:translateX(-50%);
+  }
+  .timeline .day-row:first-child .node-col::before{top:50%;}
+  .timeline .day-row:last-child .node-col::before{bottom:50%;}
+  .day-row .node-dot{
+    position:absolute;
+    left:50%; top:50%;
+    transform:translate(-50%,-50%);
+    width:13px;height:13px;
+    border-radius:50%;
+    background:var(--bg);
+    border:2px solid var(--ink-faint);
+    z-index:2;
+  }
+  .day-row.gate .node-dot{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--gold) 22%, transparent);
+  }
+
+  .card{
+    flex:1;
+    min-width:0;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:4px;
+    padding:16px 18px;
+  }
+  .card.old{background:var(--surface-muted);}
+  .card.new{background:var(--surface-ai);border-color:color-mix(in srgb, var(--after) 30%, var(--border));}
+
+  .card .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    margin-bottom:8px;
+  }
+  .card.old .tag{color:var(--before);}
+  .card.new .tag{color:var(--after-soft);}
+  .card p{margin:0;font-size:14.5px;color:var(--ink);}
+  .card .pain{
+    margin-top:10px;
+    font-size:12px;
+    color:var(--ink-faint);
+  }
+  .gate-flag{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    margin-top:10px;
+    padding:4px 9px;
+    border:1px solid var(--gold);
+    border-radius:20px;
+    color:var(--gold);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.03em;
+  }
+  .gate-flag svg{width:10px;height:10px;fill:var(--gold);}
+
+  /* ---------- Summary ---------- */
+  .summary{
+    margin-top:56px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    padding:28px 28px 30px;
+  }
+  .summary h2{font-size:19px;font-weight:600;margin-bottom:10px;}
+  .summary p{color:var(--ink-soft);font-size:14.5px;max-width:680px;}
+  .summary .arrow{
+    color:var(--after);
+    font-weight:600;
+  }
+
+  /* ---------- Roster ---------- */
+  .roster-section{padding:56px 0 0;}
+  .roster-section h2{font-size:20px;font-weight:600;margin-bottom:6px;}
+  .roster-section .sub{color:var(--ink-faint);font-size:14px;margin-bottom:20px;}
+  .roster{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+  }
+  .role{
+    background:var(--surface);
+    padding:16px 16px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .role .badge{
+    width:30px;height:30px;
+    border-radius:50%;
+    background:var(--surface-ai);
+    color:var(--after-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    font-weight:600;
+  }
+  .role.lead .badge{background:color-mix(in srgb, var(--gold) 18%, var(--surface)); color:var(--gold);}
+  .role .name{font-family:'IBM Plex Mono', monospace;font-size:12.5px;color:var(--ink);}
+  .role .desc{font-size:12.5px;color:var(--ink-faint);}
+
+  footer{
+    padding:40px 0 0;
+    color:var(--ink-faint);
+    font-size:12.5px;
+  }
+
+  @media (max-width: 760px){
+    .cols-head{display:none;}
+    .day-row{flex-direction:column;gap:10px;padding:22px 0;}
+    .day-row .time{width:auto;}
+    .day-row .node-col{display:none;}
+    .stats{grid-template-columns:1fr;}
+    .roster{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+
+<div class="wrap">
+
+  <section class="hero">
+    <span class="eyebrow">타임라인 비교 · 마니카페 운영 사례</span>
+    <h1>기존 POS로 혼자 다 하던 하루,<br>코디네이터와 6개 에이전트가 함께하는 하루</h1>
+    <p class="lede">같은 카페, 같은 영업시간표 위에 두 가지 운영 방식을 겹쳐봤습니다. 왼쪽은 사장님이 카운터·발주·응대·마케팅·정산을 전부 혼자 처리하는 기존 방식, 오른쪽은 coordinator가 6개 전담 에이전트를 조율하고 사장님은 필요한 순간에만 확인·승인하는 방식입니다.</p>
+    <p class="note"><b>에이전트가 마음대로 돈을 쓰거나 손님에게 나가지 않습니다.</b> 발주·결제·홍보 집행처럼 되돌리기 어려운 일은 하루 12개 접점 중 3번, 사장님의 승인을 반드시 거칩니다(HITL 게이트). 확인은 디스코드·웹 콘솔 어디서든 가능합니다.</p>
+    <div class="stats">
+      <div class="stat">
+        <div class="num mono">12</div>
+        <div class="label">하루 동안의 타임라인 접점</div>
+      </div>
+      <div class="stat gold">
+        <div class="num mono">3</div>
+        <div class="label">그중 사장님 승인이 필요한 순간(HITL)</div>
+      </div>
+      <div class="stat">
+        <div class="num mono">7</div>
+        <div class="label">동시에 움직이는 코디네이터 + 전담 에이전트</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="legend-section">
+    <h2>소상공인 사장님의 페인포인트</h2>
+    <p class="sub">아래 타임라인의 각 카드에는 이 여섯 가지 중 하나가 태그로 붙어 있습니다.</p>
+    <div class="legend">
+      <span class="chip">시간 부족 · 1인 다역 <span class="n">×2</span></span>
+      <span class="chip">재고 관리 부담 · 결품 리스크 <span class="n">×3</span></span>
+      <span class="chip">문의 응대 지연 · 누락 <span class="n">×2</span></span>
+      <span class="chip">매출 파악 어려움 <span class="n">×2</span></span>
+      <span class="chip">마케팅 여력 부족 <span class="n">×1</span></span>
+      <span class="chip">번아웃 · 감정노동 <span class="n">×2</span></span>
+    </div>
+  </section>
+
+  <div class="cols-head">
+    <div class="time-sp"></div>
+    <div class="colhead old"><span class="dot"></span>기존 방식 — 사장님이 직접</div>
+    <div class="node-sp"></div>
+    <div class="colhead new"><span class="dot"></span>AI 에이전트 — coordinator + 담당 에이전트</div>
+  </div>
+
+  <div class="timeline">
+
+    <div class="day-row">
+      <div class="time mono">05:30</div>
+      <div class="card old">
+        <span class="tag">기상</span>
+        <p>휴대폰으로 어제 매출 문자만 확인한다. 재고가 얼마나 남았는지는 감으로 예상하며 하루를 시작한다.</p>
+        <div class="pain">페인포인트 · 매출 파악 어려움</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">coordinator</span>
+        <p>야간에 정리된 아침 브리핑이 디스코드에 도착해 있다 — 재고 알림 1건, 예약 2건, 대기 중인 승인 0건.</p>
+      </div>
+    </div>
+
+    <div class="day-row">
+      <div class="time mono">06:30</div>
+      <div class="card old">
+        <span class="tag">오픈 준비</span>
+        <p>원두·시럽·디저트 재고를 손으로 세어 수첩에 적는다. 어제 적어둔 숫자와 안 맞아 다시 확인한다.</p>
+        <div class="pain">페인포인트 · 재고 관리 부담</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">inventory-agent</span>
+        <p>새벽에 POS 스냅샷을 대조해 재고 현황을 이미 정리해뒀다. 사장님은 카드를 훑어보기만 한다.</p>
+      </div>
+    </div>
+
+    <div class="day-row">
+      <div class="time mono">07:00</div>
+      <div class="card old">
+        <span class="tag">오픈 · 아침 피크</span>
+        <p>라떼를 만들며 걸려온 예약 전화도 직접 받는다. 손이 묶여 있어 두 통은 그대로 놓친다.</p>
+        <div class="pain">페인포인트 · 문의 응대 지연·누락</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">reservation-agent</span>
+        <p>전화로 받은 예약 요청을 웹 콘솔에 한 줄만 입력하면 즉시 등록되고, coordinator는 새로 잡힌 예약만 알림으로 띄운다.</p>
+      </div>
+    </div>
+
+    <div class="day-row gate">
+      <div class="time mono">09:10</div>
+      <div class="card old">
+        <span class="tag">원두 결품 발견</span>
+        <p>아메리카노 원두가 다 떨어진 걸 발견하고, 손님이 잠깐 줄어든 틈에 공급사 두 곳에 전화를 돌린다.</p>
+        <div class="pain">페인포인트 · 재고 관리 부담</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">inventory-agent</span>
+        <p>카드를 in-progress로 옮기고 발주 초안과 공급사 견적 요청 문구를 이미 써뒀다. 견적 총액이 15만원 승인 기준을 넘으면 그때 사장님에게 묻는다.</p>
+        <span class="gate-flag"><svg viewBox="0 0 24 24"><path d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 1 1 6 0v3z"/></svg>승인 필요 · 발주 15만원 초과</span>
+      </div>
+    </div>
+
+    <div class="day-row">
+      <div class="time mono">11:20</div>
+      <div class="card old">
+        <span class="tag">단체 주문 문의</span>
+        <p>전화와 문자로 20인분 단체 주문 문의가 오지만 접객 중이라 30분 뒤에야 확인해 답이 늦어진다.</p>
+        <div class="pain">페인포인트 · 문의 응대 지연·누락</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">customer-service-agent</span>
+        <p>웹 고객문의 창구로 들어온 메뉴·픽업 가능 시간 문의에 즉시 답하고, 특이 요청만 coordinator에게 넘긴다.</p>
+      </div>
+    </div>
+
+    <div class="day-row gate">
+      <div class="time mono">12:00</div>
+      <div class="card old">
+        <span class="tag">점심 피크</span>
+        <p>주문 받고, 결제하고, 음료를 만드는 세 가지를 동시에 하다 결제 금액을 잘못 입력해 취소하고 다시 처리한다.</p>
+        <div class="pain">페인포인트 · 시간 부족 · 1인 다역</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">order-payment-agent</span>
+        <p>결제 처리를 맡아 실수를 줄이고, 사장님은 조리에만 집중한다. 환불이나 고액 결제처럼 되돌리기 어려운 처리는 먼저 승인을 받는다.</p>
+        <span class="gate-flag"><svg viewBox="0 0 24 24"><path d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 1 1 6 0v3z"/></svg>승인 필요 · 환불·고액 결제</span>
+      </div>
+    </div>
+
+    <div class="day-row">
+      <div class="time mono">14:30</div>
+      <div class="card old">
+        <span class="tag">매출 확인</span>
+        <p>잠깐 앉아 어제 매출을 엑셀에 옮기려다 손님이 들어와 다시 미룬다. 결국 밤에 몰아서 하기로 한다.</p>
+        <div class="pain">페인포인트 · 매출 파악 어려움</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">sales-analytics-agent</span>
+        <p>"오늘 매출 어때?" 한 줄이면 시간대별 매출과 잘 나간 메뉴를 바로 정리해 답한다.</p>
+      </div>
+    </div>
+
+    <div class="day-row gate">
+      <div class="time mono">15:30</div>
+      <div class="card old">
+        <span class="tag">홍보 콘텐츠</span>
+        <p>단호박 라떼 신메뉴를 알리고 싶지만 문구 쓸 시간이 없어 이번 주도 SNS를 그냥 넘긴다.</p>
+        <div class="pain">페인포인트 · 마케팅 여력 부족</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">marketing-crm-agent</span>
+        <p>단호박 라떼 홍보 문구 초안을 이미 써뒀다. 사장님이 톤만 확인하고 승인하면, 그 문구를 그대로 복사해 사장님이 직접 게시한다(광고 플랫폼 자동 연동 전 단계).</p>
+        <span class="gate-flag"><svg viewBox="0 0 24 24"><path d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm-3 8V6a3 3 0 1 1 6 0v3z"/></svg>승인 필요 · 홍보 집행</span>
+      </div>
+    </div>
+
+    <div class="day-row">
+      <div class="time mono">17:10</div>
+      <div class="card old">
+        <span class="tag">컴플레인</span>
+        <p>음료가 잘못 나갔다는 전화를 사장님이 직접 받아 사과하고, 감정적으로 지친 채 카운터로 돌아간다.</p>
+        <div class="pain">페인포인트 · 번아웃·감정노동</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">customer-service-agent</span>
+        <p>웹 고객문의 창구로 접수된 컴플레인에 먼저 사과와 재제조 안내를 하고 기록을 남긴다. 민감한 건만 요약해 사장님에게 전달한다.</p>
+      </div>
+    </div>
+
+    <div class="day-row">
+      <div class="time mono">19:40</div>
+      <div class="card old">
+        <span class="tag">마감 정산</span>
+        <p>POS 매출과 카드단말기, 현금을 하나씩 손으로 대조한다. 숫자가 안 맞으면 처음부터 다시 센다.</p>
+        <div class="pain">페인포인트 · 시간 부족 · 1인 다역</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">sales-analytics-agent</span>
+        <p>정산은 그대로 POS에서 처리되고, 마감 리포트는 자동으로 정리되어 기다리고 있다.</p>
+      </div>
+    </div>
+
+    <div class="day-row">
+      <div class="time mono">21:00</div>
+      <div class="card old">
+        <span class="tag">다음 날 준비</span>
+        <p>내일 발주할 품목과 수량을 수첩에 옮겨 적는다. 빠뜨린 게 있는지 확신이 없다.</p>
+        <div class="pain">페인포인트 · 재고 관리 부담</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">coordinator</span>
+        <p>내일 아침 브리핑 초안을 준비한다 — 재고 알림, 예약 현황, 승인 대기 건을 한 장으로 정리한다.</p>
+      </div>
+    </div>
+
+    <div class="day-row">
+      <div class="time mono">23:00</div>
+      <div class="card old">
+        <span class="tag">잠들기 전</span>
+        <p>내일 재고가 괜찮을지, 놓친 문의는 없었는지 계속 생각하다 늦게 잠든다.</p>
+        <div class="pain">페인포인트 · 번아웃·감정노동</div>
+      </div>
+      <div class="node-col"><span class="node-dot"></span></div>
+      <div class="card new">
+        <span class="tag">coordinator</span>
+        <p>디스코드에 뜬 승인 대기 3건만 확인하고 끄면 끝이다. 나머지는 에이전트들이 밤새 대기한다.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="summary">
+    <h2>같은 하루, 다른 부담</h2>
+    <p>기존 방식에서 사장님은 12개 접점 모두를 직접 처리해야 합니다. AI 에이전트 방식에서는 같은 12개 접점 중 9곳을 coordinator와 6개 전담 에이전트가 먼저 처리해두고, <span class="arrow">돈이 오가거나 손님에게 나가는 3곳</span>만 사장님의 최종 승인을 거칩니다. 자동화가 아니라 — 결정권은 그대로 사장님에게 남기고, 그 결정에 이르기까지의 반복 노동만 덜어내는 방식입니다.</p>
+  </div>
+
+  <section class="roster-section">
+    <h2>coordinator + 6개 전담 에이전트</h2>
+    <p class="sub">각자 하나의 역할만 맡아 profile 단위로 격리되어 동작합니다.</p>
+    <div class="roster">
+      <div class="role lead">
+        <div class="badge">CO</div>
+        <div class="name">coordinator</div>
+        <div class="desc">하루 전체를 조율하고, 승인이 필요한 순간에만 사장님을 호출</div>
+      </div>
+      <div class="role">
+        <div class="badge">OP</div>
+        <div class="name">order-payment-agent</div>
+        <div class="desc">주문·결제 처리, 환불·고액 결제 승인 게이트 관리</div>
+      </div>
+      <div class="role">
+        <div class="badge">IV</div>
+        <div class="name">inventory-agent</div>
+        <div class="desc">재고 모니터링, 발주 초안 작성과 공급사 견적 요청</div>
+      </div>
+      <div class="role">
+        <div class="badge">RV</div>
+        <div class="name">reservation-agent</div>
+        <div class="desc">예약 접수와 일정 관리</div>
+      </div>
+      <div class="role">
+        <div class="badge">CS</div>
+        <div class="name">customer-service-agent</div>
+        <div class="desc">고객 문의·불만 응대, FAQ 자동 응답</div>
+      </div>
+      <div class="role">
+        <div class="badge">SA</div>
+        <div class="name">sales-analytics-agent</div>
+        <div class="desc">매출 집계와 마감 리포트</div>
+      </div>
+      <div class="role">
+        <div class="badge">MK</div>
+        <div class="name">marketing-crm-agent</div>
+        <div class="desc">홍보 문구·프로모션 초안, 캠페인 집행 승인 게이트</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    타임라인의 시각·수치는 마니카페 운영 시나리오를 바탕으로 한 예시입니다. 승인 임계값(15만원)과 HITL 게이트 3곳(주문·결제 / 재고·발주 / 마케팅·홍보)은 실제 운영 설계를 따릅니다.
+    <br><br>
+    <b>구현 가능 범위에 대한 참고</b> — 전화·음성 응대는 계속 사람이 수행하며, 에이전트는 웹 콘솔·디스코드로 전달된 텍스트 요청만 처리합니다(음성 인식 기능 없음). 카카오톡은 실제로 연동되어 있지 않아 디스코드·웹 콘솔로 표기했습니다. 홍보 문구는 승인 후에도 사장님이 직접 게시해야 합니다(광고 플랫폼 자동 게시 연동 전 단계). 05:30/21:00의 야간 자동 브리핑처럼 예약 실행이 필요한 항목은 Hermes 프로필별 cron 기능으로 구현 가능하지만, 이 저장소에서는 아직 실제로 설정·검증되지 않았습니다.
+    <br><br>
+    <b>웹앱에서 테스트하기</b> — 4곳(②재고 ③예약 ⑤고객문의 ⑥주문접수 ⑨컴플레인→고객문의)은 webapp(localhost:19131) 각 화면의 데모 큐 버튼으로 재현 가능합니다. 나머지(①⑦⑧⑩⑪⑫)는 webapp 화면이 없어 Discord 또는 Hermes 대시보드(:19128) `/chat`으로 확인합니다. 상세 표는 course/마니카페_사장님의_하루.md 참고.
+  </footer>
+
+</div>

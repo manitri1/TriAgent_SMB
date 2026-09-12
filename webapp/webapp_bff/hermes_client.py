@@ -76,7 +76,11 @@ class AgentClient:
 
     def _exec_sync(self, profile: str, message: str, session_id: str | None) -> str:
         container = self._docker.containers.get(settings.hermes_container_name)
-        cmd = [settings.hermes_bin_path, "-p", profile, "chat", "-Q", "--source", "tool"]
+        # --yolo: Hermes v0.21.0부터 terminal/execute_code의 "위험한 명령"(평문 HTTP 호출,
+        # 코드 실행)에 사람 승인을 요구한다. non-interactive 1회성 호출(여기)에는 승인해줄
+        # 사람이 없어 자동 거부되므로, mock-pos(내부 평문 HTTP)를 호출하려면 필수다
+        # (docs/07-roadmap.md §11 — tirith 설정과 무관, --yolo만 확인된 해결책).
+        cmd = [settings.hermes_bin_path, "-p", profile, "chat", "-Q", "--source", "tool", "--yolo"]
         if session_id:
             cmd += ["--resume", session_id]
         cmd += ["-q", message]

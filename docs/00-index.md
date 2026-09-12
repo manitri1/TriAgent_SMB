@@ -21,7 +21,7 @@
 | [11-external-integrations-guideline.md](11-external-integrations-guideline.md) | Shopify/Stripe 테스트 자동화 가이드라인(별도 작업, API 키 확보 전 준비 문서) — TriAgent_SMB 본체와는 독립적 |
 | [12-web-gui-demo.md](12-web-gui-demo.md) | 웹 GUI 시연 방안 — 채팅은 기존 Hermes 대시보드(`/chat`) 재사용, 실적 그래픽 분석은 mock-pos에 신규 페이지 추가 필요(아직 미구현, 절차만 정리됨) |
 | [13-demo-video-script.md](13-demo-video-script.md) | 4분할 동시 재생 10초 데모 영상 촬영·조립 스크립트 — 촬영/합성은 로컬(docker+ffmpeg) 환경 필요, `mock-pos/scripts/seed_demo_video.sh` + `scripts/build_demo_video.sh` 사용 |
-| [14-webapp-users-guide.md](14-webapp-users-guide.md) | `webapp/`(마니카페 운영 콘솔) 사용 가이드 — 고객 문의/주문 접수/재고 관리/대시보드 4화면, 기존 Hermes 대시보드와의 차이, 배포·트러블슈팅 |
+| [14-webapp-users-guide.md](14-webapp-users-guide.md) | `webapp/`(마니카페 운영 콘솔) 사용 가이드 — 고객 문의/주문 접수/재고 관리/예약 관리/대시보드 5화면, 기존 Hermes 대시보드와의 차이, 배포·트러블슈팅 |
 | [15-discord-integration.md](15-discord-integration.md) | Discord 앱 생성부터 `hermes gateway` 연결까지 — 봇 토큰 발급, `.env` 설정, 검증 방법 (미검증 설계 가이드) |
 | [16-vps-deployment.md](16-vps-deployment.md) | 원격 VPS(Linux)에 Docker Compose로 배포 — 08장(로컬 Windows)과 별도, SSH/방화벽/재부팅 자동기동 (미검증 설계 가이드) |
 | [17-vscode-remote-connection.md](17-vscode-remote-connection.md) | VS Code Remote-SSH로 VPS 컨테이너 개발환경에 접속 — 포트 포워딩 포함 (미검증 설계 가이드) |
@@ -30,6 +30,8 @@
 | [20-vps-deployment-notes.md](20-vps-deployment-notes.md) | 08~19장의 Windows 로컬 개발 전제와 실제 Linux VPS 배포의 차이 정리 — 이 VPS의 실체(호스팅사/방화벽/디스크), 공유 Traefik 라벨 활용법, 백업 대상, 재부팅 복구 |
 | [21-live-demo-plan.md](21-live-demo-plan.md) | "마니카페 사장님의 하루"(`course/`) 타임라인을 실제 VPS 배포 위에서 라이브 시연하기 위한 실행 계획 — 블로커(Discord 명령 차단 미확인, 미실행 프로필 3개, 빈 mock-pos 시드), 재현 가능한 시연 데이터, 타임라인별 채널 매핑, Gmail/Sheets/Notion 실제 연동 (실행 전, 계획 단계) |
 | [22-vps-dashboard-access.md](22-vps-dashboard-access.md) | 이 VPS의 Hermes 프로젝트 3개(SMB/MICE/ADCreator) 대시보드 접속 한눈에 보기 — 2026-09-07 포트 1xxxx 이전 + 자격증명 `.env` 이전 + 공유 Traefik HTTPS 상시 접속. SMB는 적용·검증 완료, MICE/ADCreator는 안내만 하고 적용은 대기 중 |
+| [24-review-reply-design.md](24-review-reply-design.md) | 리뷰 자동 응답 기능 설계(신규, 2026-09-11) — `customer-service-agent`에 `review-reply-draft` 스킬 추가, 리뷰는 수동 입력·답글은 초안만 생성(게시는 사람), 실제 챗 검증은 아직 남음 |
+| [25-token-optimization.md](25-token-optimization.md) | 토큰 사용량 점검·최적화(2026-09-11) — 설계 문서 대비 실제 활성 툴셋/번들 스킬이 과도했던 것을 발견해 7개 프로필 전체 정리, `hermes prompt-size` 실측 기준 신규 세션 고정 프롬프트 32.8% 절감(API 호출 없이 오프라인으로 진행) |
 
 ## 한 줄 요약
 

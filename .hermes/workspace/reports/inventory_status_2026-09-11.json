@@ -1,0 +1,48 @@
+{
+  "timeframe": "2026-09-11T05:44:05.339299Z",
+  "total_items": 12,
+  "low_stock_items": [
+    {
+      "item_id": "menu_americano",
+      "name": "",
+      "quantity": 0,
+      "reorder_threshold": 5,
+      "unit_price": 0.0,
+      "currency": "KRW"
+    }
+  ],
+  "out_of_stock_items": [
+    {
+      "item_id": "menu_americano",
+      "name": "",
+      "quantity": 0,
+      "reorder_threshold": 5,
+      "unit_price": 0.0,
+      "currency": "KRW"
+    }
+  ],
+  "inventory_value": {
+    "by_currency": {
+      "KRW": 0.0
+    },
+    "krw_total": 0.0,
+    "conversion": {
+      "converted": true,
+      "rate_source": "native"
+    }
+  },
+  "recommendations": [
+    {
+      "item_id": "menu_americano",
+      "name": "",
+      "recommendation": "reorder_urgent",
+      "note": "Quantity at or below threshold; recommend placing reorder promptly."
+    },
+    {
+      "item_id": "menu_americano",
+      "name": "",
+      "recommendation": "reorder_urgent",
+      "note": "Quantity at or below threshold; recommend placing reorder promptly."
+    }
+  ]
+}

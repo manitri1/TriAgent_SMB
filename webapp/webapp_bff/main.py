@@ -1,8 +1,8 @@
 """웹앱 BFF 진입점.
 
-4개 화면(고객 문의/주문 접수/재고 관리/대시보드) + mock-pos 읽기 전용 프록시 +
-에이전트 릴레이를 하나의 FastAPI 앱으로 묶는다. `/health`만 인증 없이 열어둔다
-(mock_pos/main.py와 동일한 관례 — 컨테이너 헬스체크용).
+5개 화면(고객 문의/주문 접수/재고 관리/예약 관리/대시보드) + mock-pos 읽기 전용
+프록시 + 에이전트 릴레이를 하나의 FastAPI 앱으로 묶는다. `/health`만 인증 없이
+열어둔다(mock_pos/main.py와 동일한 관례 — 컨테이너 헬스체크용).
 """
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles

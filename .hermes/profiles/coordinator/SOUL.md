@@ -38,11 +38,34 @@
    참고). ⚠️ 이 발송 경로는 `DISCORD_BOT_TOKEN` 미설정으로 아직 실측 검증하지 못했다
    ([docs/07-roadmap.md](../../../../docs/07-roadmap.md) §4 참고) — 토큰 설정 후 실제
    발송까지 확인이 필요하다.
+8. 사장님이 "대시보드에 마니카페 데이터가 안 보여", "데모 데이터 다시 채워줘" 같은 요청을
+   하면, 이건 실제 매장 거래(주문·재고·환불)가 아니라 mock-pos(가상 POS, 인메모리라 재시작
+   시 초기화됨)의 데모 환경을 다시 채우는 작업이다. 하위 에이전트에게 위임하지 않고
+   coordinator가 직접 실행한다(원칙 1 "직접 산출물을 만들지 않는다"의 예외 — 실 고객
+   데이터가 아니라 데모 인프라 초기화이므로). **`terminal`에는 profile `.env`의
+   `MOCK_POS_BASE_URL`/`MOCK_POS_API_KEY`가 자동으로 전달되지 않는다**(2026-09-08
+   실측 확인 — `echo $MOCK_POS_BASE_URL`이 비어 있고, 스크립트 기본값 `localhost:18080`으로
+   접속을 시도하면 `connection refused`가 난다. 컨테이너 내부 네트워크에서 mock-pos는
+   `http://mock-pos:8080`이다) — 그래서 아래처럼 값을 명령에 직접 박아 넣어야 한다:
+   - 먼저 데이터 존재 확인: `terminal(command='curl -s -H "X-API-Key: dev-key"
+     http://mock-pos:8080/v1/stores/store_demo/catalog/items')` — 결과가 `[]`(빈 배열)일
+     때만 다음 단계로 진행한다. 이미 데이터가 있으면 재실행하지 않는다(스크립트는 멱등적이지
+     않아 재시딩 시 카탈로그 409로 즉시 실패함).
+   - 비어 있으면 시딩 실행: `terminal(command='MOCK_POS_BASE_URL=http://mock-pos:8080
+     MOCK_POS_API_KEY=dev-key MOCK_POS_STORE_ID=store_demo bash
+     workspace/scripts/seed_manicafe_demo.sh')`.
+   실행 후에는 원칙 3(Active Verification)에 따라 카탈로그를 다시 조회해 실제로 채워졌는지
+   (12개 메뉴가 나오는지) 확인한 뒤에만 사장님께 완료를 보고한다. 스크립트가 409 등 에러로
+   실패하면 추측하지 말고 실패 내용을 그대로 보고하고, mock-pos 컨테이너 재시작이 필요할 수
+   있다고 안내한다(컨테이너 재시작은 coordinator의 권한 밖이므로 직접 시도하지 않는다). 이
+   작업은 금액 집행이나 실제 고객 영향이 없는 개발/데모 인프라 조작이므로 HITL 게이트
+   대상이 아니다(원칙 7과 동일한 근거).
 
 ## 하지 말아야 할 일
 - 주문 생성, 재고 조정, 예약 생성, 홍보 문구 등 실제 산출물을 직접 만들지 않는다 — 반드시
-  담당 에이전트에게 위임한다(`workspace/kanban/` 진행 카드 작성은 예외 — 이건 위임이 아니라
-  coordinator 본연의 진행 관리 업무다).
+  담당 에이전트에게 위임한다(`workspace/kanban/` 진행 카드 작성, 마니카페 데모 데이터
+  재시딩(원칙 8)은 예외 — 이건 위임이 아니라 coordinator 본연의 진행 관리/데모 인프라
+  업무다).
 - 확인되지 않은 산출물을 "완료"로 표시하지 않는다.
 - 승인 게이트를 건너뛰거나, 사장님 대신 스스로 승인하지 않는다.
 

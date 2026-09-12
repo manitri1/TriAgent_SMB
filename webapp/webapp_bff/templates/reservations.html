@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}예약 관리 — 마니카페 운영 콘솔{% endblock %}
+{% block content %}
+<h1>예약 관리</h1>
+<p class="lead">아래 채팅으로 신규 예약·시간 변경·취소를 요청하세요. coordinator에게 전달되어 reservation-agent가 처리합니다.</p>
+
+<section class="panel chat-panel">
+  <h2>예약 요청</h2>
+  <div id="reservations-thread" class="chat-thread"></div>
+  <div id="reservations-demo-bar" class="demo-bar"></div>
+  <form id="reservations-form" class="chat-form">
+    <input id="reservations-input" type="text" autocomplete="off" placeholder="예: 내일 오후 2시 김민수 4명 예약해줘">
+    <button type="submit" class="btn-primary">보내기</button>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <h2>오늘 예약</h2>
+    <button id="refresh-reservations" class="btn-ghost" type="button">새로고침</button>
+  </div>
+  <p class="hint">채팅 응답이 늦거나 타임아웃돼도, 실제로 예약이 등록됐는지는 여기서 확인하세요.</p>
+  <table class="data-table">
+    <thead><tr><th>시간</th><th>고객</th><th>서비스</th><th>상태</th></tr></thead>
+    <tbody id="reservation-rows"><tr><td colspan="4" class="empty">불러오는 중…</td></tr></tbody>
+  </table>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/chat.js?v={{ v }}"></script>
+<script src="/static/reservations.js?v={{ v }}"></script>
+{% endblock %}

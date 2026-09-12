@@ -41,6 +41,23 @@ def test_reports_sales_forwards_period_param(client, auth_headers, monkeypatch):
     assert captured["params"] == {"period": "week"}
 
 
+def test_reservations_forwards_date_param(client, auth_headers, monkeypatch):
+    captured = {}
+
+    def fake_get(path, params=None):
+        captured["path"] = path
+        captured["params"] = params
+        return _fake_response([{"reservation_id": "resv_1", "customer_id": "cust_1", "datetime": "2026-09-11T14:00:00", "service": None, "status": "BOOKED"}])
+
+    monkeypatch.setattr(pos_client, "get", fake_get)
+
+    resp = client.get("/api/pos/reservations?date=2026-09-11", headers=auth_headers)
+    assert resp.status_code == 200
+    assert resp.json()[0]["reservation_id"] == "resv_1"
+    assert captured["path"] == "/reservations"
+    assert captured["params"] == {"date": "2026-09-11"}
+
+
 def test_upstream_error_propagates_status(client, auth_headers, monkeypatch):
     def fake_get(path, params=None):
         return _fake_response({"detail": "Inventory record not found"}, status_code=404)

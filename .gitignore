@@ -55,6 +55,9 @@ venv/
 .hermes/tui-theme-boot.json
 .hermes/**/runtime/
 .hermes/**/*.lock
+.hermes/**/mcp-tokens/
+.hermes/google_client_secret.json
+.hermes/google_token.json
 .hermes/install_id
 .hermes/discord_threads.json
 .hermes/models_dev_cache.etag

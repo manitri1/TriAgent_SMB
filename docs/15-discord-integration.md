@@ -3,10 +3,15 @@
 > ✅ **자매 프로젝트 실측 반영 (2026-09-04)**: 이 문서는 같은 `e:/work/Hermes/` 아래
 > [`TriAgent_ADCreator`](../../TriAgent_ADCreator)가 실제로 Discord 봇을 연결해 운영 중인
 > 절차(`TriAgent_ADCreator/docs/08-discord-deployment.md`)를 그대로 참조해 맞췄습니다.
-> 다만 **TriAgent_SMB 자체의 `DISCORD_BOT_TOKEN`은 아직 비어 있어 이 저장소에서
-> end-to-end로 실행 검증하지는 않았습니다** — 아래 절차 자체는 검증된 방식이지만, 이
-> 프로젝트에서 실제로 봇을 연결하면 이 상태 표시와 [07-roadmap.md](07-roadmap.md)/
-> [10-usecase-tests.md](10-usecase-tests.md)를 갱신하세요.
+>
+> **2026-09-11 갱신**: `DISCORD_BOT_TOKEN`/`DISCORD_ALLOWED_USERS`를 `.hermes/.env`에
+> 채우고 `docker compose restart hermes` 후 `hermes doctor`로 확인한 결과 `discord`가
+> ✓로 뜬다("missing DISCORD_BOT_TOKEN" 사라짐). 재시작 후 컨테이너 로그에도 인증
+> 오류가 없었다. **다만 이는 설정값이 유효한 형식으로 반영됐다는 확인이지, 실제
+> Discord 채널에서 봇이 응답하는 것까지 확인한 end-to-end 검증은 아니다** — 사용자가
+> 실제로 봇에 DM을 보내거나 서버에서 멘션해 응답을 받는 것으로 최종 확인 필요.
+> 확인되면 이 상태 표시와 [07-roadmap.md](07-roadmap.md)/[10-usecase-tests.md](10-usecase-tests.md)를
+> 갱신할 것.
 
 이 프로젝트는 Discord 연동을 위해 **커스텀 봇 코드를 작성하지 않습니다.** 과거
 `hermes-core/app/discord_bot.py`(`discord.py` 기반 커스텀 봇)가 있었으나, 실제 Hermes

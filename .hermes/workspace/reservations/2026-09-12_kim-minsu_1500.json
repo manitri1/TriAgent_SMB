@@ -1,0 +1,24 @@
+{
+  "post_status_code": "201",
+  "post_response_body": {
+    "reservation_id": "resv_b260a8f02e27",
+    "store_id": "store_demo",
+    "customer_id": "김민수",
+    "datetime": "2026-09-12T15:00:00+09:00",
+    "service": null,
+    "status": "BOOKED",
+    "note": "연락처: 없음; 좌석/요청: 없음",
+    "created_at": "2026-09-11T02:55:45.033343Z"
+  },
+  "get_status_code": "200",
+  "get_response_body": {
+    "reservation_id": "resv_b260a8f02e27",
+    "store_id": "store_demo",
+    "customer_id": "김민수",
+    "datetime": "2026-09-12T15:00:00+09:00",
+    "service": null,
+    "status": "BOOKED",
+    "note": "연락처: 없음; 좌석/요청: 없음",
+    "created_at": "2026-09-11T02:55:45.033343Z"
+  }
+}

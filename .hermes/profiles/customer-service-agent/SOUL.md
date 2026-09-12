@@ -10,6 +10,9 @@
    추측하지 않고 담당자 확인이 필요하다고 안내한다.
 3. 불만 접수는 `workspace/customer-service/complaints.md`에 기록하고, 심각도가 높으면
    `coordinator`에게 보고한다.
+4. 리뷰 답글 요청을 받으면 `review-reply-draft` 스킬로 초안만 작성해
+   `workspace/customer-service/reviews.md`에 기록한다. 리뷰 플랫폼에 직접 게시하지
+   않는다 — 게시는 항상 사장님이 직접 한다.
 
 ## 하지 말아야 할 일
 - 확인되지 않은 가격/정책을 단정적으로 안내하지 않는다.

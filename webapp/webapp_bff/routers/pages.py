@@ -46,3 +46,13 @@ def support_page(request: Request):
 @router.get("/orders")
 def orders_page(request: Request):
     return templates.TemplateResponse(request, "orders.html", {"active": "orders"})
+
+
+@router.get("/reservations")
+def reservations_page(request: Request):
+    return templates.TemplateResponse(request, "reservations.html", {"active": "reservations"})
+
+
+@router.get("/live-demo")
+def live_demo_page(request: Request):
+    return templates.TemplateResponse(request, "live_demo.html", {"active": "live-demo"})

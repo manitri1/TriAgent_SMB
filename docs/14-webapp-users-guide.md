@@ -7,12 +7,30 @@
 > 시각적으로도 확인했습니다 — Pretendard 웹폰트, 마니카페 브랜드 팔레트(에스프레소
 > 브라운 accent), 아이콘 내비게이션이 정상 렌더링됩니다. 설계 배경 전체는
 > `curried-percolating-ocean.md`(plan 문서) 참고.
+>
+> **2026-09-11 추가**: 5번째 화면(`/reservations`, 예약 관리)을 추가했습니다.
+> `reservation-agent`와 mock-pos `/reservations` API는 이미 검증된 상태였으므로,
+> 화면 2(주문 접수)와 동일한 패턴(자유 채팅 → `coordinator` → 오늘 예약 표 갱신)으로
+> 화면만 새로 얹었습니다. pytest 42건 전체 통과는 확인했으나, 컨테이너 환경에서
+> 실제 채팅으로 예약을 생성해 mock-pos에 반영되는 것까지 확인하는 e2e 검증은
+> 아직 남아있습니다([webapp/README.md](../webapp/README.md) 빌드 상태 참고).
+>
+> **2026-09-11 추가 2**: 6번째 화면(`/live-demo`, 라이브 데모)을 추가했습니다.
+> [21-live-demo-plan.md](21-live-demo-plan.md) P2 표의 12개 타임라인(①~⑫)을 시간
+> 순서대로 한 화면에 모아, 장면마다 미리 채워진 프롬프트를 클릭 한 번으로 전송하고
+> 응답을 받으면 자동으로 다음 장면으로 넘어가도록 만들었습니다(기존 화면들의
+> "데모 큐" 패턴과 동일한 방식). 장면마다 관련 화면(재고/예약/주문/고객문의/
+> 대시보드)으로 이동해 결과를 확인할 수 있는 링크도 함께 표시됩니다. Discord/CLI/
+> mock-pos 대시보드가 실제 채널인 장면(①②⑦⑧⑩⑪⑫)은 동일한 프롬프트를
+> `coordinator`에게 보내 webapp에서 대체 시연합니다 — `/api/agent/message`가
+> `coordinator`/`customer-service-agent` 외 profile을 허용하지 않기 때문입니다
+> (`webapp_bff/routers/agent.py`).
 
 ## 1. 이게 뭔가요 — 기존 Hermes 대시보드(`:19128`)와 차이
 
 `http://localhost:19128`의 기존 Hermes 대시보드는 **7개 프로필을 전환해가며 자유
 채팅**하는 범용 UI입니다. 이 웹앱(`http://localhost:19131`)은 그 대신 **업무별로
-설계된 4개 화면**을 제공합니다 — 사장님/직원이 "어떤 프로필에게 뭐라고 말해야
+설계된 6개 화면**을 제공합니다 — 사장님/직원이 "어떤 프로필에게 뭐라고 말해야
 하는지" 고민할 필요 없이, 화면 자체가 용도를 알려줍니다.
 
 > ⚠️ **포트 번호 주의**: `docker-compose.yml`의 실제 호스트 포트는 `19131`입니다
@@ -26,7 +44,9 @@
 | 고객 문의 상담 | `/support` | `customer-service-agent` | 없음(FAQ/불만 접수만) |
 | 주문 접수 | `/orders` | `coordinator` | 있음(주문+결제) |
 | 재고 파악/주문관리 | `/inventory` | 읽기는 직접, 재입고는 `coordinator` | 재입고만 |
+| 예약 관리 | `/reservations` | 읽기는 직접, 예약 생성·변경·취소는 `coordinator` | 예약 생성·변경·취소 |
 | 실시간 대시보드 | `/dashboard` | 없음(mock-pos 리포트만 조회) | 없음 |
+| 라이브 데모(사장님의 하루) | `/live-demo` | 장면별로 `coordinator` 또는 `customer-service-agent` | 장면에 따라 다름(원 화면과 동일) |
 
 두 대시보드는 서로 대체 관계가 아니라 **공존**합니다 — 기존 대시보드는 관리자용
 범용 콘솔(`/profiles`, `/config`, `/logs` 등)로, 이 웹앱은 매장 직원이 매일 쓰는
@@ -167,7 +187,26 @@ cd mock-pos/scripts
   `coordinator`에게 전달됩니다. 수량이 기준치를 넘으면 승인 확인 질문이 올 수
   있습니다 — 응답 상자에 그대로 표시됩니다.
 
-### 5.4 실시간 매장 대시보드 (`/dashboard`)
+### 5.4 예약 관리 (`/reservations`)
+
+채팅으로 신규 예약·시간 변경·취소를 자유롭게 요청합니다. 예:
+
+```
+내일 오후 2시에 김민수 고객 4명 예약 잡아줘.
+김민수 고객 예약을 오후 3시로 변경해줘.
+김민수 고객 예약 취소해줘.
+```
+
+`coordinator`가 `reservation-agent`에게 위임해 처리하고, 아래 "오늘 예약" 표는
+mock-pos `/reservations` API를 직접 조회해 갱신됩니다. 예약은 결제와 달리
+금전이 오가지 않아 HITL 승인 게이트 대상이 아닙니다 — 요청하면 곧바로
+반영됩니다.
+
+> ⚠️ 2026-09-11 기준 이 화면은 pytest(단위 테스트)만 통과한 상태이고, 컨테이너
+> 환경에서 실제 채팅으로 예약을 만들어 mock-pos 반영까지 확인하는 e2e 검증은
+> 아직 하지 않았습니다.
+
+### 5.5 실시간 매장 대시보드 (`/dashboard`)
 
 읽기 전용 화면입니다. 매출 요약, 정산, 원가/마진, 매출 추이(7일), 인기 메뉴
 TOP5, 재고 현황, 오늘 예약, 재방문 고객 TOP를 한 화면에서 봅니다. "새로고침"
@@ -195,6 +234,7 @@ TOP5, 재고 현황, 오늘 예약, 재방문 고객 TOP를 한 화면에서 봅
 | 대시보드/재고 화면에 데이터가 안 보인다 | `mock-pos` 컨테이너가 떠 있는지(`docker compose ps`), `MOCK_POS_BASE_URL`/`MOCK_POS_API_KEY`가 맞는지 확인. |
 | 채팅 응답이 몇 분째 안 온다 | 비정상이 아닐 수 있음 — `coordinator` 위임은 오래 걸리는 게 정상(6절 참고). `docker compose logs webapp`으로 에러 여부 확인. |
 | 재입고 요청/주문이 승인 질문 없이 그냥 진행됐다 | 정상입니다 — HITL 게이트는 금액·수량이 `.hermes/profiles/*/USER.md`의 기준치를 넘을 때만 발동합니다(`docs/06-hitl-approval-design.md`). |
+| 채팅 요청이 **평소보다 훨씬 빨리(1초 이내)** 응답하고 내용이 비어있거나 이상하다 | OpenAI 크레딧 소진 가능성이 높음(2026-09-11 실측: `docker exec hermes-triagent-smb hermes -p coordinator chat -Q --source tool --yolo -q "..."`로 직접 실행 시 `API call failed after 3 retries: You have no credits remaining.` 확인). 정상 응답은 25초~4분 걸리므로, 1초 이내 완료는 실패 신호. [OpenAI 조직 결제 페이지](https://platform.openai.com/settings/organization/billing/)에서 크레딧 확인 후 충전. |
 
 ## 참고
 

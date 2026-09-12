@@ -213,6 +213,37 @@ platforms: [Linux, macOS, Windows]
 
 ---
 
+## customer-service-agent — `support/review_reply_draft` (신규, 2026-09-11)
+
+```yaml
+name: review-reply-draft
+description: "고객이 남긴 리뷰 원문을 받아 매장 톤에 맞는 답글 초안을 작성하고 기록한다. 게시는 하지 않는다"
+version: 1.0.0
+author: TriAgent_SMB
+license: MIT
+tags: [smb, customer-service, review]
+platforms: [Linux, macOS, Windows]
+```
+
+**사용 시점**: 사장님/직원이 리뷰 원문을 직접 붙여넣으며 답글 작성을 요청할 때.
+
+**전제 조건**: 리뷰 플랫폼(네이버/구글 등) API 연동은 없다 — 리뷰 원문은 사람이
+수동으로 붙여넣는 것을 전제로 한다. 설계 배경은
+[24-review-reply-design.md](24-review-reply-design.md) 참고.
+
+**절차**:
+1. `faq.md`로 매장 톤·사실관계를 확인한다.
+2. 긍정/부정에 따라 톤을 정한다. 부정 리뷰의 구체적 보상(환불·쿠폰)은 언급하지
+   않는다 — 금전 결정은 이 스킬의 권한 밖.
+3. 불만 성격이 강하면 `complaints.md`에도 함께 기록한다.
+4. 답글 초안을 작성해 `workspace/customer-service/reviews.md`에 원문과 함께 기록한다.
+5. **초안만 반환하고 게시하지 않는다** — `marketing-crm-agent`의 홍보 문구 승인
+   원칙과 동일하게, 게시는 항상 사장님이 직접 한다.
+
+**반환값**: 답글 초안, `reviews.md` 기록 여부, (해당 시) `complaints.md` 동시 기록 여부.
+
+---
+
 ## sales-analytics-agent — `pos/sales_reporting`
 
 ```yaml

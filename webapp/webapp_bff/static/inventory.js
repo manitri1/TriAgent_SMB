@@ -99,6 +99,7 @@ function restockConversationId() {
  * (chat.js의 demoQueue와 동일한 패턴).
  */
 const RESTOCK_DEMO_QUEUE = [
+  { label: "09:10 원두 결품 발견 (사장님의 하루, 승인 필요할 수 있음)", item: "아메리카노", qty: 50, reason: "원두 완전 품절, 긴급 대량 재입고 필요" },
   { label: "아메리카노 재입고 (저재고)", item: "아메리카노", qty: 30, reason: "재고 소진, 긴급 재입고 필요" },
   { label: "콜드브루 재입고", item: "콜드브루", qty: 15, reason: "여름철 수요 증가 대비" },
   { label: "시즌 케이크 대량 발주 (승인 필요할 수 있음)", item: "시즌 케이크(딸기)", qty: 100, reason: "행사용 대량 발주" },

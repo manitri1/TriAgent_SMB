@@ -1,0 +1,74 @@
+[
+  {
+    "item_id": "menu_americano",
+    "stock_quantity": 0,
+    "low_stock_threshold": 5,
+    "updated_at": "2026-09-08T09:23:34.153546Z"
+  },
+  {
+    "item_id": "menu_latte",
+    "stock_quantity": 37,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-08T09:23:35.220769Z"
+  },
+  {
+    "item_id": "menu_cappuccino",
+    "stock_quantity": 33,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-08T09:23:35.370647Z"
+  },
+  {
+    "item_id": "menu_espresso",
+    "stock_quantity": 58,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-08T09:23:34.917439Z"
+  },
+  {
+    "item_id": "menu_coldbrew",
+    "stock_quantity": 27,
+    "low_stock_threshold": 8,
+    "updated_at": "2026-09-08T09:23:35.322187Z"
+  },
+  {
+    "item_id": "menu_matcha_latte",
+    "stock_quantity": 23,
+    "low_stock_threshold": 8,
+    "updated_at": "2026-09-08T09:23:35.417555Z"
+  },
+  {
+    "item_id": "menu_chai_latte",
+    "stock_quantity": 21,
+    "low_stock_threshold": 8,
+    "updated_at": "2026-09-08T09:23:34.964333Z"
+  },
+  {
+    "item_id": "menu_muffin",
+    "stock_quantity": 13,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-08T09:23:35.462220Z"
+  },
+  {
+    "item_id": "menu_croissant",
+    "stock_quantity": 13,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-08T09:23:35.545748Z"
+  },
+  {
+    "item_id": "menu_sandwich",
+    "stock_quantity": 10,
+    "low_stock_threshold": 5,
+    "updated_at": "2026-09-08T09:23:35.370655Z"
+  },
+  {
+    "item_id": "menu_smoothie",
+    "stock_quantity": 12,
+    "low_stock_threshold": 6,
+    "updated_at": "2026-09-08T09:23:35.172097Z"
+  },
+  {
+    "item_id": "menu_cake",
+    "stock_quantity": 6,
+    "low_stock_threshold": 5,
+    "updated_at": "2026-09-08T09:23:35.595441Z"
+  }
+]

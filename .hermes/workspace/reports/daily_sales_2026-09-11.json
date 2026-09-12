@@ -1,0 +1,13 @@
+{
+  "total_sales": 0,
+  "order_count": 0,
+  "avg_order_value": 0,
+  "refunded_amount": 0,
+  "gross_margin": 0,
+  "gross_margin_rate": 0.0,
+  "top_selling_items": [],
+  "timeframe": {
+    "start": "2026-09-11T00:00:00+00:00",
+    "end": "2026-09-11T23:59:59+00:00"
+  }
+}

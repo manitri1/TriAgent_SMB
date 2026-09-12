@@ -146,6 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     },
     demoBarId: "orders-demo-bar",
     demoQueue: [
+      { label: "12:00 점심 피크 주문 (사장님의 하루)", message: "라떼 2잔, 아메리카노 1잔 주문 들어왔어, 결제까지 처리해줘." },
       { label: "아메리카노 2잔 주문", message: "아메리카노 2잔 주문 들어왔어, 결제까지 처리해줘." },
       { label: "라떼+머핀 세트 주문", message: "라떼 1잔, 블루베리 머핀 1개 주문이요. 결제까지 부탁해." },
       { label: "카푸치노 3잔 주문", message: "카푸치노 3잔 주문 들어왔어, 결제까지 처리해줘." },
