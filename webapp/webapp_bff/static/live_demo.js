@@ -349,17 +349,49 @@ async function loadResultPanel(step) {
         })
       );
     } else if (step.result.kind === "sales") {
-      const res = await fetch("/api/pos/reports/sales?period=today");
-      if (!res.ok) return fail();
-      const data = await res.json();
+      const [salesRes, marginRes, topRes] = await Promise.all([
+        fetch("/api/pos/reports/sales?period=today"),
+        fetch("/api/pos/reports/margin?period=today"),
+        fetch("/api/pos/reports/top-items?period=today&limit=5"),
+      ]);
+      if (!salesRes.ok) return fail();
+      const sales = await salesRes.json();
+      const margin = marginRes.ok ? await marginRes.json() : null;
+      const topItems = topRes.ok ? await topRes.json() : [];
       if (token !== resultRequestToken) return;
-      body.innerHTML = `<p class="demo-day-result-stat">오늘 매출 <strong>${data.total_sales.toLocaleString()}원</strong> · 주문 <strong>${data.order_count}</strong>건</p>`;
+      const marginStat = margin ? ` · 마진율 <strong>${(margin.margin_rate * 100).toFixed(1)}%</strong>` : "";
+      const topTable = topItems.length
+        ? compactTableHtml(
+            ["품목", "수량", "매출"],
+            topItems.map((i) => [catalogNameById[i.item_id] ?? i.name, `${i.quantity}개`, `${i.revenue.toLocaleString()}원`])
+          )
+        : '<p class="hint">오늘 판매된 품목이 없습니다.</p>';
+      body.innerHTML = `
+        <p class="demo-day-result-stat">오늘 매출 <strong>${sales.total_sales.toLocaleString()}원</strong> · 주문 <strong>${sales.order_count}</strong>건${marginStat}</p>
+        <h4 class="demo-day-result-subhead">인기 품목 TOP ${Math.min(topItems.length, 5)}</h4>
+        ${topTable}
+      `;
     } else if (step.result.kind === "settlement") {
-      const res = await fetch("/api/pos/reports/settlement?period=today");
-      if (!res.ok) return fail();
-      const data = await res.json();
+      const [settleRes, topRes] = await Promise.all([
+        fetch("/api/pos/reports/settlement?period=today"),
+        fetch("/api/pos/reports/top-items?period=today&limit=5"),
+      ]);
+      if (!settleRes.ok) return fail();
+      const data = await settleRes.json();
+      const topItems = topRes.ok ? await topRes.json() : [];
       if (token !== resultRequestToken) return;
-      body.innerHTML = `<p class="demo-day-result-stat">총 매출 <strong>${data.gross_sales.toLocaleString()}원</strong> · 결제 <strong>${data.payment_count}</strong>건 · 환불 <strong>${data.refunded_count}</strong>건</p>`;
+      const topTable = topItems.length
+        ? compactTableHtml(
+            ["품목", "수량", "매출"],
+            topItems.map((i) => [catalogNameById[i.item_id] ?? i.name, `${i.quantity}개`, `${i.revenue.toLocaleString()}원`])
+          )
+        : '<p class="hint">오늘 판매된 품목이 없습니다.</p>';
+      body.innerHTML = `
+        <p class="demo-day-result-stat">총 매출 <strong>${data.gross_sales.toLocaleString()}원</strong> · 결제 <strong>${data.payment_count}</strong>건</p>
+        <p class="demo-day-result-stat">환불 <strong>${data.refunded_count}</strong>건 (${data.refunded_amount.toLocaleString()}원) · 부분환불 <strong>${data.partial_refund_count}</strong>건 (${data.partial_refund_amount.toLocaleString()}원)</p>
+        <h4 class="demo-day-result-subhead">오늘 하루 인기 품목 TOP ${Math.min(topItems.length, 5)}</h4>
+        ${topTable}
+      `;
     } else if (step.result.kind === "support-note") {
       body.innerHTML = '<p class="hint">고객 문의는 mock-pos에 별도로 기록되지 않습니다 — 위 실행 로그의 응답이 곧 결과이며, 전체 대화는 고객 문의 화면에서 이어볼 수 있습니다.</p>';
     }
@@ -403,7 +435,11 @@ async function sendStep(step, index, message) {
     appendMessage("agent", data.text, statusClass);
     if (index === currentIndex) {
       renderSentPrompt(document.getElementById("demo-day-sent"), message);
-      renderCompactResult(document.getElementById("demo-day-summary"), { status: data.status === "ok" ? "ok" : data.status, text: data.text });
+      renderCompactResult(
+        document.getElementById("demo-day-summary"),
+        { status: data.status === "ok" ? "ok" : data.status, text: data.text },
+        { onFollowup: (msg) => sendStep(step, index, msg) }
+      );
     }
     if (data.status === "timeout") {
       let attempts = 0;

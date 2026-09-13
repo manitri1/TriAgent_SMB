@@ -190,19 +190,13 @@ function loadRestockDemoStep() {
   document.getElementById("restock-reason").value = step.reason;
 }
 
-async function submitRestockRequest(e) {
-  e.preventDefault();
-  const itemName = document.getElementById("restock-item").value;
-  const qty = document.getElementById("restock-qty").value;
-  const reason = document.getElementById("restock-reason").value.trim();
-  if (!itemName || !qty) return;
-
-  let message = `다음 품목 재입고를 요청합니다: ${itemName} ${qty}개.`;
-  if (reason) message += ` 사유: ${reason}.`;
-
+/** coordinator가 HITL 게이트 확인(수량/범위 등)을 되물으면, 그 카드의 칩을
+ * 눌러 여기로 다시 들어온다 — submitRestockRequest와 동일한 전송/로그 경로를
+ * 그대로 재사용해 같은 대화(conversation_id)에 후속 지시를 이어 보낸다. */
+async function sendRestockMessage(message, summary) {
   const replyBox = document.getElementById("restock-reply");
-  const submitBtn = e.target.querySelector("button[type=submit]");
-  submitBtn.disabled = true;
+  const submitBtn = document.querySelector("#restock-form button[type=submit]");
+  if (submitBtn) submitBtn.disabled = true;
   renderSentPrompt(document.getElementById("restock-sent-prompt"), message);
   renderCompactResult(replyBox, { status: "pending", text: "coordinator에게 전달하는 중…" });
 
@@ -218,9 +212,9 @@ async function submitRestockRequest(e) {
     });
     const data = await res.json();
     const result = { status: data.status === "ok" ? "ok" : data.status, text: data.text };
-    renderCompactResult(replyBox, result);
+    renderCompactResult(replyBox, result, { onFollowup: (msg) => sendRestockMessage(msg, summary) });
     inventoryLog.push({
-      summary: `${itemName} 재입고 요청 (${qty}개)${reason ? ` · 사유: ${reason}` : ""}`,
+      summary,
       pillHtml: statusPill(result.status === "ok" ? "완료" : result.status === "timeout" ? "확인 필요" : "오류", result.status === "ok" ? "success" : "warning"),
       sentText: message,
       replyText: result.text,
@@ -229,13 +223,26 @@ async function submitRestockRequest(e) {
   } catch (err) {
     renderCompactResult(replyBox, { status: "error", text: "네트워크 오류가 발생했습니다. 다시 시도해 주세요." });
   } finally {
-    submitBtn.disabled = false;
+    if (submitBtn) submitBtn.disabled = false;
     // 상태와 무관하게 재조회 — 타임아웃이어도 실제로는 처리 중일 수 있다
     // (Phase 0 실측, Active Verification 원칙).
     loadInventory();
     restockDemoIndex++;
     loadRestockDemoStep();
   }
+}
+
+async function submitRestockRequest(e) {
+  e.preventDefault();
+  const itemName = document.getElementById("restock-item").value;
+  const qty = document.getElementById("restock-qty").value;
+  const reason = document.getElementById("restock-reason").value.trim();
+  if (!itemName || !qty) return;
+
+  let message = `다음 품목 재입고를 요청합니다: ${itemName} ${qty}개.`;
+  if (reason) message += ` 사유: ${reason}.`;
+  const summary = `${itemName} 재입고 요청 (${qty}개)${reason ? ` · 사유: ${reason}` : ""}`;
+  await sendRestockMessage(message, summary);
 }
 
 document.getElementById("refresh-inventory").addEventListener("click", loadInventory);

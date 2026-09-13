@@ -334,7 +334,11 @@ async function sendStep(step, index, message) {
     appendMessage("agent", data.text, statusClass);
     if (index === currentIndex) {
       renderSentPrompt(document.getElementById("demo-day-sent"), message);
-      renderCompactResult(document.getElementById("demo-day-summary"), { status: data.status === "ok" ? "ok" : data.status, text: data.text });
+      renderCompactResult(
+        document.getElementById("demo-day-summary"),
+        { status: data.status === "ok" ? "ok" : data.status, text: data.text },
+        { onFollowup: (msg) => sendStep(step, index, msg) }
+      );
     }
     if (data.status === "timeout") {
       let attempts = 0;

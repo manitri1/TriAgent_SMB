@@ -126,3 +126,35 @@ def test_live_demo_no_longer_auto_advances_after_response(js_file):
     text = _read(js_file)
     finally_block = text.split("} finally {", 1)[1]
     assert "advance();" not in finally_block
+
+
+def test_common_js_defines_hitl_confirmation_helpers():
+    """"재고 대량 발주 확정" 같은 HITL 게이트 확인 응답(수량/범위 등을 되묻는
+    번호 목록)을 텍스트 그대로 덤프하지 않고 카드 + 선택지 칩으로 보여주는
+    파서/렌더러가 common.js에 있어야 한다."""
+    text = _read("common.js")
+    assert "function parseHitlConfirmation" in text
+    assert "function deriveHitlChips" in text
+    assert "function renderHitlCard" in text
+    assert '"HITL 게이트"' in text
+
+
+def test_render_compact_result_accepts_on_followup_and_renders_hitl_card():
+    """renderCompactResult가 세 번째 인자로 onFollowup을 받아, ok 상태이고
+    HITL 확인 구조가 파싱되면 renderHitlCard를 호출해야 한다."""
+    text = _read("common.js")
+    sig = re.search(r"function renderCompactResult\(([^)]*)\)", text)
+    assert sig and "onFollowup" in sig.group(1)
+    assert "renderHitlCard(container, hitl, onFollowup)" in text
+
+
+@pytest.mark.parametrize(
+    "js_file",
+    ["inventory.js", "live_demo.js", "customer_live_demo.js"],
+)
+def test_screens_wire_on_followup_for_hitl_chip_clicks(js_file):
+    """재입고 요청/라이브 데모 화면 모두, HITL 카드의 칩을 클릭하면 같은
+    대화(conversation_id)에 후속 지시를 다시 보내도록 onFollowup을 연결해야
+    한다 — 그래야 "50개로 진행" 같은 칩이 실제로 동작한다."""
+    text = _read(js_file)
+    assert "onFollowup" in text

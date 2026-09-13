@@ -21,17 +21,166 @@ function firstLineOrTruncate(text, maxChars) {
 }
 
 /**
+ * coordinator 응답이 "재고 대량 발주 확정" 같은 HITL 게이트 확인 질문(수량/범위
+ * 등을 사장님께 되묻는 번호 목록)일 때, 그 안의 진행 카드 메타데이터와 선택지를
+ * 뽑아낸다. coordinator의 task_dispatch_and_verification 스킬이 "HITL 게이트"
+ * 라는 표현을 고정적으로 쓰는 것에 의존한다(SKILL.md 참고) — 그 외 문구는 LLM이
+ * 매번 다르게 생성하므로, 구조(제목: / 담당: / "N) " 번호 목록)만 보고 최대한
+ * 관대하게 파싱하고, 번호 목록이 하나도 없으면 null을 반환해 평소처럼 원문
+ * 헤드라인만 보여주게 한다.
+ */
+function parseHitlConfirmation(text) {
+  if (!text || !text.includes("HITL 게이트")) return null;
+  const fieldKey = { "경로": "path", "제목": "title", "담당": "owner", "상태": "status" };
+  const lines = (text || "").split("\n").map((l) => l.replace(/\s+$/, ""));
+
+  const ticket = {};
+  const notes = [];
+  const groups = [];
+  const leadLines = [];
+  const trailingLines = [];
+  let mode = "lead"; // lead -> ticket -> groups -> trailing
+  let currentGroup = null;
+  let blankPending = false;
+
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) { blankPending = true; continue; }
+
+    const numHeader = mode !== "trailing" ? line.match(/^(\d+)\)\s*(.+)$/) : null;
+    if (numHeader) {
+      currentGroup = { title: numHeader[2].trim(), bullets: [] };
+      groups.push(currentGroup);
+      mode = "groups";
+      blankPending = false;
+      continue;
+    }
+
+    const bulletMatch = mode !== "trailing" ? line.match(/^-\s*(.+)$/) : null;
+    if (bulletMatch) {
+      const content = bulletMatch[1].trim();
+      if (mode === "groups" && currentGroup) {
+        currentGroup.bullets.push(content);
+        blankPending = false;
+        continue;
+      }
+      const field = content.match(/^(경로|제목|담당|상태)\s*:\s*(.+)$/);
+      if (field) { ticket[fieldKey[field[1]]] = field[2].trim(); mode = "ticket"; blankPending = false; continue; }
+      const note = content.match(/^(사유|현재\s*상태)\s*:\s*(.+)$/);
+      if (note) { notes.push(`${note[1]}: ${note[2].trim()}`); mode = "ticket"; blankPending = false; continue; }
+      if (/^(메모|생성한 진행 카드)\s*:?$/.test(content)) { mode = "ticket"; blankPending = false; continue; }
+      notes.push(content);
+      mode = "ticket";
+      blankPending = false;
+      continue;
+    }
+
+    if (mode === "lead") { leadLines.push(line); blankPending = false; continue; }
+    if (mode === "groups") {
+      if (blankPending) { mode = "trailing"; trailingLines.push(line); }
+      else if (currentGroup && currentGroup.bullets.length) {
+        currentGroup.bullets[currentGroup.bullets.length - 1] += ` ${line}`;
+      }
+      blankPending = false;
+      continue;
+    }
+    if (mode === "trailing") { trailingLines.push(line); continue; }
+    blankPending = false; // mode === "ticket"인 동안의 자유 서술 문단(예: "...HITL 게이트입니다.")은 버린다
+  }
+
+  if (!groups.length) return null;
+  return { leadText: leadLines.join(" ").trim(), ticket, notes, groups, trailingText: trailingLines.join(" ").trim() };
+}
+
+/** 그룹 제목/내용에서 실제 클릭 가능한 선택지(칩)를 뽑아낸다 — 숫자 목록이면
+ * "N개로 진행", 즉시/예정 대비 문구가 보이면 그 두 선택지, 그 외엔 각 항목을
+ * 그대로 한 개씩 칩으로 보여준다(원문을 인용해 그대로 진행해달라는 문구 전송). */
+function deriveHitlChips(group) {
+  const joined = group.bullets.join(" ");
+  const chips = [];
+  if (group.title.includes("수량")) {
+    const seen = new Set();
+    const order = [];
+    const re = /(\d+)(?:\s*~\s*(\d+))?\s*개/g;
+    let m;
+    while ((m = re.exec(joined))) {
+      [m[1], m[2]].filter(Boolean).forEach((n) => { if (!seen.has(n)) { seen.add(n); order.push(n); } });
+    }
+    order.slice(0, 4).forEach((n) => chips.push({ label: `${n}개로 진행`, message: `${n}개로 입고 처리해주세요.` }));
+  } else if (/범위|반영/.test(group.title) && /즉시/.test(joined) && /예정|나중/.test(joined)) {
+    chips.push({ label: "지금 바로 반영", message: "지금 바로 재고에 반영해주세요." });
+    chips.push({ label: "입고 예정으로만 기록", message: "입고 예정으로만 기록해두고, 실제 재고 반영은 나중에 해주세요." });
+  } else {
+    group.bullets.forEach((b) => {
+      const short = b.length > 34 ? `${b.slice(0, 34)}…` : b;
+      chips.push({ label: short, message: `"${b}"로 진행해주세요.` });
+    });
+  }
+  return chips;
+}
+
+function renderHitlCard(container, parsed, onFollowup) {
+  const card = document.createElement("div");
+  card.className = "hitl-card";
+  if (parsed.ticket.title || parsed.ticket.status) {
+    const rawStatus = (parsed.ticket.status || "").split("(")[0].trim();
+    const STATUS_LABEL_KO = { blocked: "승인 대기", pending: "대기", done: "완료", completed: "완료", open: "진행 중" };
+    const statusText = STATUS_LABEL_KO[rawStatus.toLowerCase()] || rawStatus;
+    const tone = /blocked|대기/i.test(rawStatus) ? "warning" : /done|완료|completed/i.test(rawStatus) ? "success" : "warning";
+    const ticket = document.createElement("div");
+    ticket.className = "hitl-ticket";
+    ticket.innerHTML = `
+      <div class="hitl-ticket-head">
+        <span class="hitl-ticket-title">${parsed.ticket.title || "진행 카드"}</span>
+        ${statusText ? statusPill(statusText, tone) : ""}
+      </div>
+      ${parsed.ticket.owner ? `<div class="hitl-ticket-owner">담당: ${parsed.ticket.owner}</div>` : ""}
+      ${parsed.notes.length ? `<ul class="hitl-ticket-notes">${parsed.notes.map((n) => `<li>${n}</li>`).join("")}</ul>` : ""}
+    `;
+    card.appendChild(ticket);
+  }
+  parsed.groups.forEach((group) => {
+    const chips = deriveHitlChips(group);
+    if (!chips.length) return;
+    const groupEl = document.createElement("div");
+    groupEl.className = "hitl-group";
+    groupEl.innerHTML = `<div class="hitl-group-title">${group.title}</div><div class="chip-grid"></div>`;
+    const chipGrid = groupEl.querySelector(".chip-grid");
+    chips.forEach((chip) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quick-chip";
+      btn.textContent = chip.label;
+      btn.addEventListener("click", () => onFollowup(chip.message));
+      chipGrid.appendChild(btn);
+    });
+    card.appendChild(groupEl);
+  });
+  if (parsed.trailingText) {
+    const hint = document.createElement("p");
+    hint.className = "hitl-hint";
+    hint.textContent = parsed.trailingText;
+    card.appendChild(hint);
+  }
+  container.appendChild(card);
+}
+
+/**
  * 원문 텍스트를 그대로 덤프하지 않고, 헤드라인(첫 줄/최대 길이) + 상태색 +
- * 필요할 때만 펼쳐보는 "전체 보기" 토글로 보여준다.
+ * 필요할 때만 펼쳐보는 "전체 보기" 토글로 보여준다. 응답이 HITL 게이트 확인
+ * 질문(수량/범위 등 선택지)이고 onFollowup이 주어지면, 그 선택지를 카드형
+ * 칩 버튼으로 추가로 보여준다 — 클릭하면 onFollowup(message)가 그 문구를
+ * 그대로 다시 전송한다(호출부가 실제 전송/재조회를 담당).
  * container: 통째로 새로 채울 엘리먼트.
  * status: "pending" | "ok" | "timeout" | "error"
  * text: 전체 원문(또는 대기 중 안내 문구).
  */
-function renderCompactResult(container, { status, text, headlineChars = 80 } = {}) {
+function renderCompactResult(container, { status, text, headlineChars = 80 } = {}, { onFollowup } = {}) {
   if (!container) return;
   container.className = `compact-result compact-result--${status}`;
   container.innerHTML = "";
-  const { headline: headlineText, truncated } = firstLineOrTruncate(text, headlineChars);
+  const hitl = status === "ok" && onFollowup ? parseHitlConfirmation(text) : null;
+  const { headline: headlineText, truncated } = firstLineOrTruncate(hitl ? hitl.leadText || text : text, headlineChars);
   const headline = document.createElement("div");
   headline.className = "compact-result-headline";
   headline.textContent = headlineText;
@@ -54,6 +203,8 @@ function renderCompactResult(container, { status, text, headlineChars = 80 } = {
     container.appendChild(toggle);
     container.appendChild(full);
   }
+
+  if (hitl) renderHitlCard(container, hitl, onFollowup);
 }
 
 /**
@@ -276,7 +427,8 @@ function createInsightBoard(containerId, emptyId, { profile = "coordinator", onA
         renderSentPrompt(document.getElementById(`${containerId}-sent-${insight.insightKey}`), sentCache.get(insight.insightKey));
       }
       if (insight.approveMessage && resultCache.has(insight.insightKey)) {
-        renderCompactResult(document.getElementById(`${containerId}-result-${insight.insightKey}`), resultCache.get(insight.insightKey));
+        const key = insight.insightKey;
+        renderCompactResult(document.getElementById(`${containerId}-result-${key}`), resultCache.get(key), { onFollowup: (msg) => sendMessage(key, msg) });
       }
     });
   }
@@ -299,7 +451,7 @@ function createInsightBoard(containerId, emptyId, { profile = "coordinator", onA
       const data = await res.json();
       const result = { status: data.status === "ok" ? "ok" : data.status, text: data.text };
       resultCache.set(insightKey, result);
-      renderCompactResult(document.getElementById(`${containerId}-result-${insightKey}`), result);
+      renderCompactResult(document.getElementById(`${containerId}-result-${insightKey}`), result, { onFollowup: (msg) => sendMessage(insightKey, msg) });
     } catch (err) {
       const result = { status: "error", text: "네트워크 오류가 발생했습니다. 다시 시도해 주세요." };
       resultCache.set(insightKey, result);
