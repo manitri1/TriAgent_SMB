@@ -3,7 +3,10 @@ from pathlib import Path
 
 import pytest
 
-PAGES = ["/support", "/orders", "/inventory", "/reservations", "/dashboard", "/live-demo"]
+PAGES = [
+    "/support", "/orders", "/inventory", "/reservations", "/dashboard", "/live-demo", "/live-demo/customer",
+    "/customer", "/customer/faq", "/customer/order", "/customer/reservation",
+]
 
 
 @pytest.mark.parametrize("path", PAGES)
@@ -117,7 +120,7 @@ def test_reservations_page_has_demo_queue(client, auth_headers):
 
 
 def test_demo_queues_cover_manicafe_day_in_life_story():
-    """course/마니카페_사장님의_하루.md의 타임라인 중 webapp 화면이 있는 4곳(예약·
+    """course/260912_마니카페_사장님의_하루.md의 타임라인 중 webapp 화면이 있는 4곳(예약·
     재고·고객문의·주문접수)은 각 화면 데모 큐에서 시연 가능해야 한다."""
     base = Path(__file__).resolve().parent.parent / "webapp_bff"
     support_html = (base / "templates" / "support.html").read_text(encoding="utf-8")
@@ -150,7 +153,7 @@ def test_nav_includes_reservations_link(client, auth_headers):
 def test_nav_includes_live_demo_link(client, auth_headers):
     resp = client.get("/dashboard", headers=auth_headers)
     assert 'href="/live-demo"' in resp.text
-    assert "라이브 데모" in resp.text
+    assert "사장님 라이브" in resp.text
 
 
 def test_live_demo_page_has_step_queue_and_log(client, auth_headers):
@@ -215,3 +218,116 @@ def test_live_demo_js_result_kinds_match_available_pos_proxy_endpoints():
     )
     kinds = set(re.findall(r'kind: "([^"]+)"', text))
     assert kinds == {"inventory", "orders", "reservations", "sales", "settlement", "support-note"}
+
+
+def test_nav_includes_customer_live_demo_link(client, auth_headers):
+    resp = client.get("/dashboard", headers=auth_headers)
+    assert 'href="/live-demo/customer"' in resp.text
+    assert "고객 라이브" in resp.text
+
+
+@pytest.mark.parametrize("path", ["/support", "/orders", "/inventory", "/reservations", "/dashboard", "/live-demo", "/live-demo/customer"])
+def test_staff_nav_includes_customer_screen_link(client, auth_headers, path):
+    """스태프 화면 어디에서든 메뉴바에서 바로 /customer(고객 화면)로 전환할 수
+    있어야 한다 — view-switch pill만으로는 발견성이 낮다는 피드백에 따라
+    아이콘 메뉴에도 동일한 링크를 추가했다."""
+    resp = client.get(path, headers=auth_headers)
+    assert 'href="/customer"' in resp.text
+    assert "고객 화면" in resp.text
+
+
+def test_customer_live_demo_page_has_step_queue_and_log(client, auth_headers):
+    resp = client.get("/live-demo/customer", headers=auth_headers)
+    assert 'id="demo-day-steps"' in resp.text
+    assert 'id="demo-day-detail"' in resp.text
+    assert 'id="demo-day-thread"' in resp.text
+    assert 'src="/static/customer_live_demo.js?v=' in resp.text
+
+
+def test_customer_live_demo_js_has_all_7_steps():
+    text = (
+        Path(__file__).resolve().parent.parent / "webapp_bff" / "static" / "customer_live_demo.js"
+    ).read_text(encoding="utf-8")
+    assert text.count('time: "') == 7
+    for label in ["08:15", "08:20", "08:30", "12:40", "13:10", "18:50", "19:05"]:
+        assert f'time: "{label}"' in text
+
+
+def test_customer_live_demo_js_only_uses_allowed_profiles():
+    """/api/agent/message는 coordinator/customer-service-agent만 허용한다
+    (agent.py) — live_demo.js와 동일한 제약."""
+    text = (
+        Path(__file__).resolve().parent.parent / "webapp_bff" / "static" / "customer_live_demo.js"
+    ).read_text(encoding="utf-8")
+    profiles = set(re.findall(r'profile: "([^"]+)"', text))
+    assert profiles <= {"coordinator", "customer-service-agent"}
+    assert profiles
+
+
+def test_customer_live_demo_js_result_panel_fetches_pos_proxy_not_write_routes():
+    text = (
+        Path(__file__).resolve().parent.parent / "webapp_bff" / "static" / "customer_live_demo.js"
+    ).read_text(encoding="utf-8")
+    fetch_paths = re.findall(r'fetch\(`?"?(/api/[^`"\s)]*)', text)
+    assert fetch_paths
+    for path in fetch_paths:
+        assert path.startswith("/api/pos/") or path.startswith("/api/agent/message")
+
+
+def test_customer_live_demo_js_result_kinds_match_available_pos_proxy_endpoints():
+    text = (
+        Path(__file__).resolve().parent.parent / "webapp_bff" / "static" / "customer_live_demo.js"
+    ).read_text(encoding="utf-8")
+    kinds = set(re.findall(r'kind: "([^"]+)"', text))
+    assert kinds <= {"inventory", "orders", "reservations", "sales", "settlement", "support-note"}
+    assert kinds
+
+
+def test_home_page_has_view_switch_cards(client, auth_headers):
+    resp = client.get("/home", headers=auth_headers)
+    assert 'href="/customer"' in resp.text
+    assert 'href="/live-demo/customer"' in resp.text
+    assert "고객 화면" in resp.text
+    assert "손님 라이브 데모" in resp.text
+
+
+def test_customer_home_page_uses_customer_mode(client, auth_headers):
+    resp = client.get("/customer", headers=auth_headers)
+    assert 'class="mode-customer"' in resp.text
+    assert "customer-preview-banner" in resp.text
+
+
+def test_customer_faq_page_has_chat_widget(client, auth_headers):
+    resp = client.get("/customer/faq", headers=auth_headers)
+    assert "initChatWidget" in resp.text
+    assert "customer-service-agent" in resp.text
+
+
+def test_customer_order_page_has_wizard_steps(client, auth_headers):
+    resp = client.get("/customer/order", headers=auth_headers)
+    assert 'id="order-menu-grid"' in resp.text
+    assert 'id="order-cart-step"' in resp.text
+    assert 'id="order-checkout-step"' in resp.text
+
+
+def test_customer_order_js_only_uses_allowed_profile():
+    text = (Path(__file__).resolve().parent.parent / "webapp_bff" / "static" / "customer_order.js").read_text(
+        encoding="utf-8"
+    )
+    assert '"coordinator"' in text
+    assert "customer-service-agent" not in text
+
+
+def test_customer_reservation_page_has_wizard_steps(client, auth_headers):
+    resp = client.get("/customer/reservation", headers=auth_headers)
+    assert 'id="reservation-date-grid"' in resp.text
+    assert 'id="reservation-time-grid"' in resp.text
+    assert 'id="reservation-party-grid"' in resp.text
+
+
+def test_customer_reservation_js_only_uses_allowed_profile():
+    text = (
+        Path(__file__).resolve().parent.parent / "webapp_bff" / "static" / "customer_reservation.js"
+    ).read_text(encoding="utf-8")
+    assert '"coordinator"' in text
+    assert "customer-service-agent" not in text

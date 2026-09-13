@@ -1,12 +1,12 @@
 # 21. 마니카페 "사장님의 하루" — 헤르메스 에이전트 라이브 시연 환경 구축 계획
 
-> 이 문서는 `course/마니카페_사장님의_하루.md` 타임라인을 실제 VPS 배포(TriAgent_SMB) 위에서
+> 이 문서는 `course/260912_마니카페_사장님의_하루.md` 타임라인을 실제 VPS 배포(TriAgent_SMB) 위에서
 > 라이브로 시연하기 위한 실행 계획이다. 아직 실행 전 단계이며, 각 항목이 실행되면 이 문서에
 > 결과(✅/❌ + 날짜)를 갱신한다.
 
 ## Context
 
-`course/마니카페_사장님의_하루.md`(및 아티팩트)에서 만든 12개 타임라인 비교 스토리를,
+`course/260912_마니카페_사장님의_하루.md`(및 아티팩트)에서 만든 12개 타임라인 비교 스토리를,
 실제로 VPS에 배포되어 있는 TriAgent_SMB(coordinator + 6개 에이전트, mock-pos, webapp,
 Discord 봇) 위에서 **발표자가 본인 노트북 화면 공유로 12개 전체를 라이브 시연**할 수
 있게 만드는 것이 목표다.
@@ -198,7 +198,7 @@ pytest는 통과했으나 컨테이너 환경에서 12개 전체를 실제로 �
 
 ## P3 — 문서 수정: "카카오톡" → "디스코드" (✅ 2026-09-11 완료)
 
-`course/마니카페_사장님의_하루.md`와 `.html` 양쪽에서 실제 연동과 다른 "카카오톡" 표기를
+`course/260912_마니카페_사장님의_하루.md`와 `.html` 양쪽에서 실제 연동과 다른 "카카오톡" 표기를
 "디스코드"로 교체 (사용자 확인됨):
 - hero 안내문: "확인은 카카오톡·디스코드·웹 콘솔 어디서든 가능합니다." → "확인은
   디스코드·웹 콘솔 어디서든 가능합니다."
@@ -368,7 +368,7 @@ git-무시 대상이고, `orchestration`/`pos`/`support`/`marketing` 4개 카테
 - `.hermes/profiles/sales-analytics-agent/skills/integrations/sheets_report/SKILL.md` (신규, git-무시)
 - `.hermes/profiles/coordinator/skills/integrations/notion_kanban_mirror/SKILL.md` (신규, git-무시)
 - `.hermes/config.yaml` — dashboard basic_auth 해시 로테이션
-- `course/마니카페_사장님의_하루.md` / `.html` — "카카오톡"→"디스코드" 표기 수정 + Gmail/Sheets/Notion 반영 + "웹앱에서 테스트하기" 표 신설(2026-09-11)
+- `course/260912_마니카페_사장님의_하루.md` / `.html` — "카카오톡"→"디스코드" 표기 수정 + Gmail/Sheets/Notion 반영 + "웹앱에서 테스트하기" 표 신설(2026-09-11)
 - `webapp/webapp_bff/templates/reservations.html`, `webapp/webapp_bff/static/reservations.js` (신규, 2026-09-11) — 예약 관리 화면(③번 타임라인용)
 - `webapp/webapp_bff/templates/support.html`, `webapp/webapp_bff/static/{orders,inventory}.js` — "사장님의 하루" 시나리오에 맞춘 데모 큐 항목 추가(2026-09-11, P2.1 참고)
 - `webapp/webapp_bff/templates/live_demo.html`, `webapp/webapp_bff/static/live_demo.js` (신규, 2026-09-11) — 12개 타임라인 전체를 한 화면에서 순서대로 진행하는 "라이브 데모" 화면(P2.1 하단 참고)

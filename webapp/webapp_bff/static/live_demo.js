@@ -237,6 +237,9 @@ function renderDetail() {
         <input id="demo-day-input" type="text" autocomplete="off" value="${step.message.replace(/"/g, "&quot;")}" ${busy ? "disabled" : ""}>
         <button type="submit" class="btn-primary" ${busy ? "disabled" : ""}>보내기</button>
       </form>
+      <div id="demo-day-sent" class="sent-prompt"></div>
+      <div id="demo-day-summary" class="compact-result"></div>
+      ${step.result ? `<a href="${step.result.href}" class="btn-ghost hero-quick-goto" target="_blank" rel="noopener">${step.result.label}에서 확인 →</a>` : ""}
     ` : `
       <div class="demo-day-actions">
         <button type="button" id="demo-day-mark-done" class="btn-ghost">확인 완료 · 다음 장면</button>
@@ -384,6 +387,8 @@ async function sendStep(step, index, message) {
   busy = true;
   renderDetail();
   renderStepList();
+  renderSentPrompt(document.getElementById("demo-day-sent"), message);
+  renderCompactResult(document.getElementById("demo-day-summary"), { status: "pending", text: "coordinator에게 전달하는 중…" });
   if (step.result) loadResultPanel(step); // 전송 직전 상태를 보여주고, 완료 후 finally에서 다시 한번 갱신한다
   try {
     const res = await fetch("/api/agent/message", {
@@ -396,6 +401,10 @@ async function sendStep(step, index, message) {
     pending.remove();
     const statusClass = data.status === "ok" ? null : data.status;
     appendMessage("agent", data.text, statusClass);
+    if (index === currentIndex) {
+      renderSentPrompt(document.getElementById("demo-day-sent"), message);
+      renderCompactResult(document.getElementById("demo-day-summary"), { status: data.status === "ok" ? "ok" : data.status, text: data.text });
+    }
     if (data.status === "timeout") {
       let attempts = 0;
       timeoutPollTimer = setInterval(() => {
@@ -407,16 +416,26 @@ async function sendStep(step, index, message) {
     clearInterval(elapsedTimer);
     pending.remove();
     appendMessage("agent", "네트워크 오류가 발생했습니다. 다시 시도해 주세요.", "error");
+    if (index === currentIndex) {
+      renderSentPrompt(document.getElementById("demo-day-sent"), message);
+      renderCompactResult(document.getElementById("demo-day-summary"), { status: "error", text: "네트워크 오류가 발생했습니다. 다시 시도해 주세요." });
+    }
   } finally {
     clearInterval(elapsedTimer);
     busy = false;
     done[index] = true;
     if (index === currentIndex) {
-      // 다음 장면으로 넘어가기 전에, 방금 실행한 장면의 결과 패널을 최신 데이터로
-      // 한 번 갱신해둔다 — 발표자가 왼쪽 목록에서 이 장면을 다시 클릭했을 때
-      // 이미 최신 상태가 보이게.
+      // 자동으로 다음 장면으로 넘어가지 않는다 — 방금 받은 결과(보낸 요청 +
+      // 응답 요약)를 발표자가 이 자리에서 계속 볼 수 있어야 하기 때문이다.
+      // renderDetail()을 다시 부르면 방금 채운 결과가 지워지므로, 입력창/버튼의
+      // disabled만 직접 풀어준다. 다음 장면은 왼쪽 목록을 직접 클릭해 이동한다.
+      const input = document.getElementById("demo-day-input");
+      const submitBtn = document.querySelector("#demo-day-form button[type=submit]");
+      if (input) input.disabled = false;
+      if (submitBtn) submitBtn.disabled = false;
       if (step.result) await loadResultPanel(step);
-      advance();
+      renderProgress();
+      renderStepList();
     } else {
       renderProgress();
       renderStepList();

@@ -32,6 +32,7 @@
 | [22-vps-dashboard-access.md](22-vps-dashboard-access.md) | 이 VPS의 Hermes 프로젝트 3개(SMB/MICE/ADCreator) 대시보드 접속 한눈에 보기 — 2026-09-07 포트 1xxxx 이전 + 자격증명 `.env` 이전 + 공유 Traefik HTTPS 상시 접속. SMB는 적용·검증 완료, MICE/ADCreator는 안내만 하고 적용은 대기 중 |
 | [24-review-reply-design.md](24-review-reply-design.md) | 리뷰 자동 응답 기능 설계(신규, 2026-09-11) — `customer-service-agent`에 `review-reply-draft` 스킬 추가, 리뷰는 수동 입력·답글은 초안만 생성(게시는 사람), 실제 챗 검증은 아직 남음 |
 | [25-token-optimization.md](25-token-optimization.md) | 토큰 사용량 점검·최적화(2026-09-11) — 설계 문서 대비 실제 활성 툴셋/번들 스킬이 과도했던 것을 발견해 7개 프로필 전체 정리, `hermes prompt-size` 실측 기준 신규 세션 고정 프롬프트 32.8% 절감(API 호출 없이 오프라인으로 진행) |
+| [26-webapp-deployment-review.md](26-webapp-deployment-review.md) | 웹앱 배포·활용 가능성 검토(2026-09-12) — VPS 실측(컨테이너/health/pytest 51건 통과) 기준 배포는 완료·안정 운영 중, 다만 Mock POS가 인메모리 시뮬레이터인 점·응답 지연·`docker.sock` 마운트 등 실사용 전환 갭 정리 |
 
 ## 한 줄 요약
 

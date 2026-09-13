@@ -57,12 +57,7 @@ function initChatWidget({ formId, inputId, threadId, profile, storageKey, placeh
   }
 
   function conversationId() {
-    let id = localStorage.getItem(storageKey);
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem(storageKey, id);
-    }
-    return id;
+    return getConversationId(storageKey);
   }
 
   function renderDemoBar() {

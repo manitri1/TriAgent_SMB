@@ -12,7 +12,13 @@
   <span class="dash-freshness" id="dash-freshness"></span>
 </div>
 
-<p class="eyebrow" style="margin-top: 0;">오늘의 핵심 지표</p>
+<p class="briefing-line" id="briefing-line"></p>
+
+<p class="eyebrow" style="margin-top: 0;">사장님이 오늘 확인해야 할 것</p>
+<div id="insight-list" class="insight-grid"></div>
+<div id="insight-empty" class="insight-empty" hidden>오늘은 특별히 확인하실 결정 사항이 없습니다 — 순조롭게 운영되고 있어요.</div>
+
+<p class="eyebrow">오늘의 핵심 지표</p>
 <div class="grid">
   <div class="card card--hero">
     <h2>오늘 매출</h2>
@@ -82,5 +88,6 @@
 {% endblock %}
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/common.js?v={{ v }}"></script>
 <script src="/static/dashboard.js?v={{ v }}"></script>
 {% endblock %}

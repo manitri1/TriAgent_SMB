@@ -25,7 +25,7 @@ def index():
 
 @router.get("/home")
 def home_page(request: Request):
-    return templates.TemplateResponse(request, "home.html", {"active": None})
+    return templates.TemplateResponse(request, "home.html", {"active": "home"})
 
 
 @router.get("/inventory")
@@ -56,3 +56,35 @@ def reservations_page(request: Request):
 @router.get("/live-demo")
 def live_demo_page(request: Request):
     return templates.TemplateResponse(request, "live_demo.html", {"active": "live-demo"})
+
+
+@router.get("/live-demo/customer")
+def customer_live_demo_page(request: Request):
+    return templates.TemplateResponse(request, "customer_live_demo.html", {"active": "customer-live-demo"})
+
+
+# ── 고객 화면 미리보기(데모) — 실제 손님용 공개 서비스가 아니라, 같은 직원
+# 인증 뒤에서 "손님이라면 이렇게 보일 것"을 보여주는 시연용 화면이다. 그래서
+# 별도 인증 모델 없이 기존 require_auth를 그대로 쓰고, mode="customer"만
+# 넘겨 base.html이 톤/네비게이션을 다르게 렌더링하게 한다.
+
+@router.get("/customer")
+def customer_home_page(request: Request):
+    return templates.TemplateResponse(request, "customer_home.html", {"active": "customer-home", "mode": "customer"})
+
+
+@router.get("/customer/faq")
+def customer_faq_page(request: Request):
+    return templates.TemplateResponse(request, "customer_faq.html", {"active": "customer-faq", "mode": "customer"})
+
+
+@router.get("/customer/order")
+def customer_order_page(request: Request):
+    return templates.TemplateResponse(request, "customer_order.html", {"active": "customer-order", "mode": "customer"})
+
+
+@router.get("/customer/reservation")
+def customer_reservation_page(request: Request):
+    return templates.TemplateResponse(
+        request, "customer_reservation.html", {"active": "customer-reservation", "mode": "customer"}
+    )

@@ -4,8 +4,9 @@
 <h1>라이브 데모 — 사장님의 하루 (12장면)</h1>
 <p class="lead">
   <code>docs/21-live-demo-plan.md</code>의 12개 타임라인을 시간 순서대로 진행합니다.
-  왼쪽 목록에서 장면을 고르고, 입력창에 채워진 문구를 확인한 뒤 전송하세요 — 응답을
-  받으면 자동으로 다음 장면으로 넘어갑니다. Discord/CLI/대시보드가 실제 채널인
+  왼쪽 목록에서 장면을 고르고, 입력창에 채워진 문구를 확인한 뒤 전송하세요 — 보낸
+  요청과 응답 요약이 이 자리에 남아있으니 확인한 뒤 왼쪽 목록에서 다음 장면을 눌러
+  이동하세요. Discord/CLI/대시보드가 실제 채널인
   장면도 동일한 프롬프트를 coordinator에게 보내 webapp에서 대체 시연할 수 있게
   했습니다(장면별 "실제 채널" 안내 참고).
 </p>
@@ -28,5 +29,6 @@
 </section>
 {% endblock %}
 {% block scripts %}
+<script src="/static/common.js?v={{ v }}"></script>
 <script src="/static/live_demo.js?v={{ v }}"></script>
 {% endblock %}

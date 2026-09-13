@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}문의하기 — 마니카페{% endblock %}
+{% block content %}
+<h1>문의하기</h1>
+<p class="lead">영업시간·주차·메뉴 등 궁금한 점을 편하게 물어보세요.</p>
+
+<section class="panel chat-panel">
+  <div id="customer-faq-thread" class="chat-thread"></div>
+  <div id="customer-faq-quick-replies" class="chip-row"></div>
+  <form id="customer-faq-form" class="chat-form">
+    <input id="customer-faq-input" type="text" autocomplete="off" placeholder="예: 오늘 몇 시부터 열어요?">
+    <button type="submit" class="btn-primary">보내기</button>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/common.js?v={{ v }}"></script>
+<script src="/static/chat.js?v={{ v }}"></script>
+<script>
+  initChatWidget({
+    formId: "customer-faq-form",
+    inputId: "customer-faq-input",
+    threadId: "customer-faq-thread",
+    profile: "customer-service-agent",
+    storageKey: "conversation_id_customer_faq",
+    placeholderText: "예: 오늘 몇 시부터 열어요?",
+    quickRepliesId: "customer-faq-quick-replies",
+    quickReplies: [
+      { label: "영업시간", message: "오늘 몇 시부터 열어요?" },
+      { label: "주차 가능 여부", message: "혹시 가게 앞에 주차 가능한가요?" },
+      { label: "와이파이 비밀번호", message: "와이파이 비밀번호 알려주세요" },
+      { label: "시즌 메뉴", message: "요즘 시즌 메뉴로 나온 거 있어요?" },
+    ],
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}고객 홈 — 마니카페{% endblock %}
+{% block content %}
+<div class="hero-grid">
+  <div style="position: relative;">
+    <p class="hero-eyebrow">MANICAFE</p>
+    <h1 class="hero-title">마니카페에<br><span class="accent-text">오신 걸 환영해요.</span></h1>
+    <p class="hero-lead">문의, 주문, 예약까지 — 원하는 걸 아래에서 골라 바로 물어보세요.</p>
+    <div class="hero-bubble hero-bubble--live">
+      <p class="hero-bubble-label">지금 바로 해보세요 — 골라서 물어보세요</p>
+      <div id="customer-quick-chips" class="chip-row"></div>
+      <div id="customer-quick-sent" class="sent-prompt"></div>
+      <div id="customer-quick-result" class="compact-result"></div>
+      <a id="customer-quick-goto" href="/customer/order" class="btn-ghost hero-quick-goto">주문하기에서 계속 →</a>
+    </div>
+    <div class="sr-only-chat">
+      <div id="customer-quick-thread"></div>
+      <form id="customer-quick-form">
+        <input id="customer-quick-input" type="text">
+        <button type="submit">전송</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<p class="eyebrow" style="margin-top: 0;">바로 이동하기</p>
+<div class="nav-grid">
+  <a href="/customer/faq" class="nav-card">
+    <div class="nav-card-head">
+      <span class="nav-card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </span>
+    </div>
+    <div class="nav-card-title">문의하기</div>
+    <div class="nav-card-desc">영업시간·주차·메뉴 등 궁금한 점 물어보기</div>
+  </a>
+  <a href="/customer/order" class="nav-card">
+    <div class="nav-card-head">
+      <span class="nav-card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </span>
+    </div>
+    <div class="nav-card-title">주문하기</div>
+    <div class="nav-card-desc">메뉴를 골라 셀프 주문</div>
+  </a>
+  <a href="/customer/reservation" class="nav-card">
+    <div class="nav-card-head">
+      <span class="nav-card-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </span>
+    </div>
+    <div class="nav-card-title">예약하기</div>
+    <div class="nav-card-desc">날짜·시간·인원을 골라 예약</div>
+  </a>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/common.js?v={{ v }}"></script>
+<script src="/static/chat.js?v={{ v }}"></script>
+<script src="/static/customer_home.js?v={{ v }}"></script>
+{% endblock %}

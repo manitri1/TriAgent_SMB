@@ -44,6 +44,9 @@ class OrderLineItem(OrderLineItemIn):
 class OrderCreate(BaseModel):
     line_items: List[OrderLineItemIn]
     customer_id: Optional[str] = None
+    # 데모/시드 전용: 지정하면 그 시각으로 주문을 기록한다(생략 시 지금). 매출 추이
+    # 리포트가 실제 운영 히스토리처럼 보이도록 과거 데이터를 채워 넣을 때 쓴다.
+    created_at: Optional[datetime] = None
 
 
 class OrderUpdate(BaseModel):
@@ -67,6 +70,8 @@ class Order(BaseModel):
 class PaymentCreate(BaseModel):
     order_id: str
     method: str = "CARD"
+    # 데모/시드 전용: OrderCreate.created_at과 동일한 목적 — 생략 시 지금.
+    created_at: Optional[datetime] = None
 
 
 class RefundRequest(BaseModel):

@@ -9,48 +9,91 @@
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
   <link rel="stylesheet" href="/static/app.css?v={{ v }}">
 </head>
-<body>
+<body class="mode-{{ 'customer' if mode == 'customer' else 'staff' }}">
   <header class="topnav">
-    <a href="/home" class="brand">
-      <span class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9Z"/><path d="M16 10.5h1.4a2.3 2.3 0 0 1 0 4.6H16"/><path d="M8.3 6.2c0-.9.8-1.1.8-2S8.3 2.7 8.3 2.7M12.3 6.2c0-.9.8-1.1.8-2s-.8-1.5-.8-1.5"/></svg>
-      </span>
-      <span class="brand-text">마니카페 <em>운영 콘솔</em></span>
+    <a href="{{ '/customer' if mode == 'customer' else '/home' }}" class="brand">
+      <span class="brand-text">마니카페 <em>{{ '고객센터' if mode == 'customer' else '운영 콘솔' }}</em></span>
     </a>
-    {% if active %}
-    <nav>
-      <a href="/support" class="{{ 'active' if active == 'support' }}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5.5h16a1 1 0 0 1 1 1V16a1 1 0 0 1-1 1H9l-4.5 4V17H4a1 1 0 0 1-1-1V6.5a1 1 0 0 1 1-1Z"/></svg>
-        <span>고객 문의</span>
-      </a>
-      <a href="/orders" class="{{ 'active' if active == 'orders' }}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h2l1.2 10.4A1.5 1.5 0 0 0 8.7 17.8h9.3a1.5 1.5 0 0 0 1.47-1.2L21 8.5H6.2"/><circle cx="9.5" cy="21" r="1.2" fill="currentColor" stroke="none"/><circle cx="17.5" cy="21" r="1.2" fill="currentColor" stroke="none"/></svg>
-        <span>주문 접수</span>
-      </a>
-      <a href="/inventory" class="{{ 'active' if active == 'inventory' }}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.5 8 12 3.5 20.5 8M3.5 8v8.2L12 20.5m-8.5-12.3L12 12m0 0 8.5-4M12 12v8.5m8.5-12.5V16.2L12 20.5"/></svg>
-        <span>재고 관리</span>
-      </a>
-      <a href="/reservations" class="{{ 'active' if active == 'reservations' }}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path stroke-linecap="round" d="M3.5 9.5h17M8 3v3.5M16 3v3.5"/></svg>
-        <span>예약 관리</span>
-      </a>
-      <a href="/dashboard" class="{{ 'active' if active == 'dashboard' }}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M4 20V10m6.5 10V4m6.5 16v-7"/></svg>
-        <span>대시보드</span>
-      </a>
-      <a href="/live-demo" class="{{ 'active' if active == 'live-demo' }}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path stroke-linecap="round" stroke-linejoin="round" d="M10.3 8.7v6.6l5.4-3.3-5.4-3.3Z"/></svg>
-        <span>라이브 데모</span>
-      </a>
-    </nav>
-    {% else %}
-    <span class="hero-status">실시간 연동됨</span>
-    {% endif %}
+    <div class="topnav-right">
+      {% if mode == 'customer' %}
+      <nav class="customer-nav">
+        <a href="/customer" class="{{ 'active' if active == 'customer-home' }}">
+          <span>고객 홈</span>
+        </a>
+        <a href="/customer/faq" class="{{ 'active' if active == 'customer-faq' }}">
+          <span>문의하기</span>
+        </a>
+        <a href="/customer/order" class="{{ 'active' if active == 'customer-order' }}">
+          <span>주문하기</span>
+        </a>
+        <a href="/customer/reservation" class="{{ 'active' if active == 'customer-reservation' }}">
+          <span>예약하기</span>
+        </a>
+      </nav>
+      {% else %}
+      {% set ops_pages = ['dashboard', 'support', 'orders', 'inventory', 'reservations'] %}
+      {% set live_pages = ['live-demo', 'customer-live-demo'] %}
+      <nav class="topnav-menu">
+        <div class="nav-dropdown">
+          <a href="/dashboard" class="nav-dropdown-trigger{{ ' active' if active in ops_pages }}">
+            <span>운영 화면</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+          </a>
+          <div class="nav-dropdown-panel">
+            <a href="/support" class="{{ 'active' if active == 'support' }}">고객 문의</a>
+            <a href="/orders" class="{{ 'active' if active == 'orders' }}">주문 접수</a>
+            <a href="/inventory" class="{{ 'active' if active == 'inventory' }}">재고 관리</a>
+            <a href="/reservations" class="{{ 'active' if active == 'reservations' }}">예약 관리</a>
+          </div>
+        </div>
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown-trigger{{ ' active' if active == 'home' }}">
+            <span>사용자</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-panel">
+            <a href="/home" class="{{ 'active' if active == 'home' }}">사장님 화면</a>
+            <a href="/customer">고객 화면</a>
+          </div>
+        </div>
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown-trigger{{ ' active' if active in live_pages }}">
+            <span>라이브</span>
+            <svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="nav-dropdown-panel">
+            <a href="/live-demo" class="{{ 'active' if active == 'live-demo' }}">사장님 라이브</a>
+            <a href="/live-demo/customer" class="{{ 'active' if active == 'customer-live-demo' }}">고객 라이브</a>
+          </div>
+        </div>
+      </nav>
+      {% endif %}
+    </div>
   </header>
+  {% if mode == 'customer' %}
+  <div class="customer-preview-banner">이 화면은 고객이 보게 될 화면의 데모 미리보기입니다 — 실제 고객에게 공개되지 않으며, 사장님/직원 계정으로만 접근할 수 있습니다.</div>
+  {% endif %}
   <main class="page">
     {% block content %}{% endblock %}
   </main>
+  <script>
+    document.querySelectorAll(".nav-dropdown").forEach((dropdown) => {
+      const trigger = dropdown.querySelector(".nav-dropdown-trigger");
+      trigger.addEventListener("click", (e) => {
+        const willOpen = !dropdown.classList.contains("open");
+        document.querySelectorAll(".nav-dropdown.open").forEach((d) => d.classList.remove("open"));
+        if (willOpen) {
+          e.preventDefault();
+          dropdown.classList.add("open");
+        }
+      });
+    });
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".nav-dropdown")) {
+        document.querySelectorAll(".nav-dropdown.open").forEach((d) => d.classList.remove("open"));
+      }
+    });
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

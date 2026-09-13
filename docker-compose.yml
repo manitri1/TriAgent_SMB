@@ -42,6 +42,31 @@ services:
     # 모델 인증: `.hermes/.env`(커밋 대상 아님, `.hermes/.env.example` 참고)에
     # OPENAI_API_KEY=를 채우면 Hermes Agent CLI가 $HERMES_HOME/.env를 직접 읽는다 —
     # 이 compose 파일에 environment:/env_file:을 별도로 추가할 필요가 없다.
+    #
+    # 모델 provider/이름: 각 config.yaml(top-level, profiles/<role> 7개)은 own
+    # 파일만 읽고 상위 config.yaml을 상속하지 않으므로, 실제 단일 소스는 이
+    # 컨테이너 환경변수다 (${VAR} 형태로 참조 → load_config()가 로드 시 치환).
+    # 값을 바꾸려면 여기(또는 최상위 .env)만 고치고 `docker compose up -d hermes`로
+    # 재생성하면 전부 반영된다 — profiles/<role>/.env처럼 파일을 복사할 필요 없음
+    # (컨테이너 프로세스 환경은 모든 s6 profile 서비스가 공유하기 때문).
+    #
+    # top-level(.hermes/config.yaml)은 터미널 직접 테스트용 — ChatGPT/Codex 구독
+    # 계정에서 확인된 gpt-5.5(openai-codex)로 고정.
+    #
+    # profiles/<role> 7개는 openai-codex 구독의 공유 rate-limit을 피하려고
+    # openai-api(OPENAI_API_KEY, 토큰당 과금)로 전환하고 역할별로 모델을 다르게
+    # 지정했다 (2026-09-12, models.dev 가격표 + SOUL.md 역할 근거 — docs 참고).
+    environment:
+      HERMES_MODEL_DEFAULT: ${HERMES_MODEL_DEFAULT:-gpt-5.5}
+      HERMES_MODEL_PROVIDER: ${HERMES_MODEL_PROVIDER:-openai-codex}
+      AGENT_MODEL_PROVIDER: ${AGENT_MODEL_PROVIDER:-openai-api}
+      COORDINATOR_MODEL: ${COORDINATOR_MODEL:-gpt-5.1}
+      CUSTOMER_SERVICE_AGENT_MODEL: ${CUSTOMER_SERVICE_AGENT_MODEL:-gpt-5.1}
+      ORDER_PAYMENT_AGENT_MODEL: ${ORDER_PAYMENT_AGENT_MODEL:-gpt-5.2}
+      INVENTORY_AGENT_MODEL: ${INVENTORY_AGENT_MODEL:-gpt-5.4-nano}
+      RESERVATION_AGENT_MODEL: ${RESERVATION_AGENT_MODEL:-gpt-5-mini}
+      MARKETING_CRM_AGENT_MODEL: ${MARKETING_CRM_AGENT_MODEL:-gpt-5.2}
+      SALES_ANALYTICS_AGENT_MODEL: ${SALES_ANALYTICS_AGENT_MODEL:-gpt-5.4}
 
   dashboard:
     image: nousresearch/hermes-agent:latest

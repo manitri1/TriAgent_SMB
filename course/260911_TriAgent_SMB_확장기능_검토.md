@@ -1,7 +1,7 @@
 # TriAgent_SMB 확장 기능 검토
 
 **목적**: 현재 구현 상태 대비 "다음에 확장해야 하는 기능"을 정리
-**근거**: [README.md](../README.md), [docs/07-roadmap.md](../docs/07-roadmap.md), [docs/21-live-demo-plan.md](../docs/21-live-demo-plan.md), [webapp/README.md](../webapp/README.md), 그리고 이번 데모 영상 스토리라인 검토([마니카페_데모영상_스토리라인_검토.md](마니카페_데모영상_스토리라인_검토.md))에서 발견된 기능 격차
+**근거**: [README.md](../README.md), [docs/07-roadmap.md](../docs/07-roadmap.md), [docs/21-live-demo-plan.md](../docs/21-live-demo-plan.md), [webapp/README.md](../webapp/README.md), 그리고 이번 데모 영상 스토리라인 검토([260911_마니카페_데모영상_스토리라인_검토.md](260911_마니카페_데모영상_스토리라인_검토.md))에서 발견된 기능 격차
 **작성일**: 2026-09-11
 
 ---

@@ -1,6 +1,6 @@
 model:
-  default: gpt-5-mini
-  provider: openai-api
+  default: ${ORDER_PAYMENT_AGENT_MODEL}
+  provider: ${AGENT_MODEL_PROVIDER}
 _config_version: 40
 platform_toolsets:
   cli:

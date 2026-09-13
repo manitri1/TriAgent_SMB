@@ -24,10 +24,12 @@ def create_payment(store_id: str, payload: PaymentCreate):
     if order["status"] == "CANCELED":
         raise HTTPException(status_code=409, detail="Cannot pay a canceled order")
 
+    created_at = payload.created_at or datetime.now(timezone.utc)
+
     if order["status"] == "OPEN":
         _deduct_inventory(data, order)
         order["status"] = "COMPLETED"
-        order["updated_at"] = datetime.now(timezone.utc)
+        order["updated_at"] = created_at
 
     payment = Payment(
         payment_id=f"pay_{uuid.uuid4().hex[:12]}",
@@ -35,6 +37,7 @@ def create_payment(store_id: str, payload: PaymentCreate):
         order_id=order["order_id"],
         amount=order["total_amount"],
         method=payload.method,
+        created_at=created_at,
     )
     data.payments[payment.payment_id] = payment.model_dump()
     return payment

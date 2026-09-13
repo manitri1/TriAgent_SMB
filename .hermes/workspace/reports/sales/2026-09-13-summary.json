@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-13",
+  "period": "today",
+  "currency": "KRW",
+  "gross_sales_total": 0,
+  "order_count": 0,
+  "refunded_amount": 0,
+  "partial_refund_amount": 0,
+  "net_sales": 0,
+  "source": {
+    "sales": {
+      "store_id": "store_demo",
+      "period": "today",
+      "order_count": 0,
+      "total_sales": 0,
+      "currency": "KRW"
+    },
+    "settlement": {
+      "store_id": "store_demo",
+      "period": "today",
+      "gross_sales": 0,
+      "payment_count": 0,
+      "refunded_amount": 0,
+      "refunded_count": 0,
+      "partial_refund_amount": 0,
+      "partial_refund_count": 0,
+      "currency": "KRW"
+    }
+  }
+}

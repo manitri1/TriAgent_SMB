@@ -1,0 +1,66 @@
+{
+  "timestamp_utc": "20260912T212433Z",
+  "order_type": "고객 셀프 주문",
+  "customer": {
+    "name": "김민지",
+    "customer_id": "cust_minji"
+  },
+  "requested_items": [
+    {
+      "name": "아메리카노",
+      "quantity": 1
+    }
+  ],
+  "catalog_item_snapshot": {
+    "item_id": "menu_americano",
+    "name": "아메리카노",
+    "unit_price": 3500,
+    "category": "coffee",
+    "cost": 800
+  },
+  "inventory_snapshot": {
+    "http_status": 200,
+    "response": {
+      "item_id": "menu_americano",
+      "stock_quantity": 0,
+      "low_stock_threshold": 5,
+      "updated_at": "2026-09-12T06:33:47.113255Z"
+    }
+  },
+  "computed_total_amount": 3500,
+  "order_get": {
+    "http_status": 200,
+    "response": {
+      "order_id": "order_2f927ec4b108",
+      "store_id": "store_demo",
+      "status": "OPEN",
+      "line_items": [
+        {
+          "item_id": "menu_americano",
+          "quantity": 1,
+          "note": "고객 셀프 주문",
+          "unit_price": 3500,
+          "subtotal": 3500
+        }
+      ],
+      "total_amount": 3500,
+      "currency": "KRW",
+      "customer_id": "cust_minji",
+      "created_at": "2026-09-12T21:24:16.860727Z",
+      "updated_at": "2026-09-12T21:24:16.860727Z"
+    }
+  },
+  "payment": {
+    "http_status": 409,
+    "response": {
+      "detail": "Insufficient stock for item menu_americano"
+    }
+  },
+  "summary": {
+    "order_id": "order_2f927ec4b108",
+    "payment_id": null,
+    "payment_status": "FAILED",
+    "final_paid_amount": 0,
+    "currency": "KRW"
+  }
+}

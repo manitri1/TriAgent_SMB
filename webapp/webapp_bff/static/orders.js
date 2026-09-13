@@ -9,6 +9,8 @@ let catalogItems = [];
 // 자유 채팅과 품목-피커가 같은 conversation_id(=hermes 세션)를 공유하므로,
 // 채팅 응답을 기다리는 동안 품목-피커로도 겹쳐 보내지 못하게 잠근다.
 let chatBusy = false;
+let awaitingPickerConfirm = false; // 자유채팅과 품목-피커가 conversation_id를 공유하므로, onReply가
+// 온 결과가 "방금 피커로 보낸 확정" 응답인지 구분해서 #order-confirm-result에 따로 보여준다.
 
 async function loadCatalog() {
   const container = document.getElementById("order-items");
@@ -139,7 +141,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     threadId: "orders-thread",
     profile: "coordinator",
     storageKey: "conversation_id_orders",
-    onReply: loadRecentOrders,
+    onReply: (data) => {
+      if (awaitingPickerConfirm) {
+        awaitingPickerConfirm = false;
+        renderCompactResult(document.getElementById("order-confirm-result"), {
+          status: data.status === "ok" ? "ok" : data.status,
+          text: data.text,
+        });
+      }
+      loadRecentOrders();
+    },
     onBusyChange: (busy) => {
       chatBusy = busy;
       updateSubmitButton(catalogItems);
@@ -159,6 +170,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const message = composeOrderMessage(items);
     const input = document.getElementById("orders-input");
     input.value = message;
+    awaitingPickerConfirm = true;
+    renderCompactResult(document.getElementById("order-confirm-result"), {
+      status: "pending", text: "coordinator에게 전달하는 중…",
+    });
     document.getElementById("orders-form").requestSubmit();
     Object.keys(selectedQty).forEach((k) => (selectedQty[k] = 0));
     document.querySelectorAll(".qty-value").forEach((el) => (el.textContent = "0"));

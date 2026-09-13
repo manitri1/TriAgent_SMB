@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}예약하기 — 마니카페{% endblock %}
+{% block content %}
+<h1>예약하기</h1>
+<p class="lead">날짜·시간·인원을 고르고, 이름을 입력한 뒤 예약을 확정하세요.</p>
+
+<section class="panel">
+  <div class="wizard-step">
+    <p class="wizard-step-label">날짜 선택</p>
+    <div id="reservation-date-grid" class="chip-grid">
+      <button type="button" class="wizard-chip" data-date="오늘">오늘</button>
+      <button type="button" class="wizard-chip" data-date="내일">내일</button>
+    </div>
+  </div>
+
+  <div class="wizard-step">
+    <p class="wizard-step-label">시간 선택</p>
+    <div id="reservation-time-grid" class="chip-grid">
+      <button type="button" class="wizard-chip" data-time="오후 12시">오후 12시</button>
+      <button type="button" class="wizard-chip" data-time="오후 1시">오후 1시</button>
+      <button type="button" class="wizard-chip" data-time="오후 6시">오후 6시</button>
+      <button type="button" class="wizard-chip" data-time="오후 7시">오후 7시</button>
+      <button type="button" class="wizard-chip" data-time="오후 8시">오후 8시</button>
+    </div>
+  </div>
+
+  <div class="wizard-step">
+    <p class="wizard-step-label">인원 선택</p>
+    <div id="reservation-party-grid" class="chip-grid">
+      <button type="button" class="wizard-chip" data-party="1">1명</button>
+      <button type="button" class="wizard-chip" data-party="2">2명</button>
+      <button type="button" class="wizard-chip" data-party="3">3명</button>
+      <button type="button" class="wizard-chip" data-party="4">4명</button>
+      <button type="button" class="wizard-chip" data-party="5">5명</button>
+      <button type="button" class="wizard-chip" data-party="6">6명</button>
+    </div>
+  </div>
+
+  <div class="wizard-step">
+    <p class="wizard-step-label">예약자 정보</p>
+    <div class="wizard-name-field">
+      <input id="reservation-customer-name" type="text" placeholder="성함을 입력해주세요 (예: 김민지)">
+    </div>
+    <div class="wizard-summary" id="reservation-summary">날짜·시간·인원을 먼저 선택해주세요.</div>
+    <div class="insight-actions">
+      <button type="button" id="reservation-submit" class="btn-primary" disabled>예약 확정</button>
+    </div>
+  </div>
+
+  <div id="reservation-sent-prompt" class="sent-prompt"></div>
+  <div id="reservation-result" class="compact-result"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/common.js?v={{ v }}"></script>
+<script src="/static/customer_reservation.js?v={{ v }}"></script>
+{% endblock %}

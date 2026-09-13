@@ -1,22 +1,39 @@
 {% extends "base.html" %}
-{% block title %}재고 파악/주문관리 — 마니카페 운영 콘솔{% endblock %}
+{% block title %}재고 관리 — 마니카페 운영 콘솔{% endblock %}
 {% block content %}
-<h1>재고 파악 / 주문관리</h1>
-<p class="lead">현재 재고 현황입니다. 재입고가 필요하면 아래에서 요청하세요 — coordinator에게 전달되어 승인 절차(HITL 게이트 2)를 거칩니다.</p>
+<div class="panel-head" style="margin-bottom: 6px;">
+  <h1 style="margin: 0;">재고 관리</h1>
+  <button id="refresh-inventory" class="btn-ghost" type="button">새로고침</button>
+</div>
+<p class="lead">재고 현황을 한눈에 확인하고, 필요한 재입고는 아래 카드에서 바로 요청하세요 — coordinator에게 전달되어 승인 절차(HITL 게이트 2)를 거칩니다.</p>
 
-<section class="panel">
-  <div class="panel-head">
-    <h2>재고 현황</h2>
-    <button id="refresh-inventory" class="btn-ghost" type="button">새로고침</button>
+<div class="stat-row">
+  <div class="stat-card">
+    <div class="stat-label">정상 재고</div>
+    <div class="stat-value" id="inv-stat-normal" style="color: var(--success);">-</div>
   </div>
-  <table class="data-table">
-    <thead><tr><th>품목</th><th>현재 재고</th><th>저재고 임계치</th><th>상태</th></tr></thead>
-    <tbody id="inventory-rows"><tr><td colspan="4" class="empty">불러오는 중…</td></tr></tbody>
-  </table>
-</section>
+  <div class="stat-card stat-card--danger">
+    <div class="stat-label">저재고 위험</div>
+    <div class="stat-value" id="inv-stat-risk">-</div>
+  </div>
+  <div class="stat-card stat-card--warning">
+    <div class="stat-label">소진 임박</div>
+    <div class="stat-value" id="inv-stat-eta">-</div>
+  </div>
+</div>
 
-<section class="panel">
-  <h2>재입고 요청</h2>
+<p class="eyebrow">지금 확인해야 할 것</p>
+<div id="inventory-actions" class="insight-grid"></div>
+<div id="inventory-actions-empty" class="insight-empty" hidden>지금 확인하실 재고 이슈가 없습니다.</div>
+<div class="action-add" id="restock-form-toggle" style="display: flex; align-items: center; justify-content: center; background: var(--surface); border: 1.5px dashed var(--border-strong); border-radius: var(--radius); padding: 14px 16px; color: var(--muted); font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 20px;">
+  + 직접 재입고 요청 만들기
+</div>
+
+<section class="panel" id="restock-form-panel" hidden>
+  <div class="panel-head">
+    <h2>재입고 요청</h2>
+    <button type="button" class="btn-ghost" id="restock-form-close">닫기</button>
+  </div>
   <p class="hint">coordinator에게 전달됩니다 — 수량이 기준을 넘으면 승인이 필요할 수 있습니다.</p>
   <div id="inventory-demo-bar" class="demo-bar"></div>
   <div id="restock-quick-chips" class="chip-row"></div>
@@ -32,7 +49,17 @@
     </label>
     <button type="submit" class="btn-primary">재입고 요청</button>
   </form>
-  <div id="restock-reply" class="restock-reply"></div>
+  <div id="restock-sent-prompt" class="sent-prompt"></div>
+  <div id="restock-reply" class="compact-result"></div>
 </section>
+
+<p class="eyebrow">재고 현황</p>
+<div id="inventory-accordion" class="accordion"></div>
+
+<p class="eyebrow">처리 로그</p>
+<div id="inventory-log" class="log"></div>
 {% endblock %}
-{% block scripts %}<script src="/static/inventory.js?v={{ v }}"></script>{% endblock %}
+{% block scripts %}
+<script src="/static/common.js?v={{ v }}"></script>
+<script src="/static/inventory.js?v={{ v }}"></script>
+{% endblock %}

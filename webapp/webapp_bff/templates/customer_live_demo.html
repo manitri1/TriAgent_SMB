@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}손님 라이브 데모 — 마니카페 운영 콘솔{% endblock %}
+{% block content %}
+<h1>손님 라이브 데모 — 손님의 하루 (7장면)</h1>
+<p class="lead">
+  단골 손님 한 명이 하루 동안 마니카페와 주고받는 문의·주문·예약·컴플레인을
+  시간 순서대로 진행합니다. 왼쪽 목록에서 장면을 고르고, 입력창에 채워진 문구를
+  확인한 뒤 전송하세요 — 보낸 요청과 응답 요약이 이 자리에 남아있으니 확인한 뒤
+  왼쪽 목록에서 다음 장면을 눌러 이동하세요. 실제
+  손님은 전화·카카오톡·매장 방문으로 문의하지만, 이 화면에서는 동일한 문구를
+  고객 문의(<code>customer-service-agent</code>) 또는 coordinator에게 보내
+  webapp에서 대체 시연합니다(<a href="/live-demo">사장님 라이브 데모</a>와 동일한
+  구조, 관점만 손님으로 바꿈).
+</p>
+
+<section class="panel demo-day">
+  <div class="demo-day-progress">
+    <span id="demo-day-progress-label">1/7</span>
+    <span class="demo-day-progress-track"><span id="demo-day-progress-fill" class="demo-day-progress-fill"></span></span>
+    <button type="button" id="demo-day-reset" class="demo-reset">처음부터</button>
+  </div>
+  <div class="demo-day-layout">
+    <ol class="demo-day-steps" id="demo-day-steps"></ol>
+    <div class="demo-day-detail" id="demo-day-detail"></div>
+  </div>
+</section>
+
+<section class="panel chat-panel" style="height: 42vh;">
+  <h2>실행 로그</h2>
+  <div id="demo-day-thread" class="chat-thread"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/common.js?v={{ v }}"></script>
+<script src="/static/customer_live_demo.js?v={{ v }}"></script>
+{% endblock %}

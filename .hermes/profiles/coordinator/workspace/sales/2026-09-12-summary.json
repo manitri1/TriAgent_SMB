@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-12",
+  "period": "today",
+  "store_id": "store_demo",
+  "currency": "KRW",
+  "total_sales": 36000,
+  "order_count": 4,
+  "refunded_amount": 0,
+  "partial_refund_amount": 0,
+  "refunded_count": 0,
+  "partial_refund_count": 0,
+  "verified_against_settlement": {
+    "gross_sales": 36000,
+    "payment_count": 4
+  }
+}

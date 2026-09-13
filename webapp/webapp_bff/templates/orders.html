@@ -24,6 +24,7 @@
     </div>
     <button id="order-submit" class="btn-primary" type="button" disabled>주문 접수</button>
   </div>
+  <div id="order-confirm-result" class="compact-result"></div>
 </section>
 
 <section class="panel chat-panel">
@@ -49,6 +50,7 @@
 </section>
 {% endblock %}
 {% block scripts %}
+<script src="/static/common.js?v={{ v }}"></script>
 <script src="/static/chat.js?v={{ v }}"></script>
 <script src="/static/orders.js?v={{ v }}"></script>
 {% endblock %}

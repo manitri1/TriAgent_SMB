@@ -56,7 +56,7 @@ task_dispatch_and_verification`, `pos/order_and_payment`, `pos/stock_and_reorder
 | coordinator | `code_execution` | docs/03: coordinator는 `terminal`로 위임하지 mock-pos를 직접 호출하지 않음 |
 | coordinator 제외 6개 프로필 | `clarify` | docs/03: HITL 승인 대화는 coordinator만 담당. 다른 프로필이 `clarify`를 가지면 사용자에게 직접 승인을 구해 coordinator의 승인 게이트를 우회할 위험(delegation과 동일한 클래스의 문제) |
 
-`cronjob`은 의도적으로 유지했다 — [TriAgent_SMB_확장기능_검토.md](../course/TriAgent_SMB_확장기능_검토.md)에서
+`cronjob`은 의도적으로 유지했다 — [TriAgent_SMB_확장기능_검토.md](../course/260911_TriAgent_SMB_확장기능_검토.md)에서
 다음 순위로 잡은 "예약 자동 리마인더 cron 검증" 작업에 필요하다.
 
 ## 3. 결과 (신규 세션 첫 턴 기준, `hermes prompt-size`로 실측)

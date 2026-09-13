@@ -1,18 +1,16 @@
 let catalogNameById = {};
 
+const inventoryActionBoard = createInsightBoard("inventory-actions", "inventory-actions-empty", {
+  onAfterSend: loadInventory,
+});
+const inventoryLog = createActionLog("inventory-log");
+
 async function loadCatalog() {
   const res = await fetch("/api/pos/catalog/items");
   if (!res.ok) return [];
   const items = await res.json();
   catalogNameById = Object.fromEntries(items.map((i) => [i.item_id, i.name]));
   return items;
-}
-
-/** 재고 심각도 3단계 — 위험(임계치 절반 이하) > 부족(임계치 이하) > 정상. */
-function stockSeverity(stockQty, threshold) {
-  if (stockQty <= threshold * 0.5) return { label: "위험", cls: "pill-danger", level: 2 };
-  if (stockQty <= threshold) return { label: "부족", cls: "pill-warning", level: 1 };
-  return { label: "정상", cls: "pill-success", level: 0 };
 }
 
 function renderRestockQuickChips(items) {
@@ -44,32 +42,89 @@ function renderRestockQuickChips(items) {
   });
 }
 
-async function loadInventory() {
-  const tbody = document.getElementById("inventory-rows");
-  const res = await fetch("/api/pos/inventory");
-  if (!res.ok) {
-    tbody.innerHTML = '<tr><td colspan="4" class="empty">불러오지 못했습니다.</td></tr>';
-    return;
-  }
-  const items = await res.json();
-  if (!items.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="empty">등록된 품목이 없습니다.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = "";
-  items.forEach((item) => {
+function inventoryAccordionRows(items, etaDaysById) {
+  return items.map((item) => {
     const threshold = item.low_stock_threshold ?? 5;
     const severity = stockSeverity(item.stock_quantity, threshold);
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${catalogNameById[item.item_id] ?? item.item_id}</td>
-      <td>${item.stock_quantity}</td>
-      <td>${threshold}</td>
-      <td><span class="pill ${severity.cls}">${severity.label}</span></td>
+    const name = catalogNameById[item.item_id] ?? item.item_id;
+    const etaDays = etaDaysById[item.item_id];
+    const cellsHtml = `
+      <div class="acc-col-name">${name}</div>
+      <div class="acc-col-fig"${severity.level > 0 ? ' style="color: var(--danger); font-weight: 700;"' : ""}>${item.stock_quantity} / ${threshold}</div>
+      <div class="acc-col-pill">${statusPill(severity.label, severity.level === 2 ? "danger" : severity.level === 1 ? "warning" : "success")}</div>
     `;
-    tbody.appendChild(tr);
+    const etaLine = etaDays != null
+      ? `<div class="acc-detail-label" style="margin-top: 14px;">소진 예상</div><div>최근 판매 속도 기준 약 ${etaDays.toFixed(1)}일 후 소진 예상입니다.</div>`
+      : "";
+    const detailHtml = `
+      <div>
+        <div class="acc-detail-label">현재 재고</div>
+        <div>재고 ${item.stock_quantity}개 · 저재고 임계치 ${threshold}개</div>
+        ${etaLine}
+      </div>
+      <div>
+        <div class="acc-detail-label">빠른 처리</div>
+        <button type="button" class="btn-primary restock-item-btn" data-item="${name}">이 품목 재입고 요청</button>
+      </div>
+    `;
+    return { cellsHtml, detailHtml, itemName: name };
   });
+}
+
+async function loadInventory() {
+  const container = document.getElementById("inventory-accordion");
+  const [invRes, topItemsWeek] = await Promise.all([
+    fetch("/api/pos/inventory"),
+    fetch("/api/pos/reports/top-items?period=week&limit=50").then((r) => (r.ok ? r.json() : [])),
+  ]);
+  if (!invRes.ok) {
+    container.innerHTML = '<p class="hint" style="padding:16px 18px;margin:0;">불러오지 못했습니다.</p>';
+    return;
+  }
+  const items = await invRes.json();
+  if (!items.length) {
+    container.innerHTML = '<p class="hint" style="padding:16px 18px;margin:0;">등록된 품목이 없습니다.</p>';
+    return;
+  }
+
+  const nameById = catalogNameById;
+  const { normal, risk, etaSoon } = summarizeInventoryStatus(items, topItemsWeek);
+  document.getElementById("inv-stat-normal").textContent = normal;
+  document.getElementById("inv-stat-risk").textContent = risk;
+  document.getElementById("inv-stat-eta").textContent = etaSoon;
+
+  const velocityById = Object.fromEntries((topItemsWeek || []).map((i) => [i.item_id, i.quantity / 7]));
+  const etaDaysById = {};
+  items.forEach((item) => {
+    const v = velocityById[item.item_id] || 0;
+    if (v > 0) etaDaysById[item.item_id] = item.stock_quantity / v;
+  });
+
+  const rows = inventoryAccordionRows(items, etaDaysById);
+  renderAccordion("inventory-accordion", rows);
+  container.querySelectorAll(".restock-item-btn").forEach((btn) => {
+    btn.addEventListener("click", () => openRestockForm(btn.dataset.item));
+  });
+
+  const insights = computeInventoryInsights({ inventory: items, nameById, topItemsWeek, withLink: false });
+  inventoryActionBoard.render(insights);
+
   renderRestockQuickChips(items);
+}
+
+function openRestockForm(itemName) {
+  document.getElementById("restock-form-panel").hidden = false;
+  document.getElementById("restock-form-toggle").hidden = true;
+  if (itemName) {
+    const select = document.getElementById("restock-item");
+    if (select && [...select.options].some((o) => o.value === itemName)) select.value = itemName;
+    document.getElementById("restock-qty").focus();
+  }
+}
+
+function closeRestockForm() {
+  document.getElementById("restock-form-panel").hidden = true;
+  document.getElementById("restock-form-toggle").hidden = false;
 }
 
 async function loadCatalogIntoRestockSelect() {
@@ -85,12 +140,7 @@ async function loadCatalogIntoRestockSelect() {
 }
 
 function restockConversationId() {
-  let id = localStorage.getItem("conversation_id_inventory_restock");
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem("conversation_id_inventory_restock", id);
-  }
-  return id;
+  return getConversationId("conversation_id_inventory_restock");
 }
 
 /**
@@ -153,8 +203,8 @@ async function submitRestockRequest(e) {
   const replyBox = document.getElementById("restock-reply");
   const submitBtn = e.target.querySelector("button[type=submit]");
   submitBtn.disabled = true;
-  replyBox.className = "restock-reply restock-reply--pending";
-  replyBox.textContent = "coordinator에게 전달하는 중…";
+  renderSentPrompt(document.getElementById("restock-sent-prompt"), message);
+  renderCompactResult(replyBox, { status: "pending", text: "coordinator에게 전달하는 중…" });
 
   try {
     const res = await fetch("/api/agent/message", {
@@ -167,11 +217,17 @@ async function submitRestockRequest(e) {
       }),
     });
     const data = await res.json();
-    replyBox.className = `restock-reply${data.status === "ok" ? "" : ` restock-reply--${data.status}`}`;
-    replyBox.textContent = data.text;
+    const result = { status: data.status === "ok" ? "ok" : data.status, text: data.text };
+    renderCompactResult(replyBox, result);
+    inventoryLog.push({
+      summary: `${itemName} 재입고 요청 (${qty}개)${reason ? ` · 사유: ${reason}` : ""}`,
+      pillHtml: statusPill(result.status === "ok" ? "완료" : result.status === "timeout" ? "확인 필요" : "오류", result.status === "ok" ? "success" : "warning"),
+      sentText: message,
+      replyText: result.text,
+      replyTone: result.status === "ok" ? "" : result.status === "error" ? "error" : "warn",
+    });
   } catch (err) {
-    replyBox.className = "restock-reply restock-reply--error";
-    replyBox.textContent = "네트워크 오류가 발생했습니다. 다시 시도해 주세요.";
+    renderCompactResult(replyBox, { status: "error", text: "네트워크 오류가 발생했습니다. 다시 시도해 주세요." });
   } finally {
     submitBtn.disabled = false;
     // 상태와 무관하게 재조회 — 타임아웃이어도 실제로는 처리 중일 수 있다
@@ -184,4 +240,6 @@ async function submitRestockRequest(e) {
 
 document.getElementById("refresh-inventory").addEventListener("click", loadInventory);
 document.getElementById("restock-form").addEventListener("submit", submitRestockRequest);
+document.getElementById("restock-form-toggle").addEventListener("click", () => openRestockForm());
+document.getElementById("restock-form-close").addEventListener("click", closeRestockForm);
 loadCatalogIntoRestockSelect();

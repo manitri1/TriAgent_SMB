@@ -53,12 +53,15 @@ def create_order(store_id: str, payload: OrderCreate):
             )
         )
 
+    created_at = payload.created_at or datetime.now(timezone.utc)
     order = Order(
         order_id=f"order_{uuid.uuid4().hex[:12]}",
         store_id=store_id,
         line_items=line_items,
         total_amount=total_amount,
         customer_id=payload.customer_id,
+        created_at=created_at,
+        updated_at=created_at,
     )
     data.orders[order.order_id] = order.model_dump()
     return order

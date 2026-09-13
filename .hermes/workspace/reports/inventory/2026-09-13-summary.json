@@ -1,0 +1,99 @@
+{
+  "store_id": "store_demo",
+  "as_of_date": "2026-09-13",
+  "fetched_at": "2026-09-12T06:33:47.113255Z",
+  "totals": {
+    "item_count": 13,
+    "out_of_stock_count": 1,
+    "low_stock_count": 0,
+    "low_stock_le3_count": 0
+  },
+  "items": [
+    {
+      "item_id": "menu_americano",
+      "stock_quantity": 0,
+      "low_stock_threshold": 5,
+      "updated_at": "2026-09-12T06:33:47.113255Z"
+    },
+    {
+      "item_id": "menu_cake",
+      "stock_quantity": 91,
+      "low_stock_threshold": 5,
+      "updated_at": "2026-09-12T06:33:50.608749Z"
+    },
+    {
+      "item_id": "menu_cappuccino",
+      "stock_quantity": 260,
+      "low_stock_threshold": 10,
+      "updated_at": "2026-09-12T06:33:50.622818Z"
+    },
+    {
+      "item_id": "menu_chai_latte",
+      "stock_quantity": 174,
+      "low_stock_threshold": 8,
+      "updated_at": "2026-09-12T06:33:50.582657Z"
+    },
+    {
+      "item_id": "menu_coldbrew",
+      "stock_quantity": 225,
+      "low_stock_threshold": 8,
+      "updated_at": "2026-09-12T06:33:50.594976Z"
+    },
+    {
+      "item_id": "menu_croissant",
+      "stock_quantity": 161,
+      "low_stock_threshold": 10,
+      "updated_at": "2026-09-12T06:33:50.618719Z"
+    },
+    {
+      "item_id": "menu_espresso",
+      "stock_quantity": 470,
+      "low_stock_threshold": 10,
+      "updated_at": "2026-09-12T06:33:50.557203Z"
+    },
+    {
+      "item_id": "menu_grapefruit_ade",
+      "stock_quantity": 106,
+      "low_stock_threshold": 8,
+      "updated_at": "2026-09-12T06:33:50.565935Z"
+    },
+    {
+      "item_id": "menu_latte",
+      "stock_quantity": 310,
+      "low_stock_threshold": 10,
+      "updated_at": "2026-09-12T21:47:12.641377Z"
+    },
+    {
+      "item_id": "menu_matcha_latte",
+      "stock_quantity": 202,
+      "low_stock_threshold": 8,
+      "updated_at": "2026-09-12T06:33:50.448750Z"
+    },
+    {
+      "item_id": "menu_muffin",
+      "stock_quantity": 185,
+      "low_stock_threshold": 10,
+      "updated_at": "2026-09-12T06:33:50.616480Z"
+    },
+    {
+      "item_id": "menu_sandwich",
+      "stock_quantity": 123,
+      "low_stock_threshold": 5,
+      "updated_at": "2026-09-12T06:33:50.547395Z"
+    },
+    {
+      "item_id": "menu_smoothie",
+      "stock_quantity": 146,
+      "low_stock_threshold": 6,
+      "updated_at": "2026-09-12T06:33:50.547392Z"
+    }
+  ],
+  "out_of_stock": [
+    {
+      "item_id": "menu_americano",
+      "stock_quantity": 0
+    }
+  ],
+  "low_stock": [],
+  "low_stock_le3_example": []
+}

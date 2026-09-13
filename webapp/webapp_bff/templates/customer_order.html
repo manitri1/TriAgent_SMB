@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}주문하기 — 마니카페{% endblock %}
+{% block content %}
+<h1>주문하기</h1>
+<p class="lead">메뉴를 골라 담고, 이름을 입력한 뒤 주문을 확정하세요.</p>
+
+<section class="panel">
+  <div class="wizard-step">
+    <p class="wizard-step-label">메뉴 선택</p>
+    <div id="order-menu-grid" class="chip-grid"><p class="hint">메뉴를 불러오는 중…</p></div>
+  </div>
+
+  <div id="order-qty-step" class="wizard-step" hidden>
+    <p class="wizard-step-label">수량 선택 — <span id="order-qty-item-name"></span></p>
+    <div id="order-qty-grid" class="chip-grid"></div>
+  </div>
+
+  <div id="order-cart-step" class="wizard-step" hidden>
+    <p class="wizard-step-label">장바구니</p>
+    <div id="order-cart-summary" class="wizard-summary"></div>
+    <div class="insight-actions">
+      <button type="button" id="order-cart-add-more" class="btn-ghost">메뉴 더 담기</button>
+      <button type="button" id="order-cart-confirm" class="btn-primary">주문 확정하기</button>
+    </div>
+  </div>
+
+  <div id="order-checkout-step" class="wizard-step" hidden>
+    <p class="wizard-step-label">주문자 정보</p>
+    <div class="wizard-name-field">
+      <input id="order-customer-name" type="text" placeholder="성함을 입력해주세요 (예: 김민지)">
+    </div>
+    <div class="insight-actions">
+      <button type="button" id="order-checkout-back" class="btn-ghost">장바구니로 돌아가기</button>
+      <button type="button" id="order-checkout-submit" class="btn-primary">주문 확정</button>
+    </div>
+  </div>
+
+  <div id="order-sent-prompt" class="sent-prompt"></div>
+  <div id="order-result" class="compact-result"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/common.js?v={{ v }}"></script>
+<script src="/static/customer_order.js?v={{ v }}"></script>
+{% endblock %}

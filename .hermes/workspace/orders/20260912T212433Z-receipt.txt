@@ -1,0 +1,14 @@
+[Mock POS 영수증/결제 증빙]
+UTC Timestamp: 20260912T212433Z
+Customer: 김민지 (cust_minji)
+Order type: 고객 셀프 주문
+Item: 아메리카노 x1 @ 3500 = 3500 KRW
+Stock at payment attempt: 0
+Order ID: order_2f927ec4b108
+Payment HTTP: 409
+Payment status: FAILED
+Final paid amount: 0 KRW
+Payment failure detail:
+{
+  "detail": "Insufficient stock for item menu_americano"
+}

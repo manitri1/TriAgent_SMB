@@ -1,0 +1,7 @@
+{
+  "remote.SSH.defaultForwardedPorts": [
+    { "localPort": 19131, "remotePort": 19131, "name": "webapp (hermes-triagent-smb-webapp)" },
+    { "localPort": 19128, "remotePort": 19128, "name": "dashboard (hermes-triagent-smb-dashboard)" }
+  ],
+  "remote.autoForwardPortsSource": "hybrid"
+}
