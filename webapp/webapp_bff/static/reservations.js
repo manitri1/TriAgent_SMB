@@ -19,33 +19,60 @@ function todayISODate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+const reservationsAccordion = createRowActionAccordion("reservations-accordion", {
+  profile: "coordinator",
+  storageKeyPrefix: "conversation_id_reservations_row",
+  onAfterSend: loadReservations,
+});
+
+function reservationActionsFor(r) {
+  if (r.status === "BOOKED") {
+    return [
+      { label: "시간 변경", tone: "ghost", prefill: true, message: `예약 ${r.reservation_id}을(를) __시 __분으로 변경해주세요.` },
+      { label: "예약 취소", tone: "danger", confirm: `${r.customer_id} 고객의 예약을 취소할까요?`, message: `예약 ${r.reservation_id}을(를) 취소해주세요.` },
+    ];
+  }
+  return [];
+}
+
+function reservationAccordionRows(reservations) {
+  return reservations.map((r) => {
+    const time = new Date(r.datetime).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+    const cellsHtml = `
+      <div class="acc-col-time">${time}</div>
+      <div class="acc-col-name">${r.customer_id}${r.service ? ` · ${r.service}` : ""}</div>
+      <div class="acc-col-pill">${renderReservationStatus(r.status)}</div>
+    `;
+    const factsHtml = `
+      <div class="detail-kv"><span class="detail-kv-k">서비스</span><span class="detail-kv-v">${r.service || "-"}</span></div>
+      <div class="detail-kv"><span class="detail-kv-k">요청사항</span><span class="detail-kv-v">${r.note || "없음"}</span></div>
+      <div class="detail-kv"><span class="detail-kv-k">접수 시각</span><span class="detail-kv-v">${new Date(r.created_at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span></div>
+    `;
+    return {
+      id: r.reservation_id,
+      cellsHtml,
+      factsHtml,
+      contextLabel: `예약 · ${r.customer_id} ${time}`,
+      editPlaceholder: "예: 인원을 3명으로 늘려줘",
+      actions: reservationActionsFor(r),
+    };
+  });
+}
+
 async function loadReservations() {
-  const tbody = document.getElementById("reservation-rows");
+  const container = document.getElementById("reservations-accordion");
   const res = await fetch(`/api/pos/reservations?date=${todayISODate()}`);
   if (!res.ok) {
-    tbody.innerHTML = '<tr><td colspan="4" class="empty">불러오지 못했습니다.</td></tr>';
+    container.innerHTML = '<p class="hint" style="padding:16px 18px;margin:0;">불러오지 못했습니다.</p>';
     return;
   }
   const reservations = await res.json();
   if (!reservations.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="empty">오늘 등록된 예약이 없습니다.</td></tr>';
+    container.innerHTML = '<p class="hint" style="padding:16px 18px;margin:0;">오늘 등록된 예약이 없습니다.</p>';
     return;
   }
-  tbody.innerHTML = "";
-  reservations
-    .slice()
-    .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))
-    .forEach((r) => {
-      const time = new Date(r.datetime).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${time}</td>
-        <td>${r.customer_id}</td>
-        <td>${r.service ?? "-"}</td>
-        <td>${renderReservationStatus(r.status)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+  const sorted = reservations.slice().sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+  reservationsAccordion.render(reservationAccordionRows(sorted));
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -55,7 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initChatWidget({
     formId: "reservations-form",
     inputId: "reservations-input",
-    threadId: "reservations-thread",
+    sentPromptId: "reservations-sent-prompt",
+    resultId: "reservations-result",
     profile: "coordinator",
     storageKey: "conversation_id_reservations",
     onReply: loadReservations,

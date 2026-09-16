@@ -291,9 +291,11 @@ function clearTimeoutPolling() {
   }
 }
 
-function compactTableHtml(headers, rows) {
+function compactTableHtml(headers, rows, rowClasses) {
   const head = headers.map((h) => `<th>${h}</th>`).join("");
-  const body = rows.map((cells) => `<tr>${cells.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("");
+  const body = rows
+    .map((cells, i) => `<tr class="${(rowClasses && rowClasses[i]) || ""}">${cells.map((c) => `<td>${c}</td>`).join("")}</tr>`)
+    .join("");
   return `<table class="data-table data-table--compact"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
 }
 
@@ -313,9 +315,18 @@ async function loadResultPanel(step) {
       const items = await res.json();
       if (token !== resultRequestToken) return;
       if (!items.length) { body.innerHTML = '<p class="hint">등록된 품목이 없습니다.</p>'; return; }
+      const severities = items.map((i) => stockSeverity(i.stock_quantity, i.low_stock_threshold ?? 5));
       body.innerHTML = compactTableHtml(
         ["품목", "재고", "저재고 임계치"],
-        items.map((i) => [catalogNameById[i.item_id] ?? i.item_id, i.stock_quantity, i.low_stock_threshold ?? 5])
+        items.map((i, idx) => {
+          const threshold = i.low_stock_threshold ?? 5;
+          const sev = severities[idx];
+          const qtyHtml = sev.level > 0
+            ? `<strong style="color: var(${sev.level === 2 ? "--danger" : "--warning"});">${i.stock_quantity}</strong>`
+            : i.stock_quantity;
+          return [catalogNameById[i.item_id] ?? i.item_id, qtyHtml, threshold];
+        }),
+        severities.map((sev) => (sev.level === 2 ? "row-stock-danger" : sev.level === 1 ? "row-stock-warning" : ""))
       );
     } else if (step.result.kind === "orders") {
       const res = await fetch("/api/pos/orders");

@@ -4,6 +4,11 @@ const inventoryActionBoard = createInsightBoard("inventory-actions", "inventory-
   onAfterSend: loadInventory,
 });
 const inventoryLog = createActionLog("inventory-log");
+const inventoryAccordion = createRowActionAccordion("inventory-accordion", {
+  profile: "coordinator",
+  storageKeyPrefix: "conversation_id_inventory_row",
+  onAfterSend: loadInventory,
+});
 
 async function loadCatalog() {
   const res = await fetch("/api/pos/catalog/items");
@@ -42,32 +47,50 @@ function renderRestockQuickChips(items) {
   });
 }
 
-function inventoryAccordionRows(items, etaDaysById) {
+function inventoryAccordionRows(items, etaDaysById, velocityById) {
   return items.map((item) => {
     const threshold = item.low_stock_threshold ?? 5;
     const severity = stockSeverity(item.stock_quantity, threshold);
     const name = catalogNameById[item.item_id] ?? item.item_id;
     const etaDays = etaDaysById[item.item_id];
+    const velocity = velocityById[item.item_id] || 0;
     const cellsHtml = `
       <div class="acc-col-name">${name}</div>
       <div class="acc-col-fig"${severity.level > 0 ? ' style="color: var(--danger); font-weight: 700;"' : ""}>${item.stock_quantity} / ${threshold}</div>
       <div class="acc-col-pill">${statusPill(severity.label, severity.level === 2 ? "danger" : severity.level === 1 ? "warning" : "success")}</div>
     `;
-    const etaLine = etaDays != null
-      ? `<div class="acc-detail-label" style="margin-top: 14px;">소진 예상</div><div>최근 판매 속도 기준 약 ${etaDays.toFixed(1)}일 후 소진 예상입니다.</div>`
-      : "";
-    const detailHtml = `
-      <div>
-        <div class="acc-detail-label">현재 재고</div>
-        <div>재고 ${item.stock_quantity}개 · 저재고 임계치 ${threshold}개</div>
-        ${etaLine}
-      </div>
-      <div>
-        <div class="acc-detail-label">빠른 처리</div>
-        <button type="button" class="btn-primary restock-item-btn" data-item="${name}">이 품목 재입고 요청</button>
-      </div>
+    const factsHtml = `
+      <div class="detail-kv"><span class="detail-kv-k">현재 재고</span><span class="detail-kv-v">${item.stock_quantity}개 (임계치 ${threshold}개)</span></div>
+      <div class="detail-kv"><span class="detail-kv-k">일평균 판매량</span><span class="detail-kv-v">${velocity > 0 ? `${velocity.toFixed(1)}개 / 일` : "최근 판매 데이터 없음"}</span></div>
+      <div class="detail-kv"><span class="detail-kv-k">소진 예상</span><span class="detail-kv-v">${etaDays != null ? `최근 판매 속도 기준 약 ${etaDays.toFixed(1)}일 후` : "판매 속도 데이터 부족"}</span></div>
+      <div class="detail-kv"><span class="detail-kv-k">마지막 갱신</span><span class="detail-kv-v">${new Date(item.updated_at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span></div>
     `;
-    return { cellsHtml, detailHtml, itemName: name };
+    return {
+      id: item.item_id,
+      cellsHtml,
+      factsHtml,
+      contextLabel: `재고 · ${name}`,
+      editPlaceholder: `예: ${name} 재고 수량을 다시 세어보니 달라요, 수정해줘`,
+      actions: [
+        {
+          label: "재입고 요청",
+          tone: "primary",
+          message: `품목 ${name} 재입고를 요청합니다. 적정 재입고 수량은 재고/판매 데이터를 참고해 판단해주세요.`,
+        },
+        {
+          label: "재고 수량 직접 수정",
+          tone: "ghost",
+          prefill: true,
+          message: `품목 ${name}의 재고 수량을 __개로 수정해주세요.`,
+        },
+        {
+          label: "품절 처리",
+          tone: "danger",
+          confirm: `${name}을(를) 품절 처리할까요?`,
+          message: `품목 ${name}을(를) 품절 처리해주세요.`,
+        },
+      ],
+    };
   });
 }
 
@@ -100,11 +123,8 @@ async function loadInventory() {
     if (v > 0) etaDaysById[item.item_id] = item.stock_quantity / v;
   });
 
-  const rows = inventoryAccordionRows(items, etaDaysById);
-  renderAccordion("inventory-accordion", rows);
-  container.querySelectorAll(".restock-item-btn").forEach((btn) => {
-    btn.addEventListener("click", () => openRestockForm(btn.dataset.item));
-  });
+  const rows = inventoryAccordionRows(items, etaDaysById, velocityById);
+  inventoryAccordion.render(rows);
 
   const insights = computeInventoryInsights({ inventory: items, nameById, topItemsWeek, withLink: false });
   inventoryActionBoard.render(insights);

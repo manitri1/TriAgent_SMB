@@ -1,0 +1,126 @@
+{
+  "generated_at_utc": "2026-09-15T03:06:37+00:00",
+  "generated_at_kst": "2026-09-15T12:06:37+09:00",
+  "store_id": "store_demo",
+  "item": {
+    "item_id": "menu_latte",
+    "name": "라떼",
+    "category": "coffee",
+    "unit_price": 4500,
+    "cost": 1000
+  },
+  "inventory_before": {
+    "item_id": "menu_latte",
+    "stock_quantity": 3,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-15T03:02:54.625606Z"
+  },
+  "recent_sales": [
+    {
+      "days": 7,
+      "quantity": 21,
+      "avg_per_day": 3.0,
+      "orders_with_item": 15,
+      "revenue": 94500,
+      "by_date": {
+        "2026-09-09": 1,
+        "2026-09-10": 2,
+        "2026-09-11": 3,
+        "2026-09-12": 2,
+        "2026-09-13": 9,
+        "2026-09-14": 2,
+        "2026-09-15": 2
+      }
+    },
+    {
+      "days": 14,
+      "quantity": 43,
+      "avg_per_day": 3.0714285714285716,
+      "orders_with_item": 34,
+      "revenue": 193500,
+      "by_date": {
+        "2026-09-01": 3,
+        "2026-09-03": 5,
+        "2026-09-04": 2,
+        "2026-09-05": 3,
+        "2026-09-06": 5,
+        "2026-09-07": 3,
+        "2026-09-08": 1,
+        "2026-09-09": 1,
+        "2026-09-10": 2,
+        "2026-09-11": 3,
+        "2026-09-12": 2,
+        "2026-09-13": 9,
+        "2026-09-14": 2,
+        "2026-09-15": 2
+      }
+    },
+    {
+      "days": 30,
+      "quantity": 80,
+      "avg_per_day": 2.6666666666666665,
+      "orders_with_item": 64,
+      "revenue": 360000,
+      "by_date": {
+        "2026-08-16": 2,
+        "2026-08-17": 1,
+        "2026-08-18": 5,
+        "2026-08-19": 2,
+        "2026-08-20": 6,
+        "2026-08-21": 3,
+        "2026-08-22": 1,
+        "2026-08-23": 5,
+        "2026-08-26": 5,
+        "2026-08-27": 1,
+        "2026-08-28": 1,
+        "2026-08-29": 1,
+        "2026-08-30": 4,
+        "2026-09-01": 3,
+        "2026-09-03": 5,
+        "2026-09-04": 2,
+        "2026-09-05": 3,
+        "2026-09-06": 5,
+        "2026-09-07": 3,
+        "2026-09-08": 1,
+        "2026-09-09": 1,
+        "2026-09-10": 2,
+        "2026-09-11": 3,
+        "2026-09-12": 2,
+        "2026-09-13": 9,
+        "2026-09-14": 2,
+        "2026-09-15": 2
+      }
+    }
+  ],
+  "calculation": {
+    "coverage_days": 7,
+    "safety_stock_threshold": 10,
+    "target_stock": 31,
+    "raw_restock_delta": 28,
+    "rounded_restock_delta": 30,
+    "rounding": "ceil to nearest 5 units",
+    "estimated_amount_krw": 30000,
+    "approval_limit_krw": 150000,
+    "hitl_gate2_required": false
+  },
+  "api_paths": {
+    "inventory_list": "GET /v1/stores/store_demo/inventory",
+    "catalog_items": "GET /v1/stores/store_demo/catalog/items",
+    "orders": "GET /v1/stores/store_demo/orders",
+    "adjust": "POST /v1/stores/store_demo/inventory/menu_latte/adjust"
+  },
+  "adjust_result": {
+    "item_id": "menu_latte",
+    "stock_quantity": 33,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-15T03:06:37.377082Z"
+  },
+  "inventory_after_verified": {
+    "item_id": "menu_latte",
+    "stock_quantity": 33,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-15T03:06:37.377082Z"
+  },
+  "orders_total_fetched": 703,
+  "status": "completed"
+}

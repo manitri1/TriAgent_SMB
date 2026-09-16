@@ -19,6 +19,9 @@ class PosClient:
     def get(self, path: str, params: dict | None = None) -> httpx.Response:
         return self._client.get(path, params=params)
 
+    def post(self, path: str, json: dict | None = None) -> httpx.Response:
+        return self._client.post(path, json=json)
+
     def close(self) -> None:
         self._client.close()
 

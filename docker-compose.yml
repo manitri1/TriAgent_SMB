@@ -107,6 +107,12 @@ services:
       - "18080:8080"
     environment:
       MOCK_POS_API_KEY: ${MOCK_POS_API_KEY:-dev-key}
+      STORE_ID: ${STORE_ID:-store_demo}
+      # "오늘 데이터 없음"(대시보드 매출/리포트 0) 자가치유 — 인메모리 저장소라
+      # 컨테이너를 며칠 재시작 안 하면 seed_manicafe_month.py가 채운 마지막 날짜
+      # 이후의 "오늘"은 계속 0건으로 남는 문제가 있었다(mock_pos/self_heal.py 참고).
+      # 서버 기동 시 + 1시간마다 오늘/누락된 날짜를 자동으로 채워 넣는다.
+      MOCK_POS_SELF_HEAL_ENABLED: ${MOCK_POS_SELF_HEAL_ENABLED:-true}
 
   webapp:
     # 4화면 커스텀 운영 콘솔(고객 문의/주문 접수/재고 관리/대시보드). 설계 배경은

@@ -108,7 +108,8 @@ def test_dashboard_page_has_demo_hint(client, auth_headers):
 
 def test_reservations_page_has_chat_and_table(client, auth_headers):
     resp = client.get("/reservations", headers=auth_headers)
-    assert 'id="reservations-thread"' in resp.text
+    assert 'id="reservations-sent-prompt"' in resp.text
+    assert 'id="reservations-result"' in resp.text
     assert 'src="/static/chat.js?v=' in resp.text
     assert 'src="/static/reservations.js?v=' in resp.text
     assert "오늘 예약" in resp.text

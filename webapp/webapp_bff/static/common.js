@@ -495,45 +495,134 @@ function createInsightBoard(containerId, emptyId, { profile = "coordinator", onA
 }
 
 /**
- * 목록 행을 눌러서 그 자리에 상세를 펼치는 아코디언 — 채팅/모달 없이 "상세
- * 보기" 하나로 목록과 상세를 한 화면에 둔다. 한 번에 하나만 열린다.
- * rows: [{ cellsHtml, detailHtml, onExpand? }]. cellsHtml은 acc-row 안에
- * 그대로 삽입되는 칸들(예: `<div class="acc-col-name">...</div>`x n).
+ * 목록 행을 눌러서 그 자리에 상세를 펼치는 아코디언 — 펼친 안에 세부 정보,
+ * 선택한 건을 수정 요청하는 한 줄 채팅, 그 건을 처리하는 액션 메뉴가 함께
+ * 있다. createInsightBoard와 같은 전송(coordinator 릴레이)/캐시 로직을 행
+ * 단위로 재사용한다 — 화면마다 다른 건 rows 데이터뿐. 한 번에 하나만 열린다.
+ *
+ * rows: [{
+ *   id,               // 행 고유 키 — conversation_id/전송 결과 캐시 키로 씀
+ *   cellsHtml,        // acc-row 안에 그대로 삽입되는 한 줄 칸들
+ *   factsHtml,        // 세부 정보(키-값) — `.detail-kv`들을 이어붙인 HTML
+ *   contextLabel,     // 보낼 때 "[이 라벨] 메시지" 형태로 덧붙여 어떤 건인지 알려줌
+ *   editPlaceholder,  // 수정 요청 입력창 placeholder
+ *   actions: [{
+ *     label, tone,    // tone: primary|ghost|danger
+ *     message,        // 보낼 문구(prefill이면 입력창에 채울 템플릿)
+ *     prefill,        // true면 즉시 전송 대신 입력창에 채워 넣고 포커스만 준다
+ *                      //   (수량·시간처럼 구체 값이 필요한 처리에 사용)
+ *     confirm,        // 지정하면 전송 전 window.confirm으로 한 번 더 확인
+ *     handler,        // 지정하면 서버 전송 없이 이 로컬 함수만 실행(row 인자로 호출)
+ *   }],
+ * }]
  */
-function renderAccordion(containerId, rows) {
+function createRowActionAccordion(containerId, { profile = "coordinator", storageKeyPrefix, onAfterSend } = {}) {
   const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = "";
-  if (!rows.length) {
-    container.innerHTML = '<p class="hint" style="padding:16px 18px;margin:0;">표시할 항목이 없습니다.</p>';
-    return;
-  }
-  rows.forEach((row) => {
-    const item = document.createElement("div");
-    item.className = "acc-item";
-    item.innerHTML = `
-      <div class="acc-row">${row.cellsHtml}<div class="acc-toggle">상세 보기 ▾</div></div>
-      <div class="acc-detail" hidden>${row.detailHtml}</div>
-    `;
-    const rowEl = item.querySelector(".acc-row");
-    const detailEl = item.querySelector(".acc-detail");
-    const toggleEl = item.querySelector(".acc-toggle");
-    rowEl.addEventListener("click", () => {
-      const isOpen = !detailEl.hidden;
-      container.querySelectorAll(".acc-item").forEach((i) => {
-        i.querySelector(".acc-detail").hidden = true;
-        i.querySelector(".acc-row").classList.remove("open");
-        i.querySelector(".acc-toggle").textContent = "상세 보기 ▾";
+  const sentCache = new Map();
+  const resultCache = new Map();
+  let openId = null;
+  let currentRows = [];
+
+  async function send(row, rawText) {
+    const message = row.contextLabel ? `[${row.contextLabel}] ${rawText}` : rawText;
+    sentCache.set(row.id, message);
+    resultCache.set(row.id, { status: "pending", text: "coordinator에게 전달하는 중…" });
+    openId = row.id;
+    render(currentRows);
+
+    const conversation_id = getConversationId(`${storageKeyPrefix}_${row.id}`);
+    try {
+      const res = await fetch("/api/agent/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile, message, conversation_id }),
       });
-      if (!isOpen) {
-        detailEl.hidden = false;
-        rowEl.classList.add("open");
-        toggleEl.textContent = "접기 ▴";
-        if (row.onExpand) row.onExpand(item);
+      const data = await res.json();
+      resultCache.set(row.id, { status: data.status === "ok" ? "ok" : data.status, text: data.text });
+    } catch (err) {
+      resultCache.set(row.id, { status: "error", text: "네트워크 오류가 발생했습니다. 다시 시도해 주세요." });
+    } finally {
+      render(currentRows);
+      // 상태와 무관하게 재조회를 권한다 — 타임아웃이어도 컨테이너 안에서는
+      // 이미 처리가 끝났을 수 있다(Active Verification 원칙, common.js 상단 참고).
+      if (onAfterSend) onAfterSend();
+    }
+  }
+
+  function render(rows) {
+    currentRows = rows;
+    if (!container) return;
+    container.innerHTML = "";
+    if (!rows.length) {
+      container.innerHTML = '<p class="hint" style="padding:16px 18px;margin:0;">표시할 항목이 없습니다.</p>';
+      return;
+    }
+    rows.forEach((row) => {
+      const isOpen = row.id === openId;
+      const item = document.createElement("div");
+      item.className = "acc-item";
+      const actionsHtml = row.actions && row.actions.length
+        ? row.actions
+            .map((a, i) => `<button type="button" class="btn-${a.tone || "ghost"}" data-action-idx="${i}">${a.label}</button>`)
+            .join("")
+        : '<span class="hint" style="margin:0;">지금 처리할 작업이 없습니다.</span>';
+      item.innerHTML = `
+        <div class="acc-row${isOpen ? " open" : ""}">${row.cellsHtml}<div class="acc-toggle">${isOpen ? "접기 ▴" : "세부 보기 ▾"}</div></div>
+        <div class="acc-detail" ${isOpen ? "" : "hidden"}>
+          ${row.factsHtml || ""}
+          <div class="section-label">수정 요청</div>
+          <div class="edit-chat">
+            <input type="text" placeholder="${row.editPlaceholder || "예: 이 건에 대해 수정하고 싶은 내용을 적어주세요"}">
+            <button type="button" class="btn-primary" data-role="edit-send">전송</button>
+          </div>
+          <div class="section-label">처리</div>
+          <div class="action-menu">${actionsHtml}</div>
+          <div class="sent-prompt"></div>
+          <div class="compact-result"></div>
+        </div>
+      `;
+      const rowEl = item.querySelector(".acc-row");
+      const sentEl = item.querySelector(".sent-prompt");
+      const resultEl = item.querySelector(".compact-result");
+      const editInput = item.querySelector(".edit-chat input");
+      const editSendBtn = item.querySelector('[data-role="edit-send"]');
+
+      if (sentCache.has(row.id)) renderSentPrompt(sentEl, sentCache.get(row.id));
+      if (resultCache.has(row.id)) {
+        renderCompactResult(resultEl, resultCache.get(row.id), { onFollowup: (msg) => send(row, msg) });
       }
+
+      rowEl.addEventListener("click", () => {
+        openId = openId === row.id ? null : row.id;
+        render(currentRows);
+      });
+
+      function triggerEdit() {
+        const text = editInput.value.trim();
+        if (!text) return;
+        send(row, text);
+      }
+      editInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); triggerEdit(); }
+      });
+      editSendBtn.addEventListener("click", triggerEdit);
+
+      item.querySelectorAll("[data-action-idx]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const action = row.actions[Number(btn.dataset.actionIdx)];
+          if (!action) return;
+          if (action.handler) { action.handler(row); return; }
+          if (action.prefill) { editInput.value = action.message; editInput.focus(); return; }
+          if (action.confirm && !window.confirm(action.confirm)) return;
+          send(row, action.message);
+        });
+      });
+
+      container.appendChild(item);
     });
-    container.appendChild(item);
-  });
+  }
+
+  return { render };
 }
 
 /**

@@ -203,6 +203,10 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.015em; margin: 0 0 6p
 .data-table tbody tr:last-child td { border-bottom: none; }
 .data-table tbody tr:hover td { background: var(--surface-2); }
 .data-table .empty { color: var(--muted); text-align: center; padding: 22px 0; }
+.data-table tbody tr.row-stock-danger td:first-child,
+.data-table tbody tr.row-stock-warning td:first-child { border-left: 4px solid transparent; padding-left: 8px; }
+.data-table tbody tr.row-stock-danger td:first-child { border-left-color: var(--danger); background: var(--danger-bg); }
+.data-table tbody tr.row-stock-warning td:first-child { border-left-color: var(--warning); background: var(--warning-bg); }
 
 /* ── forms ───────────────────────────────────────────── */
 .restock-form { display: grid; gap: 14px; max-width: 380px; }
@@ -315,6 +319,10 @@ h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.015em; margin: 0 0 6p
 .sent-prompt-label { font-weight: 700; color: var(--ink); margin-right: 4px; }
 
 /* ── chat ────────────────────────────────────────────── */
+/* 화면 5(고객용 FAQ)·사장님의 하루 데모는 여전히 말풍선이 쌓이는 대화창을
+   쓴다(chat.js의 threadId 모드) — 이 기본값은 그 화면들 것. 운영 화면
+   4개(문의/주문/재고/예약)의 자유 채팅은 .secondary-panel-body.chat-panel
+   오버라이드로 "한 줄 입력 + 간략 결과"로 바꿔 쓴다(아래 참고). */
 .chat-panel { display: flex; flex-direction: column; height: 58vh; }
 .chat-thread { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 4px 2px 16px; }
 .chat-thread:empty::before {
@@ -508,6 +516,30 @@ canvas { max-height: 240px; }
   color: var(--muted); font-size: 13px; text-align: center; margin-bottom: 20px;
 }
 
+/* ── 마케팅·CRM 제안 팝업 (버튼으로 열어 데이터 기반 제안 중 골라 진행) ── */
+.marketing-suggest-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0 0 20px; }
+dialog.modal {
+  border: none; border-radius: var(--radius); box-shadow: var(--shadow);
+  background: var(--surface); color: var(--ink); padding: 22px 24px;
+  width: min(640px, calc(100vw - 40px)); max-height: min(80vh, 720px); overflow-y: auto;
+}
+dialog.modal::backdrop { background: rgba(20, 16, 40, 0.45); }
+dialog.modal .insight-grid { grid-template-columns: 1fr; margin-bottom: 0; }
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.modal-head h2 { margin: 0; font-size: 16px; }
+
+/* ── 목업 데이터 초기 세팅 팝업 ── */
+.seed-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 4px 0 14px; }
+.seed-option {
+  display: flex; flex-direction: column; gap: 6px; text-align: left; cursor: pointer;
+  background: var(--surface); border: 1.5px solid var(--border-strong); border-radius: var(--radius);
+  padding: 14px 16px; font: inherit; color: inherit;
+}
+.seed-option:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+.seed-option:disabled { opacity: 0.5; cursor: not-allowed; }
+.seed-option-title { font-weight: 700; font-size: 14px; }
+.seed-option-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
 /* tertiary "세부 데이터" wrap — deliberately quieter than hero/analytics */
 .detail-section {
   background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: var(--radius);
@@ -636,12 +668,14 @@ canvas { max-height: 240px; }
 .acc-col-name { flex: 1; font-weight: 600; font-size: 14px; min-width: 0; }
 .acc-col-fig { width: 90px; flex-shrink: 0; font-size: 13.5px; font-variant-numeric: tabular-nums; }
 .acc-col-pill { width: 90px; flex-shrink: 0; }
+.acc-col-time { width: 56px; flex-shrink: 0; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc-col-order { width: 72px; flex-shrink: 0; font-size: 13px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acc-col-amount { width: 92px; flex-shrink: 0; text-align: right; font-weight: 700; font-size: 13.5px; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .acc-toggle { width: 90px; flex-shrink: 0; text-align: right; font-size: 12.5px; font-weight: 700; color: var(--muted); }
 .acc-row.open .acc-toggle { color: var(--accent-strong); }
 .acc-detail[hidden] { display: none; }
 .acc-detail {
   padding: 16px 18px 20px; background: var(--surface-2); border-bottom: 1px solid var(--border);
-  display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px;
 }
 .acc-item:last-child .acc-detail { border-bottom: none; }
 .acc-detail-label {
@@ -651,6 +685,29 @@ canvas { max-height: 240px; }
 .acc-bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 56px; }
 .acc-bar-chart div { flex: 1; background: var(--border-strong); border-radius: 3px 3px 0 0; }
 .acc-bar-chart div.hi { background: var(--accent); }
+
+/* ── 아코디언 행 세부 안의 "수정 요청" 한 줄 채팅 + "처리" 메뉴
+   (renderAccordion → createRowActionAccordion로 대체하며 도입) ───────── */
+.detail-kv { display: flex; gap: 14px; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 13.5px; }
+.detail-kv:last-of-type { border-bottom: none; }
+.detail-kv-k { flex-shrink: 0; width: 112px; color: var(--muted); font-weight: 600; }
+.detail-kv-v { flex: 1; min-width: 0; color: var(--ink); line-height: 1.5; }
+.section-label {
+  font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .06em; margin: 16px 0 7px;
+}
+.edit-chat { display: flex; gap: 8px; }
+.edit-chat input {
+  flex: 1; min-width: 0; padding: 9px 12px; border: 1px solid var(--border); border-radius: 9px; font-size: 13.5px;
+  background: var(--surface); color: var(--ink); font-family: inherit;
+}
+.edit-chat input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.action-menu { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.btn-danger {
+  border: none; background: var(--danger); color: #fff; padding: 8px 16px; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: filter 0.12s ease;
+}
+.btn-danger:hover { filter: brightness(1.05); }
 
 /* ── action log (채팅 스레드 대신 쓰는 접이식 처리 로그) ──────────── */
 .log {
@@ -697,6 +754,34 @@ canvas { max-height: 240px; }
 .stat-card--warning .stat-value { color: var(--warning); }
 .stat-unit { font-size: 15px; font-weight: 600; color: var(--muted); margin-left: 4px; }
 @media (max-width: 720px) { .stat-row { grid-template-columns: 1fr; } .acc-detail { grid-template-columns: 1fr; } }
+
+/* ── 보조 입력 수단 카드(품목 피커/자유채팅) — 목록(접수 내역/최근 주문/재고
+   현황/오늘 예약)을 화면 상단 주 콘텐츠로 올리고, 기존 입력 수단은 그대로
+   유지하되 시각적으로는 보조 진입점으로 낮춘다. 기본값은 열림(open) — 데모
+   큐 등 기존 동작 노출에 영향 없게 하기 위함. ───────────────────────── */
+.secondary-panel {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow); margin-bottom: 20px; overflow: hidden;
+}
+.secondary-panel > summary {
+  list-style: none; cursor: pointer; padding: 14px 20px;
+  font-size: 12.5px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.secondary-panel > summary::-webkit-details-marker { display: none; }
+.secondary-panel > summary::marker { display: none; content: ""; }
+.secondary-panel > summary::after {
+  content: "▾"; font-size: 11px; color: var(--muted); transition: transform 0.12s ease; flex-shrink: 0;
+}
+.secondary-panel[open] > summary::after { transform: rotate(180deg); }
+.secondary-panel[open] > summary { border-bottom: 1px solid var(--border); }
+.secondary-panel-body { padding: 20px 22px; }
+/* 운영 화면(문의/주문/예약)의 자유 채팅 — 말풍선 대화창 대신 한 줄 입력 +
+   보낸 요청 + 간략한 결과만 보여준다(위 접수 내역/최근 주문/예약 목록
+   accordion이 실제 이력을 이미 담당하므로). */
+.secondary-panel-body.chat-panel { padding: 20px 22px; display: block; height: auto; }
+.secondary-panel-body.chat-panel .chat-form { border-top: none; padding-top: 0; }
 
 /* ── "+" 액션 카드 (재입고 요청/새 주문/새 예약 등 폼을 접었다 펼치는 진입점) ── */
 .action-add {

@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-14",
+  "store_id": "store_demo",
+  "item": {
+    "item_id": "menu_americano",
+    "name": "아메리카노",
+    "unit_price": 3500,
+    "cost": 800
+  },
+  "request": {
+    "quantity": 50,
+    "reason": "원두 완전 품절, 긴급 대량 재입고 필요",
+    "requested_by": "박서준 사장",
+    "source_card": "/opt/data/workspace/kanban/2026-09-14-restock-americano-50.md"
+  },
+  "approval": {
+    "hitl_gate": "gate_2",
+    "approval_basis": "사장님이 사용자 메시지로 아메리카노 50개 범위를 명시 요청",
+    "scope_guard": "아메리카노 50개를 초과하지 않음"
+  },
+  "cost_check": {
+    "unit_cost": 800,
+    "quantity": 50,
+    "estimated_cost": 40000,
+    "no_approval_limit": 150000,
+    "over_limit": false
+  },
+  "pos_adjustment": {
+    "endpoint": "POST /v1/stores/store_demo/inventory/menu_americano/adjust",
+    "delta": 50,
+    "reason": "사장님 요청: 원두 완전 품절, 긴급 대량 재입고 필요 — 아메리카노 50개 재입고"
+  },
+  "before": {
+    "stock_quantity": 15,
+    "low_stock_threshold": 5,
+    "updated_at": "2026-09-14T14:06:16.654280Z"
+  },
+  "after_verified_get": {
+    "item_id": "menu_americano",
+    "stock_quantity": 65,
+    "low_stock_threshold": 5,
+    "updated_at": "2026-09-14T14:09:41.298488Z"
+  }
+}

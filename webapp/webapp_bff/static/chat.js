@@ -1,7 +1,15 @@
 /**
- * 공용 채팅 위젯. 화면 1(고객 문의)이 사용하고, 화면 2(주문 접수)의 자유
- * 채팅창도 같은 함수를 재사용한다 — 결국 모두 동일한 /api/agent/message
- * 릴레이 하나로 수렴한다(curried-percolating-ocean.md).
+ * 공용 채팅 위젯. 결국 모두 동일한 /api/agent/message 릴레이 하나로
+ * 수렴한다(curried-percolating-ocean.md). 결과를 두 가지 방식으로 보여줄 수
+ * 있다:
+ *   - threadId를 넘기면 말풍선이 쌓이는 대화창(기존 방식) — 고객용 FAQ
+ *     (customer_faq.html), 사장님의 하루 데모, 대시보드 홈 퀵챗이 이 방식을
+ *     그대로 쓴다.
+ *   - sentPromptId + resultId를 넘기면 "보낸 요청 한 줄 + 간략한 결과"만
+ *     보여준다(재입고 요청 폼과 같은 패턴 — renderSentPrompt/renderCompactResult).
+ *     운영 화면 4개(문의/주문/재고/예약)의 자유 채팅이 이 방식이다 — 위
+ *     접수 내역/최근 주문/예약 목록(accordion)이 이미 실제 이력을 보여주므로,
+ *     여기서는 매번 새로 보내면 이전 결과 위에 덮어써도 정보 손실이 없다.
  *
  * conversation_id는 화면별로 localStorage에 저장해, 새로고침해도 같은 hermes
  * session_id(--resume)로 이어지게 한다.
@@ -19,10 +27,12 @@ const TIMEOUT_POLL_INTERVAL_MS = 15000;
 const TIMEOUT_POLL_MAX_ATTEMPTS = 5;
 const SLOW_HINT_THRESHOLD_SECONDS = 20;
 
-function initChatWidget({ formId, inputId, threadId, profile, storageKey, placeholderText, onReply, onBusyChange, demoQueue, demoBarId, quickReplies, quickRepliesId }) {
+function initChatWidget({ formId, inputId, threadId, sentPromptId, resultId, profile, storageKey, placeholderText, onReply, onBusyChange, demoQueue, demoBarId, quickReplies, quickRepliesId }) {
   const form = document.getElementById(formId);
   const input = document.getElementById(inputId);
-  const thread = document.getElementById(threadId);
+  const thread = threadId ? document.getElementById(threadId) : null;
+  const sentEl = sentPromptId ? document.getElementById(sentPromptId) : null;
+  const resultEl = resultId ? document.getElementById(resultId) : null;
   const demoBar = demoBarId ? document.getElementById(demoBarId) : null;
   let demoIndex = 0;
   let busy = false;
@@ -89,7 +99,7 @@ function initChatWidget({ formId, inputId, threadId, profile, storageKey, placeh
 
   // 응답 텍스트에 "승인"이 포함되면 HITL 승인 대기 상태로 간주해 버블을 강조한다
   // — 실제 승인 여부는 status 필드가 아니라 에이전트가 되묻는 문장으로 표현되기
-  // 때문에(예: "...승인하시겠습니까?"), 텍스트 휴리스틱으로 판단한다.
+  // 때문에(예: "...승인하시겠습니까?"), 텍스트 휴리스틱으로 판단한다. (threadId 모드 전용)
   function isApprovalPrompt(role, text, statusClass) {
     return role === "agent" && !statusClass && /승인/.test(text);
   }
@@ -113,21 +123,36 @@ function initChatWidget({ formId, inputId, threadId, profile, storageKey, placeh
     return row;
   }
 
+  function pendingText(startedAt) {
+    const secs = Math.floor((Date.now() - startedAt) / 1000);
+    return secs >= SLOW_HINT_THRESHOLD_SECONDS
+      ? `응답을 기다리는 중… (${secs}초, 보통 25초~4분 정도 걸려요)`
+      : `응답을 기다리는 중… (${secs}초)`;
+  }
+
   async function send(message) {
     if (busy) return; // 응답 대기 중 중복 전송 방지 — 같은 세션에 겹쳐 보내면
     // 특히 주문 접수 화면에서 중복 주문으로 이어질 수 있다.
     clearTimeoutPolling();
-    appendMessage("user", message);
-    const pending = appendMessage("agent", "생각하는 중… (0초)", "pending");
-    const pendingBubble = pending.querySelector(".chat-bubble");
     const startedAt = Date.now();
+    let pending, pendingBubble;
+    if (thread) {
+      appendMessage("user", message);
+      pending = appendMessage("agent", "생각하는 중… (0초)", "pending");
+      pendingBubble = pending.querySelector(".chat-bubble");
+    } else {
+      renderSentPrompt(sentEl, message);
+      renderCompactResult(resultEl, { status: "pending", text: pendingText(startedAt) });
+    }
     const elapsedTimer = setInterval(() => {
-      const secs = Math.floor((Date.now() - startedAt) / 1000);
-      let text = `생각하는 중… (${secs}초)`;
-      if (secs >= SLOW_HINT_THRESHOLD_SECONDS) {
-        text += "\n보통 25초~4분 정도 걸려요. 잠시만 기다려 주세요.";
+      if (thread) {
+        const secs = Math.floor((Date.now() - startedAt) / 1000);
+        let text = `생각하는 중… (${secs}초)`;
+        if (secs >= SLOW_HINT_THRESHOLD_SECONDS) text += "\n보통 25초~4분 정도 걸려요. 잠시만 기다려 주세요.";
+        pendingBubble.textContent = text;
+      } else {
+        renderCompactResult(resultEl, { status: "pending", text: pendingText(startedAt) });
       }
-      pendingBubble.textContent = text;
     }, 1000);
 
     setBusy(true);
@@ -139,18 +164,28 @@ function initChatWidget({ formId, inputId, threadId, profile, storageKey, placeh
       });
       const data = await res.json();
       clearInterval(elapsedTimer);
-      pending.remove();
-      const statusClass = data.status === "ok" ? null : data.status;
-      appendMessage("agent", data.text, statusClass);
+      if (thread) {
+        pending.remove();
+        const statusClass = data.status === "ok" ? null : data.status;
+        appendMessage("agent", data.text, statusClass);
+      } else {
+        const status = data.status === "ok" ? "ok" : data.status;
+        renderCompactResult(resultEl, { status, text: data.text }, { onFollowup: (msg) => send(msg) });
+      }
       // 상태(ok/timeout/error)와 무관하게 재조회를 권한다 — 타임아웃이어도
       // 컨테이너 안에서는 작업이 이미 끝났을 수 있다(Phase 0 실측, Active
-      // Verification 원칙).
-      if (onReply) onReply(data);
+      // Verification 원칙). 원래 보낸 메시지도 함께 넘겨준다 — 문의 목록처럼
+      // "무엇에 대한 응답인지"가 필요한 화면을 위해서다.
+      if (onReply) onReply(data, message);
       if (data.status === "timeout") startTimeoutPolling();
     } catch (err) {
       clearInterval(elapsedTimer);
-      pending.remove();
-      appendMessage("agent", "네트워크 오류가 발생했습니다. 다시 시도해 주세요.", "error");
+      if (thread) {
+        pending.remove();
+        appendMessage("agent", "네트워크 오류가 발생했습니다. 다시 시도해 주세요.", "error");
+      } else {
+        renderCompactResult(resultEl, { status: "error", text: "네트워크 오류가 발생했습니다. 다시 시도해 주세요." });
+      }
     } finally {
       clearInterval(elapsedTimer);
       setBusy(false);

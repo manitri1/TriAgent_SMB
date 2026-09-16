@@ -86,6 +86,61 @@ function renderOrderStatus(status) {
   return `<span class="pill ${cls}">${label}</span>`;
 }
 
+const ordersAccordion = createRowActionAccordion("orders-accordion", {
+  profile: "coordinator",
+  storageKeyPrefix: "conversation_id_orders_row",
+  onAfterSend: loadRecentOrders,
+});
+
+/** 주문 상태에 따라 실제로 의미 있는 처리만 보여준다 — 이미 끝난(취소/환불)
+ * 건에는 액션을 붙이지 않는다. */
+function orderActionsFor(order) {
+  if (order.status === "OPEN") {
+    return [
+      { label: "결제 진행", tone: "primary", message: `주문 ${order.order_id} 결제를 진행해 주세요.` },
+      { label: "주문 취소", tone: "danger", confirm: `주문 ${order.order_id}를 취소할까요?`, message: `주문 ${order.order_id}를 취소해 주세요.` },
+    ];
+  }
+  if (order.status === "COMPLETED") {
+    return [{ label: "환불 처리", tone: "danger", confirm: `주문 ${order.order_id}를 환불할까요?`, message: `주문 ${order.order_id}를 환불해 주세요.` }];
+  }
+  if (order.status === "PARTIALLY_REFUNDED") {
+    return [{ label: "전액 환불", tone: "danger", confirm: `주문 ${order.order_id}를 전액 환불할까요?`, message: `주문 ${order.order_id}를 전액 환불해 주세요.` }];
+  }
+  return [];
+}
+
+function orderAccordionRows(orders) {
+  return orders.map((order) => {
+    const lineSummary = order.line_items
+      .map((li) => `${catalogNameById[li.item_id] ?? li.item_id} x${li.quantity}`)
+      .join(", ");
+    const memo = order.line_items.map((li) => li.note).filter(Boolean).join(", ") || "-";
+    const shortId = order.order_id.replace(/^order_/, "").slice(0, 6);
+    const cellsHtml = `
+      <div class="acc-col-order" title="${order.order_id}">#${shortId}</div>
+      <div class="acc-col-name">${order.customer_id ? `${order.customer_id} · ` : ""}${lineSummary}</div>
+      <div class="acc-col-amount">${order.total_amount.toLocaleString()}원</div>
+      <div class="acc-col-pill">${renderOrderStatus(order.status)}</div>
+    `;
+    const factsHtml = `
+      <div class="detail-kv"><span class="detail-kv-k">주문번호</span><span class="detail-kv-v">${order.order_id}</span></div>
+      <div class="detail-kv"><span class="detail-kv-k">품목</span><span class="detail-kv-v">${lineSummary}</span></div>
+      <div class="detail-kv"><span class="detail-kv-k">고객</span><span class="detail-kv-v">${order.customer_id || "비회원"}</span></div>
+      <div class="detail-kv"><span class="detail-kv-k">메모</span><span class="detail-kv-v">${memo}</span></div>
+      <div class="detail-kv"><span class="detail-kv-k">접수 시각</span><span class="detail-kv-v">${new Date(order.created_at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span></div>
+    `;
+    return {
+      id: order.order_id,
+      cellsHtml,
+      factsHtml,
+      contextLabel: `주문 #${order.order_id}`,
+      editPlaceholder: "예: 크루아상 빼고 스콘으로 바꿔줘",
+      actions: orderActionsFor(order),
+    };
+  });
+}
+
 function composeOrderMessage(items) {
   const parts = Object.entries(selectedQty)
     .filter(([, qty]) => qty > 0)
@@ -102,32 +157,19 @@ function composeOrderMessage(items) {
 }
 
 async function loadRecentOrders() {
-  const tbody = document.getElementById("orders-rows");
+  const container = document.getElementById("orders-accordion");
   const res = await fetch("/api/pos/orders");
   if (!res.ok) {
-    tbody.innerHTML = '<tr><td colspan="4" class="empty">불러오지 못했습니다.</td></tr>';
+    container.innerHTML = '<p class="hint" style="padding:16px 18px;margin:0;">불러오지 못했습니다.</p>';
     return;
   }
   const orders = await res.json();
   if (!orders.length) {
-    tbody.innerHTML = '<tr><td colspan="4" class="empty">주문 내역이 없습니다.</td></tr>';
+    container.innerHTML = '<p class="hint" style="padding:16px 18px;margin:0;">주문 내역이 없습니다.</p>';
     return;
   }
   const recent = orders.slice(-10).reverse();
-  tbody.innerHTML = "";
-  recent.forEach((order) => {
-    const items = order.line_items
-      .map((li) => `${catalogNameById[li.item_id] ?? li.item_id} x${li.quantity}`)
-      .join(", ");
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${order.order_id}</td>
-      <td>${items}</td>
-      <td>${order.total_amount.toLocaleString()}원</td>
-      <td>${renderOrderStatus(order.status)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+  ordersAccordion.render(orderAccordionRows(recent));
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -138,7 +180,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   initChatWidget({
     formId: "orders-form",
     inputId: "orders-input",
-    threadId: "orders-thread",
+    sentPromptId: "orders-sent-prompt",
+    resultId: "orders-result",
     profile: "coordinator",
     storageKey: "conversation_id_orders",
     onReply: (data) => {

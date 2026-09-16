@@ -18,6 +18,46 @@
 <div id="insight-list" class="insight-grid"></div>
 <div id="insight-empty" class="insight-empty" hidden>오늘은 특별히 확인하실 결정 사항이 없습니다 — 순조롭게 운영되고 있어요.</div>
 
+<div class="marketing-suggest-row">
+  <button id="marketing-suggest-btn" class="btn-primary" type="button">마케팅·CRM 제안 보기</button>
+  <span class="hint">단골·인기 메뉴 데이터를 바탕으로 홍보 문구 초안을 요청할 수 있습니다.</span>
+</div>
+
+<dialog id="marketing-modal" class="modal">
+  <div class="modal-head">
+    <h2>마케팅·CRM 제안</h2>
+    <button type="button" class="btn-ghost" id="marketing-modal-close">닫기</button>
+  </div>
+  <p class="hint">단골·인기 메뉴 데이터를 바탕으로 뽑은 제안입니다. 원하는 항목을 골라 요청하면 marketing-crm-agent가 홍보 문구 초안을 작성합니다 — 실제 발송은 사람이 승인해야 합니다.</p>
+  <div id="marketing-suggestion-list" class="insight-grid"></div>
+  <div id="marketing-suggestion-empty" class="insight-empty" hidden>지금은 데이터 기준으로 제안할 항목이 없습니다.</div>
+</dialog>
+
+<div class="marketing-suggest-row">
+  <button id="seed-data-btn" class="btn-ghost" type="button">목업 데이터 초기 세팅</button>
+  <span class="hint">시연·리허설 전 mock-pos 데이터를 리셋하고 다시 채웁니다 — 컨테이너 재시작 없이 바로 적용됩니다.</span>
+</div>
+
+<dialog id="seed-modal" class="modal">
+  <div class="modal-head">
+    <h2>목업 데이터 초기 세팅</h2>
+    <button type="button" class="btn-ghost" id="seed-modal-close">닫기</button>
+  </div>
+  <p class="hint">두 방식 모두 <strong>지금 있는 주문·재고·고객 데이터를 전부 지우고</strong> 새로 채웁니다 — 실행 전 정말 필요한지 확인하세요.</p>
+  <div class="seed-options">
+    <button type="button" class="seed-option" id="seed-option-quick" data-mode="quick">
+      <span class="seed-option-title">빠르게 채우기</span>
+      <span class="seed-option-desc">메뉴 12종 · 고객 6명 · 오늘 주문/결제 20여 건 · 환불 2건. 아메리카노 품절 등 라이브 데모 대본과 동일한 상태로 즉시 리허설할 수 있습니다.</span>
+    </button>
+    <button type="button" class="seed-option" id="seed-option-month" data-mode="month">
+      <span class="seed-option-title">한 달 시뮬레이션</span>
+      <span class="seed-option-desc">메뉴 12종 · 고객 6명 · 지난 5주간 요일별 패턴을 반영한 주문·결제 이력. "매출 추이" 차트를 실제 운영처럼 채울 때 사용하세요.</span>
+    </button>
+  </div>
+  <div id="seed-sent" class="sent-prompt"></div>
+  <div id="seed-result" class="compact-result"></div>
+</dialog>
+
 <p class="eyebrow">오늘의 핵심 지표</p>
 <div class="grid">
   <div class="card card--hero">

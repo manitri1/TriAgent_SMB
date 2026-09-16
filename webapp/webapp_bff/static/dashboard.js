@@ -142,6 +142,140 @@ function computeInsights({
   return insights;
 }
 
+/**
+ * 마케팅·CRM 제안 — "확인해야 할 것" 인사이트와 달리 문제가 아니라 기회를
+ * 짚는다(감사 인사, 재유치, 판매 저조 품목 홍보, 인기 메뉴 프로모션). 자동으로
+ * 카드에 끼워넣지 않고, 버튼을 눌렀을 때만 팝업으로 보여준다 — 매번 볼 필요는
+ * 없지만 원할 때 근거 데이터와 함께 골라 진행할 수 있게 한다. 승인해도
+ * marketing-crm-agent는 문구 "초안"만 작성한다(발송 수단이 없음, SOUL.md 참고) —
+ * approveMessage는 항상 coordinator로 보낸다(웹앱은 coordinator/customer-service-agent
+ * 외 profile을 허용하지 않는다, agent.py 참고).
+ */
+function buildMarketingSuggestions({ repeatCustomers, topItemsWeek }) {
+  const suggestions = [];
+
+  if (repeatCustomers && repeatCustomers.length) {
+    const vips = repeatCustomers.slice().sort((a, b) => b.total_spent - a.total_spent).slice(0, 5);
+    if (vips.length) {
+      const names = vips.map((c) => c.name ?? c.customer_id);
+      suggestions.push({
+        id: "vip-thanks", icon: "💜", title: `VIP 단골 ${vips.length}명 — 감사 혜택 문구 검토`,
+        detail: `${names.join(", ")} — 누적 결제액 상위 고객입니다.`,
+        approveMessage: `다음 VIP 고객에게 보낼 감사 혜택/쿠폰 홍보 문구 초안을 작성해주세요: ${names.join(", ")}.`,
+      });
+    }
+
+    const now = Date.now();
+    const churnRisk = repeatCustomers.filter((c) => {
+      if (c.order_count < 3 || !c.last_order_at) return false;
+      return (now - new Date(c.last_order_at).getTime()) / 86400000 >= 14;
+    });
+    if (churnRisk.length) {
+      const names = churnRisk.slice(0, 5).map((c) => c.name ?? c.customer_id);
+      suggestions.push({
+        id: "churn-winback", icon: "🔵", title: `이탈 위험 단골 ${churnRisk.length}명 — 재유치 문구 검토`,
+        detail: `${names.join(", ")}${churnRisk.length > 5 ? ` 외 ${churnRisk.length - 5}명` : ""} — 최근 14일 이상 재방문이 없습니다.`,
+        approveMessage: `최근 14일 이상 재방문이 없는 단골 고객(${names.join(", ")})에게 보낼 재유치 메시지 초안을 작성해주세요.`,
+      });
+    }
+  }
+
+  if (topItemsWeek && topItemsWeek.length >= 3) {
+    const withVolume = topItemsWeek.filter((i) => i.quantity > 0);
+    if (withVolume.length >= 3) {
+      const avgQty = withVolume.reduce((sum, i) => sum + i.quantity, 0) / withVolume.length;
+      const worst = withVolume.slice().sort((a, b) => a.quantity - b.quantity)[0];
+      if (worst.quantity <= avgQty * 0.5) {
+        suggestions.push({
+          id: "slow-item-promo", icon: "🟠", title: `${worst.name} — 이번 주 판매 저조, 홍보 검토`,
+          detail: `이번 주 ${worst.quantity}개 판매(평균 ${avgQty.toFixed(1)}개). 홍보로 수요를 끌어올릴 수 있는지 검토해보세요.`,
+          approveMessage: `${worst.name}의 판매를 늘리기 위한 홍보 문구 초안을 작성해주세요 (SNS/카카오톡 채널용).`,
+        });
+      }
+      const best = withVolume.slice().sort((a, b) => b.quantity - a.quantity)[0];
+      if (best.quantity > 0) {
+        suggestions.push({
+          id: "top-item-bundle", icon: "🟢", title: `${best.name} — 이번 주 1위, 세트 프로모션 검토`,
+          detail: `이번 주 ${best.quantity}개 판매. 인기를 살린 세트/시즌 프로모션을 고려해보세요.`,
+          approveMessage: `${best.name}를 활용한 세트/시즌 프로모션 홍보 문구 초안을 작성해주세요.`,
+        });
+      }
+    }
+  }
+
+  return suggestions;
+}
+
+let latestMarketingData = { repeatCustomers: [], topItemsWeek: [] };
+const marketingSentCache = new Map();
+const marketingResultCache = new Map();
+
+function renderMarketingModal() {
+  const list = document.getElementById("marketing-suggestion-list");
+  const empty = document.getElementById("marketing-suggestion-empty");
+  if (!list) return;
+  const suggestions = buildMarketingSuggestions(latestMarketingData);
+  list.innerHTML = "";
+  if (!suggestions.length) {
+    if (empty) empty.hidden = false;
+    return;
+  }
+  if (empty) empty.hidden = true;
+  suggestions.forEach((s) => {
+    const card = document.createElement("div");
+    card.className = "insight-card";
+    card.innerHTML = `
+      <span class="insight-icon">${s.icon}</span>
+      <div style="flex: 1; min-width: 0;">
+        <div class="insight-title">${s.title}</div>
+        <div class="insight-detail">${s.detail}</div>
+        <div class="insight-actions">
+          <button type="button" class="btn-primary btn-ghost--sm" data-suggestion-id="${s.id}">이 문구 초안 요청하기</button>
+        </div>
+        <div class="sent-prompt" id="marketing-sent-${s.id}"></div>
+        <div class="compact-result" id="marketing-result-${s.id}"></div>
+      </div>
+    `;
+    list.appendChild(card);
+    if (marketingSentCache.has(s.id)) {
+      renderSentPrompt(document.getElementById(`marketing-sent-${s.id}`), marketingSentCache.get(s.id));
+    }
+    if (marketingResultCache.has(s.id)) {
+      renderCompactResult(document.getElementById(`marketing-result-${s.id}`), marketingResultCache.get(s.id), {
+        onFollowup: (msg) => sendMarketingMessage(s.id, msg),
+      });
+    }
+    card.querySelector("[data-suggestion-id]").addEventListener("click", () => sendMarketingMessage(s.id, s.approveMessage));
+  });
+}
+
+async function sendMarketingMessage(suggestionId, message) {
+  marketingSentCache.set(suggestionId, message);
+  renderSentPrompt(document.getElementById(`marketing-sent-${suggestionId}`), message);
+  renderCompactResult(document.getElementById(`marketing-result-${suggestionId}`), { status: "pending", text: "coordinator에게 전달하는 중…" });
+  try {
+    const res = await fetch("/api/agent/message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        profile: "coordinator",
+        message,
+        conversation_id: getConversationId(`conversation_id_marketing_${suggestionId}`),
+      }),
+    });
+    const data = await res.json();
+    const result = { status: data.status === "ok" ? "ok" : data.status, text: data.text };
+    marketingResultCache.set(suggestionId, result);
+    renderCompactResult(document.getElementById(`marketing-result-${suggestionId}`), result, {
+      onFollowup: (msg) => sendMarketingMessage(suggestionId, msg),
+    });
+  } catch (err) {
+    const result = { status: "error", text: "네트워크 오류가 발생했습니다. 다시 시도해 주세요." };
+    marketingResultCache.set(suggestionId, result);
+    renderCompactResult(document.getElementById(`marketing-result-${suggestionId}`), result);
+  }
+}
+
 /** 카드 나열 대신 한눈에 읽는 한 줄 요약 — 오늘 매출 상태 + 확인 필요 건수. */
 function buildBriefingLine(insights, salesToday) {
   const critical = insights.filter((i) => i.level === "critical").length;
@@ -204,6 +338,10 @@ async function loadDashboard() {
   insightBoard.render(insights);
   const briefing = document.getElementById("briefing-line");
   if (briefing) briefing.textContent = buildBriefingLine(insights, salesToday);
+
+  latestMarketingData = { repeatCustomers: repeatCustomers || [], topItemsWeek: topItemsWeek || [] };
+  const marketingModalEl = document.getElementById("marketing-modal");
+  if (marketingModalEl && marketingModalEl.open) renderMarketingModal();
 
   if (salesToday) {
     document.getElementById("sales-today").textContent = salesToday.total_sales.toLocaleString() + "원";
@@ -287,6 +425,74 @@ async function loadDashboard() {
 }
 
 document.getElementById("refresh").addEventListener("click", loadDashboard);
+
+const marketingModal = document.getElementById("marketing-modal");
+document.getElementById("marketing-suggest-btn").addEventListener("click", () => {
+  renderMarketingModal();
+  marketingModal.showModal();
+});
+document.getElementById("marketing-modal-close").addEventListener("click", () => marketingModal.close());
+marketingModal.addEventListener("click", (e) => {
+  if (e.target === marketingModal) marketingModal.close(); // 배경(backdrop) 클릭 시 닫기
+});
+
+/**
+ * 목업 데이터 초기 세팅 — 시연·리허설 전 mock-pos를 리셋하고 다시 채운다
+ * (webapp_bff/routers/admin.py 경유, coordinator를 거치지 않는다 — 업무
+ * 결정이 아니라 환경 초기화이기 때문). 두 모드 다 파괴적 동작이라 실행 전
+ * confirm으로 한 번 더 확인한다.
+ */
+const seedModal = document.getElementById("seed-modal");
+document.getElementById("seed-data-btn").addEventListener("click", () => {
+  document.getElementById("seed-sent").innerHTML = "";
+  document.getElementById("seed-result").innerHTML = "";
+  seedModal.showModal();
+});
+document.getElementById("seed-modal-close").addEventListener("click", () => seedModal.close());
+seedModal.addEventListener("click", (e) => {
+  if (e.target === seedModal) seedModal.close(); // 배경(backdrop) 클릭 시 닫기
+});
+
+const SEED_MODE_LABELS = { quick: "빠르게 채우기(오늘 스냅샷)", month: "한 달 시뮬레이션" };
+
+async function runSeed(mode) {
+  const label = SEED_MODE_LABELS[mode] || mode;
+  if (!window.confirm(`${label}로 목업 데이터를 초기화할까요? 지금 있는 모든 주문·재고·고객 데이터가 사라집니다.`)) return;
+
+  const sentEl = document.getElementById("seed-sent");
+  const resultEl = document.getElementById("seed-result");
+  renderSentPrompt(sentEl, `${label} 요청`);
+  renderCompactResult(resultEl, {
+    status: "pending",
+    text: mode === "month" ? "5주치 데이터를 시뮬레이션하는 중… (잠시 걸릴 수 있습니다)" : "mock-pos 데이터를 새로 채우는 중…",
+  });
+
+  const optionButtons = document.querySelectorAll(".seed-option");
+  optionButtons.forEach((btn) => (btn.disabled = true));
+  try {
+    const res = await fetch("/api/admin/seed-mock-data", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "요청이 실패했습니다.");
+    const days = data.days_simulated > 1 ? ` (최근 ${data.days_simulated}일치)` : "";
+    renderCompactResult(resultEl, {
+      status: "ok",
+      text: `완료 — 메뉴 ${data.catalog_items}종, 고객 ${data.customers}명, 주문 ${data.orders}건, 결제 ${data.payments}건${days}. 대시보드를 새로고침했습니다.`,
+    });
+    loadDashboard();
+  } catch (err) {
+    renderCompactResult(resultEl, { status: "error", text: `초기화에 실패했습니다: ${err.message}` });
+  } finally {
+    optionButtons.forEach((btn) => (btn.disabled = false));
+  }
+}
+
+document.querySelectorAll(".seed-option").forEach((btn) => {
+  btn.addEventListener("click", () => runSeed(btn.dataset.mode));
+});
 
 let autoTimer = null;
 document.getElementById("auto").addEventListener("change", (e) => {

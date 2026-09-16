@@ -204,3 +204,18 @@ class RepeatCustomer(BaseModel):
     order_count: int
     total_spent: int
     last_order_at: Optional[datetime] = None
+
+
+# --- Admin (demo/rehearsal용 목업 데이터 초기화) ---
+
+class SeedRequest(BaseModel):
+    mode: str = "quick"  # "quick"(오늘 스냅샷) | "month"(5주 시뮬레이션)
+
+
+class SeedResult(BaseModel):
+    mode: str
+    catalog_items: int
+    customers: int
+    orders: int
+    payments: int
+    days_simulated: int

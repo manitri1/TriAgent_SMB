@@ -1,0 +1,90 @@
+{
+  "base_url": "http://mock-pos:8080",
+  "store_id": "store_demo",
+  "item_id": "menu_americano",
+  "before": {
+    "item_id": "menu_americano",
+    "stock_quantity": 0,
+    "low_stock_threshold": 5,
+    "updated_at": "2026-09-14T09:39:35.851509Z"
+  },
+  "after": {
+    "item_id": "menu_americano",
+    "stock_quantity": 15,
+    "low_stock_threshold": 5,
+    "updated_at": "2026-09-14T14:06:16.654280Z"
+  },
+  "adjust_response": {
+    "item_id": "menu_americano",
+    "stock_quantity": 15,
+    "low_stock_threshold": 5,
+    "updated_at": "2026-09-14T14:06:16.654280Z"
+  },
+  "catalog_item": {
+    "item_id": "menu_americano",
+    "name": "아메리카노",
+    "unit_price": 3500,
+    "category": "coffee",
+    "cost": 800
+  },
+  "recent_window": {
+    "start": "2026-09-08",
+    "end": "2026-09-14",
+    "days": [
+      "2026-09-08",
+      "2026-09-09",
+      "2026-09-10",
+      "2026-09-11",
+      "2026-09-12",
+      "2026-09-13",
+      "2026-09-14"
+    ]
+  },
+  "recent_completed_sales_qty_by_day": {
+    "2026-09-08": 0,
+    "2026-09-09": 0,
+    "2026-09-10": 0,
+    "2026-09-11": 0,
+    "2026-09-12": 0,
+    "2026-09-13": 0,
+    "2026-09-14": 0
+  },
+  "recent_canceled_unmet_qty_by_day": {
+    "2026-09-08": 0,
+    "2026-09-09": 0,
+    "2026-09-10": 3,
+    "2026-09-11": 3,
+    "2026-09-12": 2,
+    "2026-09-13": 0,
+    "2026-09-14": 1
+  },
+  "recent_attempted_qty_by_day": {
+    "2026-09-08": 0,
+    "2026-09-09": 0,
+    "2026-09-10": 3,
+    "2026-09-11": 3,
+    "2026-09-12": 2,
+    "2026-09-13": 0,
+    "2026-09-14": 1
+  },
+  "recent_completed_sales_qty_7d": 0,
+  "recent_canceled_unmet_qty_7d": 9,
+  "recent_attempted_qty_7d": 9,
+  "calculation": {
+    "low_stock_threshold": 5,
+    "current_stock_before": 0,
+    "formula": "ceil_to_5(max(low_stock_threshold, recent_attempted_7d + low_stock_threshold - current_stock_before))",
+    "raw_needed": 14,
+    "recommended_restock_qty": 15,
+    "unit_cost_krw": 800,
+    "estimated_amount_krw": 12000,
+    "approval_limit_krw": 150000,
+    "hitl_gate2_required": false
+  },
+  "api_paths": {
+    "inventory_item_get": "GET http://mock-pos:8080/v1/stores/store_demo/inventory/menu_americano",
+    "inventory_adjust_post": "POST http://mock-pos:8080/v1/stores/store_demo/inventory/menu_americano/adjust",
+    "orders_get": "GET http://mock-pos:8080/v1/stores/store_demo/orders",
+    "catalog_get": "GET http://mock-pos:8080/v1/stores/store_demo/catalog/items"
+  }
+}

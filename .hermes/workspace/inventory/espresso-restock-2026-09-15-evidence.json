@@ -1,0 +1,75 @@
+{
+  "status": "completed_restock",
+  "store_id": "store_demo",
+  "item_id": "menu_espresso",
+  "item_name": "에스프레소",
+  "executed_at_kst": "2026-09-15T12:04:29.188326+09:00",
+  "inventory_before": {
+    "item_id": "menu_espresso",
+    "stock_quantity": 68,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-15T03:02:54.625606Z"
+  },
+  "inventory_after": {
+    "item_id": "menu_espresso",
+    "stock_quantity": 183,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-15T03:04:29.246347Z"
+  },
+  "adjust_result": {
+    "item_id": "menu_espresso",
+    "stock_quantity": 183,
+    "low_stock_threshold": 10,
+    "updated_at": "2026-09-15T03:04:29.246347Z"
+  },
+  "recent_sales_velocity": {
+    "7": {
+      "qty": 72,
+      "avg_per_day": 10.285714285714286,
+      "by_item": {
+        "menu_cappuccino": 19,
+        "menu_espresso": 16,
+        "menu_americano": 16,
+        "menu_latte": 21
+      },
+      "daily": {
+        "2026-09-08": 4,
+        "2026-09-09": 5,
+        "2026-09-10": 13,
+        "2026-09-11": 12,
+        "2026-09-12": 14,
+        "2026-09-13": 15,
+        "2026-09-14": 6,
+        "2026-09-15": 3
+      }
+    },
+    "14": {
+      "qty": 151,
+      "avg_per_day": 10.785714285714286
+    },
+    "30": {
+      "qty": 336,
+      "avg_per_day": 11.2
+    }
+  },
+  "forecast_days_to_stockout_from_request": 2.8,
+  "forecast_velocity_units_per_day": 24.28571428571429,
+  "used_velocity_units_per_day": 24.28571428571429,
+  "target_days": 7,
+  "safety_threshold": 10,
+  "restock_qty": 115,
+  "unit_cost_krw": 700,
+  "estimated_cost_krw": 80500,
+  "approval_limit_krw": 150000,
+  "gate2_required": false,
+  "formula": "restock=ceil_to_5(max(0, ceil(max(recent_7d_base_sales_velocity, current_stock/2.8)*7 + low_stock_threshold)-current_stock))",
+  "espresso_base_item_ids": [
+    "menu_americano",
+    "menu_cappuccino",
+    "menu_espresso",
+    "menu_latte"
+  ],
+  "pos_adjust_endpoint": "POST /v1/stores/store_demo/inventory/menu_espresso/adjust",
+  "pos_adjust_delta": 115,
+  "pos_adjust_reason": "2026-09-15 espresso restock: forecast 2.8 days to stockout; below gate2 limit"
+}

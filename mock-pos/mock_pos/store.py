@@ -30,5 +30,11 @@ class InMemoryStore:
                 self._stores[store_id] = StoreData()
             return self._stores[store_id]
 
+    def reset(self, store_id: str) -> None:
+        """해당 매장의 데이터를 전부 지우고 빈 상태로 되돌린다 — 목업 데이터
+        재시드(mock_pos/seed.py) 전용. 다른 매장(store_id)에는 영향 없다."""
+        with self._lock:
+            self._stores[store_id] = StoreData()
+
 
 store = InMemoryStore()
